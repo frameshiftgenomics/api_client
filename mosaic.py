@@ -63,8 +63,12 @@ class Store(object):
 
 
 class Mosaic(object):
-    def __init__(self, host_type='local'):
-        store = Store(host_type + '.ini')
+    def __init__(self, host_type='local', config_file=None):
+        # config_file takes precedence over host_type
+        if config_file:
+            store = Store(config_file)
+        else:
+            store = Store(host_type + '.ini')
 
         self._store = store
 
@@ -89,7 +93,6 @@ class Mosaic(object):
         }
 
         self._request_history = []
-
 
     def __repr__(self):
         return f"Mosaic('{self._host_type}')"
