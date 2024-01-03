@@ -37,7 +37,6 @@ This Mosaic API client is designed to support two workflows:
 import configparser
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from pprint import pprint
 import json
 
 # Suppress only the InsecureRequestWarning caused by using verify=False
@@ -151,7 +150,7 @@ class Mosaic(object):
 
         try:
             return res.json()
-        except json.JSONDecodeError as err:
+        except json.JSONDecodeError:
             # the server might not have returned anything.
             return None
 
@@ -174,7 +173,7 @@ class Mosaic(object):
 
         try:
             return res.json()
-        except json.JSONDecodeError as err:
+        except json.JSONDecodeError:
             # the server might not have returned anything.
             return None
 
@@ -212,7 +211,7 @@ class Mosaic(object):
 
         try:
             return res.json()
-        except json.JSONDecodeError as err:
+        except json.JSONDecodeError:
             # the server might not have returned anything.
             return None
 
@@ -230,7 +229,6 @@ class Mosaic(object):
 
         res.raise_for_status()
 
-
     def get_paged_route_iter(self, resource, *, params=None):
         """
         limit, order_by, order_dir, search come from params, if used.
@@ -239,7 +237,6 @@ class Mosaic(object):
 
         If you want a specific page, don't use this method.
         """
-        page = 1
         limit = None
        
         if params:
@@ -326,7 +323,7 @@ class Mosaic(object):
             data['description'] = description
 
         if not name and not description:
-            raise Exception(f'Provide either name or description')
+            raise Exception('Provide either name or description')
 
         self.put(f'projects/{project_id}', data=data)
 
@@ -412,7 +409,7 @@ class Project(object):
             data['description'] = description
 
         if not name and not description:
-            raise Exception(f'Provide either name or description')
+            raise Exception('Provide either name or description')
 
         self._mosaic.put(f'{self._path}/samples/{sample_id}', data=data)
 
