@@ -382,6 +382,16 @@ class Project(object):
     def __str__(self):
         return f"{self.name} (id: {self.id})"
 
+    """
+    PROJECT SETTINGS
+    """
+
+    def get_project_settings(self):
+        return self._mosaic.get(f'{self._path}/settings')
+
+    """
+    SAMPLES
+    """
 
     def get_samples(self):
         return self._mosaic.get(f'{self._path}/samples')
