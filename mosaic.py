@@ -455,10 +455,69 @@ class Project(object):
     def update_sample_attribute(self, data):
         pass
 
+    """
+    VARIANT ANNOTATIONS
+    """
 
     def get_variant_annotations(self):
         return self._mosaic.get(f'{self._path}/variants/annotations')
 
+
+    def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+        data = { 'name': name }
+
+        if value_type:
+            data['value_type'] = value_type
+
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+
+        if display_type:
+            data['display_type'] = display_type
+
+        if severity:
+            data['severity'] = severity
+
+        if category:
+            data['category'] = category
+
+        if value_truncate_type:
+            data['value_truncate_type'] = value_truncate_type
+
+        if value_max_length:
+            data['value_max_length'] = value_max_length
+
+        return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
+
+    def create_variant_annotation(self, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+        data = { 'name': name }
+
+        if value_type:
+            data['value_type'] = value_type
+
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+
+        if display_type:
+            data['display_type'] = display_type
+
+        if severity:
+            data['severity'] = severity
+
+        if category:
+            data['category'] = category
+
+        if value_truncate_type:
+            data['value_truncate_type'] = value_truncate_type
+
+        if value_max_length:
+            data['value_max_length'] = value_max_length
+
+        return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
+
+    """
+    VARIANT FILTERS
+    """
 
     def get_variant_filters(self):
         return self._mosaic.get(f'{self._path}/variants/filters')
