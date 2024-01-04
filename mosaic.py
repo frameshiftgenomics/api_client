@@ -66,20 +66,20 @@ class Mosaic(object):
         # config_file takes precedence over host_type
         if config_file:
             store = Store(config_file)
+            self._host_type = 'config_file'
         else:
             store = Store(host_type + '.ini')
+            self._host_type = host_type
 
         self._store = store
 
-
         config_section = 'Configuration'
 
-        self._host_type = host_type
         self._verify = (host_type != 'local')
 
-        if host_type == 'local':
+        if self._host_type == 'local':
             self._api_host = 'https://localhost:3000/api/v1'
-        elif host_type == 'remote':
+        elif self._host_type == 'remote':
             self._api_host = 'https://mosaic.frameshift.io/api/v1'
         else:
             self._api_host = store.get(config_section, 'host')
