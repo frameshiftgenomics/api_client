@@ -488,8 +488,8 @@ class Project(object):
     def get_variant_annotations(self):
         return self._mosaic.get(f'{self._path}/variants/annotations')
 
-    def get_variant_annotations_to_import(self):
-        return self._mosaic.get(f'{self._path}/variants/annotations/import')
+    def get_variant_annotations_to_import(self): 
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
 
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
