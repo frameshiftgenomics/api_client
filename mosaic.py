@@ -114,8 +114,27 @@ class Mosaic(object):
 
 
     """
+    Mosaic Configuration methods
+    (to avoid needing to work directly with Store() )
+    """
+    def get_config(self, section, key):
+        self._store.get(section, key)
+
+
+    def set_config(self, section, key, value):
+        self._store.set(section, key, value)
+
+
+    def config_file(self):
+        return self._store._config_file
+
+    """
     Mosaic HTTP request methods.
     """
+    def _http_request(self, action, url, *, params=None, data=None):
+        pass
+        #        action(url, headers=self._headers, 
+
 
     def get(self, resource, *, params=None):
         url = f'{self._api_host}/{resource}'
@@ -252,13 +271,17 @@ class Mosaic(object):
 
         is_exhausted = False
 
+        page = 1
+
         while not is_exhausted:
+            params['page'] = page
             res = self.get(resource, params=params)
             count, data = res['count'], res['data']
            
             received_count += len(data)
+            page += 1
 
-            is_exhausted = (received_count >= count)
+            is_exhausted = (received_count >= count or not data)
 
             yield from data
 
