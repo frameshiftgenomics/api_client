@@ -38,10 +38,13 @@ import configparser
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
+import sys
+from requests.exceptions import HTTPError
 
 # Suppress only the InsecureRequestWarning caused by using verify=False
 # (which we use for the local Mosaic instance)
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# Note: Not needed with new infrastructure.
+# requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class Store(object):
     def __init__(self, config_file='local.ini'):
@@ -62,7 +65,7 @@ class Store(object):
 
 
 class Mosaic(object):
-    def __init__(self, host_type='local', config_file=None):
+    def __init__(self, host_type='local', config_file=None, show_traceback=False):
         # config_file takes precedence over host_type
         if config_file:
             store = Store(config_file)
@@ -71,6 +74,7 @@ class Mosaic(object):
             store = Store(host_type + '.ini')
             self._host_type = host_type
 
+
         self._store = store
 
         config_section = 'Configuration'
@@ -78,7 +82,7 @@ class Mosaic(object):
         self._verify = (host_type != 'local')
 
         if self._host_type == 'local':
-            self._api_host = 'https://localhost:3000/api/v1'
+            self._api_host = 'http://localhost:3000/api/v1'
         elif self._host_type == 'remote':
             self._api_host = 'https://mosaic.frameshift.io/api/v1'
         else:
@@ -92,6 +96,9 @@ class Mosaic(object):
         }
 
         self._request_history = []
+
+        if not show_traceback:
+            sys.tracebacklimit = 0
 
     def __repr__(self):
         return f"Mosaic('{self._host_type}')"
@@ -128,74 +135,57 @@ class Mosaic(object):
     def config_file(self):
         return self._store._config_file
 
+
     """
     Mosaic HTTP request methods.
     """
-    def _http_request(self, action, url, *, params=None, data=None):
-        pass
-        #        action(url, headers=self._headers, 
+    def _http_request(self, method, resource, *, params=None, data=None):
+        kwargs = {
+                'headers': self._headers, 
+                'verify': self._verify, 
+                'params': params
+                }
+
+        if data:
+            # json.dumps prevents form encoding
+            kwargs['data'] = json.dumps(data)
+
+        url = f'{self._api_host}/{resource}'
+
+        res = method(url, **kwargs)
+
+        self._log_request(res.request)
+
+        # Try to return an error message if one exists.
+        err_msg = None
+        try:
+            res.raise_for_status()
+        except:
+            try:
+                obj = res.json()
+                err_msg = f"\n\nHTTP {res.status_code}\n{url}\n{obj['message']}"
+            except json.JSONDecodeError:
+                err_msg = f'\n\nHTTP {res.status_code}\n{url}\n(No message sent)'
+        if err_msg:
+            raise HTTPError(err_msg)
+
+        try:
+            return res.json()
+        except json.JSONDecodeError:
+            # the server might not have returned anything.
+            return None
 
 
     def get(self, resource, *, params=None):
-        url = f'{self._api_host}/{resource}'
-
-        res = requests.get(url, 
-                                headers=self._headers, 
-                                verify=self._verify,
-                                params=params)
-
-        self._log_request(res.request)
-
-        res.raise_for_status()
-
-        return res.json()
+        return self._http_request(requests.get, resource, params=params)
 
 
     def post(self, resource, *, params=None, data=None):
-        url = f'{self._api_host}/{resource}'
-
-        # json.dumps(data) blocks form encoding.
-        data = json.dumps(data) if data else None
-
-        res = requests.post(url, 
-                                 headers=self._headers,
-                                 verify=self._verify,
-                                 params=params,
-                                 data=data)
-
-        self._log_request(res.request)
-
-        res.raise_for_status()
-
-        try:
-            return res.json()
-        except json.JSONDecodeError:
-            # the server might not have returned anything.
-            return None
+        return self._http_request(requests.post, resource, params=params, data=data)
 
 
     def patch(self, resource, *, params=None, data=None):
-        url = f'{self._api_host}/{resource}'
-
-        # json.dumps(data) blocks form encoding.
-        data = json.dumps(data) if data else None
-
-        res = requests.patch(url, 
-                                 headers=self._headers,
-                                 verify=self._verify,
-                                 params=params,
-                                 data=data)
-
-        self._log_request(res.request)
-
-        res.raise_for_status()
-
-        try:
-            return res.json()
-        except json.JSONDecodeError:
-            # the server might not have returned anything.
-            return None
-
+        return self._http_request(requests.patch, resource, params=params, data=data)
 
 
     def put(self, resource, *, params=None, data=None):
@@ -213,40 +203,12 @@ class Mosaic(object):
         /samples/35 -- the resource identifier. Thus, 
         for us, PUT oftens performs updates.
         """
-        url = f'{self._api_host}/{resource}'
-
-        # json.dumps(data) blocks form encoding.
-        data = json.dumps(data) if data else None
-
-        res = requests.put(url, 
-                                 headers=self._headers,
-                                 verify=self._verify,
-                                 params=params,
-                                 data=data)
-
-        self._log_request(res.request)
-
-        res.raise_for_status()
-
-        try:
-            return res.json()
-        except json.JSONDecodeError:
-            # the server might not have returned anything.
-            return None
-
+        return self._http_request(requests.put, resource, params=params, data=data)
 
 
     def delete(self, resource, *, params=None):
-        url = f'{self._api_host}/{resource}'
+        return self._http_request(requests.delete, resource, params=params)
 
-        res = requests.delete(url, 
-                                headers=self._headers, 
-                                verify=self._verify,
-                                params=params)
-
-        self._log_request(res.request)
-
-        res.raise_for_status()
 
     def get_paged_route_iter(self, resource, *, params=None):
         """
@@ -264,7 +226,7 @@ class Mosaic(object):
             params = {}
 
         if not limit:
-            limit = 25
+            limit = 50
             params['limit'] = limit
 
         received_count = 0
