@@ -405,6 +405,47 @@ class Project(object):
     def __str__(self):
         return f"{self.name} (id: {self.id})"
 
+    """
+    PROJECT SETTINGS
+    """
+
+    def get_project_settings(self):
+        return self._mosaic.get(f'{self._path}/settings')
+
+    """
+    SAMPLE ATTRIBUTES
+    """
+
+    def get_attributes_for_sample(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
+
+
+    def set_sample_attribute_value(self, sample_id, attr_id, value):
+        pass
+
+
+    def delete_sample_attribute(self, data):
+        pass
+
+
+    def update_sample_attribute(self, data):
+        pass
+
+
+    """
+    SAMPLE HPO TERMS
+    """
+
+    def get_sample_hpo_terms(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/hpo-terms')
+
+
+    def get_samples_hpo_terms(self):
+        return self._mosaic.get(f'{self._path}/samples/hpo-terms')
+
+    """
+    SAMPLES
+    """
 
     def get_samples(self):
         return self._mosaic.get(f'{self._path}/samples')
@@ -463,21 +504,6 @@ class Project(object):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
 
 
-    def get_sample_attributes(self, sample_id):
-        return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
-
-
-    def set_sample_attribute_value(self, sample_id, attr_id, value):
-        pass
-
-
-    def delete_sample_attribute(self, data):
-        pass
-
-
-    def update_sample_attribute(self, data):
-        pass
-
     """
     VARIANT ANNOTATIONS
     """
@@ -485,6 +511,8 @@ class Project(object):
     def get_variant_annotations(self):
         return self._mosaic.get(f'{self._path}/variants/annotations')
 
+    def get_variant_annotations_to_import(self):
+        return self._mosaic.get(f'{self._path}/variants/annotations/import')
 
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
