@@ -44,7 +44,7 @@ from requests.exceptions import HTTPError
 # Suppress only the InsecureRequestWarning caused by using verify=False
 # (which we use for the local Mosaic instance)
 # Note: Not needed with new infrastructure.
-# requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class Store(object):
     def __init__(self, config_file='local.ini'):
@@ -374,6 +374,34 @@ class Project(object):
     def get_project_settings(self):
         return self._mosaic.get(f'{self._path}/settings')
 
+
+    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_ids=None, sorted_annotations=None, is_template=None):
+        data = { }
+
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+
+        if reference:
+            data['reference'] = reference
+
+        if selected_sample_attribute_chart_data:
+            data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
+
+        if selected_sample_attribute_column_ids:
+            data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
+
+        if selected_variant_annotation_ids:
+            data['selected_variant_annotation_ids'] = selected_variant_annotation_ids
+
+        if sorted_annotations:
+            data['sorted_annotations'] = sorted_annotations
+
+        if is_template:
+            data['is_template'] = is_template
+
+        return self._mosaic.put(f'{self._path}/settings', data=data)
+
+
     """
     SAMPLE ATTRIBUTES
     """
@@ -461,9 +489,25 @@ class Project(object):
 
         return self._mosaic.post(f'{self._path}/samples/merge', data=data)
 
+    """
+    SAMPLE FILES
+    """
 
     def get_sample_files(self, sample_id):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
+
+
+    def post_sample_file(self, sample_id):
+        data = { 'name': name }
+
+        if description:
+            data['description'] = description
+
+        return self._mosaic.post(f'{self._path}/samples', data=data)
+
+
+    def delete_sample_file(self, sample_id, file_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/files/{file_id}')
 
 
     """
@@ -536,16 +580,30 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/filters')
 
 
-    def post_variant_filter(self, *, name, filter_data, category=None, description=None):
+    def post_variant_filter(self, *, name=None, description=None, category=None, column_uids=None, sort_column_uid=None, sort_direction=None, filter_data=None):
         data = { 'name': name, 'filter': filter_data }
-
-        if category:
-            data['category'] = category
+        if name:
+            data['name'] = name
 
         if description:
             data['description'] = description
 
-        self._mosaic.post(f'{self._path}/variants/filters', data=data)
+        if category:
+            data['category'] = category
+
+        if column_uids:
+            data['selected_variant_column_uids'] = column_uids
+
+        if sort_column_uid:
+            data['sort_by_column_uid'] = sort_column_uid
+
+        if sort_direction:
+            data['sort_dir'] = sort_direction
+
+        if filter_data:
+            data['filter'] = filter_data
+
+        return self._mosaic.post(f'{self._path}/variants/filters', data=data)
 
     
     def update_variant_filter(self, filter_id, new_data):
