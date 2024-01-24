@@ -185,6 +185,7 @@ class Mosaic(object):
 
 
     def patch(self, resource, *, params=None, data=None):
+        print('terst')
         return self._http_request(requests.patch, resource, params=params, data=data)
 
 
@@ -368,6 +369,23 @@ class Project(object):
         return f"{self.name} (id: {self.id})"
 
     """
+    PROJECT ATTRIBUTES
+    """
+
+    def get_project_attributes(self):
+        return self._mosaic.get(f'{self._path}/attributes')
+
+
+    """
+    PROJECT DASHBOARD
+    """
+
+    def get_project_dashboard(self):
+        return self._mosaic.get(f'{self._path}/dashboard')
+
+
+
+    """
     PROJECT SETTINGS
     """
 
@@ -403,8 +421,20 @@ class Project(object):
 
 
     """
+    PROJECTS
+    """
+
+    def patch_project(self, template_project_id):
+        return self._mosaic.patch(f'{self._path}/template/{template_project_id}')
+
+
+    """
     SAMPLE ATTRIBUTES
     """
+
+    def get_sample_attributes(self):
+        return self._mosaic.get(f'{self._path}/samples/attributes')
+
 
     def get_attributes_for_sample(self, sample_id):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
