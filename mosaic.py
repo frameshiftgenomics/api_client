@@ -380,9 +380,39 @@ class Project(object):
     PROJECT DASHBOARD
     """
 
-    def get_project_dashboard(self):
-        return self._mosaic.get(f'{self._path}/dashboard')
+    def get_project_attributes(self):
+        return self._mosaic.get(f'{self._path}/attributes')
 
+
+    """
+    PROJECT FILES
+    """
+
+    def get_project_files(self):
+        return self._mosaic.get(f'{self._path}/files')
+
+
+    def get_project_file_url(self, file_id):
+        return self._mosaic.get(f'{self._path}/files/{file_id}/url')
+
+
+    def delete_project_file(self, file_id):
+        return self._mosaic.delete(f'{self._path}/files/{file_id}')
+
+
+    def post_project_file(self, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
+        data = { }
+
+        if size: data['size'] = size
+        if uri: data['uri'] = uri
+        if endpoint_url: data['endpoint_url'] = endpoint_url
+        if library_type: data['library_type'] = library_type
+        if name: data['name'] = name
+        if nickname: data['nickname'] = nickname
+        if reference: data['reference'] = reference
+        if file_type: data['file_type'] = file_type
+
+        return self._mosaic.post(f'{self._path}/files', data=data)
 
 
     """
@@ -396,26 +426,13 @@ class Project(object):
     def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_ids=None, sorted_annotations=None, is_template=None):
         data = { }
 
-        if privacy_level:
-            data['privacy_level'] = privacy_level
-
-        if reference:
-            data['reference'] = reference
-
-        if selected_sample_attribute_chart_data:
-            data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
-
-        if selected_sample_attribute_column_ids:
-            data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
-
-        if selected_variant_annotation_ids:
-            data['selected_variant_annotation_ids'] = selected_variant_annotation_ids
-
-        if sorted_annotations:
-            data['sorted_annotations'] = sorted_annotations
-
-        if is_template:
-            data['is_template'] = is_template
+        if privacy_level: data['privacy_level'] = privacy_level
+        if reference: data['reference'] = reference
+        if selected_sample_attribute_chart_data: data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
+        if selected_sample_attribute_column_ids: data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
+        if selected_variant_annotation_ids:data['selected_variant_annotation_ids'] = selected_variant_annotation_ids
+        if sorted_annotations:data['sorted_annotations'] = sorted_annotations
+        if is_template: data['is_template'] = is_template
 
         return self._mosaic.put(f'{self._path}/settings', data=data)
 
@@ -423,6 +440,10 @@ class Project(object):
     """
     PROJECTS
     """
+
+    def get_collection_projects(self):
+        return self._mosaic.get(f'{self._path}/sub-projects')
+
 
     def patch_project(self, template_project_id):
         return self._mosaic.patch(f'{self._path}/template/{template_project_id}')
