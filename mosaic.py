@@ -325,6 +325,34 @@ class Mosaic(object):
         """
         return self._request_history
 
+    """
+    ATTRIBUTE FORMS
+    """
+
+    def get_attribute_forms(self):
+        return self.get(f'attribute-forms')
+
+
+    def post_attribute_form(self, *, name=None, attributes=None):
+        data = { }
+        if name: data['name'] = name
+        if attributes: data['attribute_form_attributes'] = attributes
+
+        return self.post(f'attribute-forms', data=data)
+
+
+    def put_attribute_form(self, attribute_form_id, *, name=None, attributes=None):
+        data = { }
+        if name: data['name'] = name
+        if attributes: data['attribute_form_attributes'] = attributes
+
+        return self.put(f'attribute-forms/{attribute_form_id}', data=data)
+
+
+    def delete_attribute_form(self, attribute_form_id):
+        return self.delete(f'attribute-forms/{attribute_form_id}')
+
+
 
 class Project(object):
     def __init__(self, *, mosaic_host_type='local', mosaic=None, project_id=None, project_data=None):
@@ -368,6 +396,7 @@ class Project(object):
     def __str__(self):
         return f"{self.name} (id: {self.id})"
 
+
     """
     PROJECT ATTRIBUTES
     """
@@ -389,7 +418,7 @@ class Project(object):
     """
 
     def get_project_files(self):
-        return self._mosaic.get(f'{self._path}/files')
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/files')
 
 
     def get_project_file_url(self, file_id):
@@ -400,7 +429,7 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/files/{file_id}')
 
 
-    def post_project_file(self, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
+    def post_project_file(self, *, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
         data = { }
 
         if size: data['size'] = size
@@ -413,6 +442,21 @@ class Project(object):
         if file_type: data['file_type'] = file_type
 
         return self._mosaic.post(f'{self._path}/files', data=data)
+
+
+    def put_project_file(self, file_id, *, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
+        data = { }
+
+        if size: data['size'] = size
+        if uri: data['uri'] = uri
+        if endpoint_url: data['endpoint_url'] = endpoint_url
+        if library_type: data['library_type'] = library_type
+        if name: data['name'] = name
+        if nickname: data['nickname'] = nickname
+        if reference: data['reference'] = reference
+        if file_type: data['file_type'] = file_type
+
+        return self._mosaic.put(f'{self._path}/files/{file_id}', data=data)
 
 
     """
@@ -548,13 +592,44 @@ class Project(object):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
 
 
-    def post_sample_file(self, sample_id):
-        data = { 'name': name }
+    def post_sample_file(self, sample_id, *, url=None, experiment_id=None, library_type=None, name, nickname=None, qc=None, reference, file_type, size=None, uri, vcf_sample_name=None):
+        data = {
+            'name': name,
+            'reference': reference,
+            'type': file_type,
+            'uri': uri
+        }
 
-        if description:
-            data['description'] = description
+        if url: data['endpoint_url'] = url
+        if experiment_id: data['experiment_id'] = experiment_id
+        if library_type: data['library_type'] = library_type
+        if nickname: data['nickname'] = nickname
+        if qc: data['qc'] = qc
+        if size: data['size'] = size
+        if vcf_sample_name: data['vcf_sample_name'] = vcf_sample_name
 
-        return self._mosaic.post(f'{self._path}/samples', data=data)
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/files', data=data)
+
+
+    def put_sample_file(self, sample_id, file_id, *, url=None, experiment_id=None, library_type=None, name=None, nickname=None, qc=None, reference=None, file_type=None, size=None, uri=None, vcf_sample_name=None):
+        data = {}
+
+        if name: data['name'] = name
+        if reference: data['reference'] = reference
+        if file_type: data['type'] = file_type
+        if uri: data['uri'] = uri
+        if url: data['endpoint_url'] = url
+        if experiment_id: data['experiment_id'] = experiment_id
+        if library_type: data['library_type'] = library_type
+        if nickname: data['nickname'] = nickname
+        if qc: data['qc'] = qc
+        if size: data['size'] = size
+        if vcf_sample_name: data['vcf_sample_name'] = vcf_sample_name
+        if not data:
+          print('No fields to update were provided. Please include at least one field to update')
+          exit(1)
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/files/{file_id}', data=data)
 
 
     def delete_sample_file(self, sample_id, file_id):
