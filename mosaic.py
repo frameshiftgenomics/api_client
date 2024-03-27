@@ -489,6 +489,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/sub-projects')
 
 
+    def get_project(self):
+        return self._mosaic.get(f'{self._path}/')
+
+
     def patch_project(self, template_project_id):
         return self._mosaic.patch(f'{self._path}/template/{template_project_id}')
 
@@ -505,8 +509,20 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
 
 
-    def set_sample_attribute_value(self, sample_id, attr_id, value):
-        pass
+    def post_sample_attribute_value(self, sample_id, attribute_id, value):
+        data = { }
+
+        if value: data['value'] = value
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
+
+
+    def put_sample_attribute_value(self, sample_id, attribute_id, value):
+        data = { }
+
+        if value: data['value'] = value
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
 
 
     def delete_sample_attribute(self, data):
