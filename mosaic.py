@@ -223,6 +223,7 @@ class Mosaic(object):
        
         if params:
             limit = params.get('limit')
+            search = params.get('search')
         else:
             params = {}
 
@@ -353,6 +354,16 @@ class Mosaic(object):
         return self.delete(f'attribute-forms/{attribute_form_id}')
 
 
+    """
+    GENES
+    """
+
+    def get_genes(self, gene=None):
+        params = { }
+        if gene: params['search'] = gene
+
+        yield from self.get_paged_route_iter(f'genes', params=params)
+
 
 class Project(object):
     def __init__(self, *, mosaic_host_type='local', mosaic=None, project_id=None, project_data=None):
@@ -398,6 +409,16 @@ class Project(object):
 
 
     """
+    GENES
+    """
+
+
+    def get_gene_sets(self):
+        return self._mosaic.get(f'{self._path}/genes/sets')
+
+
+
+    """
     PROJECT ATTRIBUTES
     """
 
@@ -405,13 +426,21 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/attributes')
 
 
+    def put_project_attributes(self, attribute_id, *, description=None, is_public=None, name=None, predefined_values=None, value=None):
+        data = { }
+
+        if description: data['description'] = description
+        if is_public: data['is_public'] = is_public
+        if name: data['name'] = name
+        if predefined_values: data['predefined_values'] = predefined_values
+        if value: data['value'] = value
+
+        return self._mosaic.put(f'{self._path}/attributes/{attribute_id}', data=data)
+
+
     """
     PROJECT DASHBOARD
     """
-
-    def get_project_attributes(self):
-        return self._mosaic.get(f'{self._path}/attributes')
-
 
     """
     PROJECT FILES
@@ -543,6 +572,16 @@ class Project(object):
 
     def get_samples_hpo_terms(self):
         return self._mosaic.get(f'{self._path}/samples/hpo-terms')
+
+
+    def post_sample_hpo_term(self, sample_id, hpo_id):
+        data = { }
+
+        if hpo_id: data['hpo_id'] = hpo_id
+        print('  TEST', sample_id, data)
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
+
 
     """
     SAMPLES
