@@ -185,7 +185,6 @@ class Mosaic(object):
 
 
     def patch(self, resource, *, params=None, data=None):
-        print('terst')
         return self._http_request(requests.patch, resource, params=params, data=data)
 
 
@@ -358,6 +357,7 @@ class Mosaic(object):
     GENES
     """
 
+
     def get_genes(self, gene=None):
         params = { }
         if gene: params['search'] = gene
@@ -409,12 +409,61 @@ class Project(object):
 
 
     """
+    EXPERIMENTS
+    """
+
+    def delete_experiment(self, experiment_id):
+        return self._mosaic.delete(f'{self._path}/experiments/{experiment_id}')
+
+
+    def get_experiment(self, experiment_id):
+        return self._mosaic.get(f'{self._path}/experiments/{experiment_id}')
+
+
+    def get_experiments(self):
+        return self._mosaic.get(f'{self._path}/experiments')
+
+
+    def post_experiment(self, *, name=None, description=None, experiment_type=None, file_ids=None):
+        data = { }
+
+        if name: data['name'] = name
+        if description: data['description'] = description
+        if experiment_type: data['type'] = experiment_type
+        if not file_ids: data['file_ids'] = []
+
+        return self._mosaic.post(f'{self._path}/experiments', data=data)
+
+
+    def put_experiment(self, *, name=None, description=None, experiment_type=None, file_ids=None):
+        data = { }
+
+        if name: data['name'] = name
+        if description: data['description'] = description
+        if experiment_type: data['type'] = experiment_type
+        if not file_ids: data['file_ids'] = []
+
+        return self._mosaic.put(f'{self._path}/experiments', data=data)
+
+
+
+    """
     GENES
     """
 
-
     def get_gene_sets(self):
         return self._mosaic.get(f'{self._path}/genes/sets')
+
+    def post_gene_set(self, *, name=None, description=None, is_public_to_project=None, gene_ids=None, gene_names=None):
+        data = { }
+
+        if name: data['name'] = name
+        if description: data['description'] = description
+        if is_public_to_project: data['is_public_to_project'] = is_public_to_project
+        if gene_ids: data['gene_ids'] = gene_ids
+        if gene_names: data['gene_names'] = gene_names
+
+        return self._mosaic.post(f'{self._path}/genes/sets', data=data)
 
 
 
@@ -578,7 +627,6 @@ class Project(object):
         data = { }
 
         if hpo_id: data['hpo_id'] = hpo_id
-        print('  TEST', sample_id, data)
 
         return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
 
@@ -701,6 +749,20 @@ class Project(object):
     def get_variant_annotations_to_import(self): 
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
 
+    def post_variant_annotation(self, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+        data = { }
+
+        if name: data['name'] = name
+        if value_type: data['value_type'] = value_type
+        if privacy_level: data['privacy_level'] = privacy_level
+        if display_type: data['display_type'] = display_type
+        if severity: data['severity'] = severity
+        if category: data['category'] = category
+        if value_truncate_type: data['value_truncate_type'] = value_truncate_type
+        if value_max_length: data['value_max_length'] = value_max_length
+
+        return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
+
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
 
@@ -726,32 +788,6 @@ class Project(object):
             data['value_max_length'] = value_max_length
 
         return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
-
-    def create_variant_annotation(self, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
-        data = { 'name': name }
-
-        if value_type:
-            data['value_type'] = value_type
-
-        if privacy_level:
-            data['privacy_level'] = privacy_level
-
-        if display_type:
-            data['display_type'] = display_type
-
-        if severity:
-            data['severity'] = severity
-
-        if category:
-            data['category'] = category
-
-        if value_truncate_type:
-            data['value_truncate_type'] = value_truncate_type
-
-        if value_max_length:
-            data['value_max_length'] = value_max_length
-
-        return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
     """
     VARIANT FILTERS
