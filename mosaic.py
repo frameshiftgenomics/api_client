@@ -475,11 +475,12 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/attributes')
 
 
-    def put_project_attributes(self, attribute_id, *, description=None, is_public=None, name=None, predefined_values=None, value=None):
+    def put_project_attributes(self, attribute_id, *, description=None, is_public=None, name=None, predefined_values=None, value=None, is_editable=None):
         data = { }
 
         if description: data['description'] = description
         if is_public: data['is_public'] = is_public
+        if is_editable: data['is_editable'] = is_editable
         if name: data['name'] = name
         if predefined_values: data['predefined_values'] = predefined_values
         if value: data['value'] = value
@@ -743,6 +744,9 @@ class Project(object):
     VARIANT ANNOTATIONS
     """
 
+    def delete_variant_annotation(self, annotation_id):
+        return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}')
+
     def get_variant_annotations(self):
         return self._mosaic.get(f'{self._path}/variants/annotations')
 
@@ -762,6 +766,11 @@ class Project(object):
         if value_max_length: data['value_max_length'] = value_max_length
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
+
+    def post_import_variant_annotation(self, annotation_id):
+        data = {'annotation_id': annotation_id}
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/import', data=data)
 
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
