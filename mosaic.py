@@ -266,7 +266,7 @@ class Mosaic(object):
             yield Project(mosaic=self, project_data=pdata)
 
 
-    def create_project(self, name, reference='GRCh38', family_members=None):
+    def create_project(self, name, reference='GRCh38', family_members=None, privacy_level=None):
         """
         family_members looks like e.g.
         [
@@ -289,8 +289,8 @@ class Mosaic(object):
         # TODO: support other optional fields.
         data = { 'name': name, 'reference': reference }
 
-        if family_members:
-            data['family_members'] = family_members
+        if family_members: data['family_members'] = family_members
+        if privacy_level: data['privacy_level'] = privacy_level
 
         project_data = self.post('projects', data=data)
 
@@ -409,6 +409,21 @@ class Project(object):
 
 
     """
+    COLLECTIONS
+    """
+
+    def post_sub_projects(self, *, collection_projects=None, role_type_id=None, same_role=None):
+        data = { }
+
+        if collection_projects: data['collection_projects'] = collection_projects
+        if role_type_id: data['role_type_id'] = role_type_id
+        if same_role: data['same_role'] = same_role
+
+        return self._mosaic.post(f'{self._path}/sub-projects', data=data)
+
+
+
+    """
     EXPERIMENTS
     """
 
@@ -495,6 +510,25 @@ class Project(object):
     PROJECT DASHBOARD
     """
 
+    def get_project_dashboard(self):
+        return self._mosaic.get(f'{self._path}/dashboard')
+
+
+    def post_project_dashboard(self, *, dashboard_type=None, is_active=None, should_show_name_in_badge=None, chart_id=None, attribute_id=None, project_analysis_id=None, project_conversation_id=None, variant_set_id=None):
+        data = { }
+
+        if dashboard_type: data['dashboard_type'] = dashboard_type 
+        if is_active: data['is_active'] = is_active 
+        if should_show_name_in_badge: data['should_show_name_in_badge'] = should_show_name_in_badge 
+        if chart_id: data['chart_id'] = chart_id 
+        if attribute_id: data['attribute_id'] = attribute_id 
+        if project_analysis_id: data['project_analysis_id'] = project_analysis_id 
+        if project_conversation_id: data['project_conversation_id'] = project_conversation_id 
+        if variant_set_id: data['variant_set_id'] = variant_set_id 
+
+        return self._mosaic.post(f'{self._path}/dashboard', data=data)
+
+
     """
     PROJECT FILES
     """
@@ -549,9 +583,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/settings')
 
 
-    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_ids=None, sorted_annotations=None, is_template=None):
+    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
         data = { }
 
+        if default_variant_set_annotation_ids: data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
         if privacy_level: data['privacy_level'] = privacy_level
         if reference: data['reference'] = reference
         if selected_sample_attribute_chart_data: data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
@@ -842,6 +877,13 @@ class Project(object):
     def delete_variant_filter(self, filter_id):
         self._mosaic.delete(f'{self._path}/variants/filters/{filter_id}')
 
+
+    """
+    VARIANTS
+    """
+
+    #def get_variant_set(self):
+    #    return self._mosaic.get(f'{self._path}/variants/filters')
 
 if __name__ == '__main__':
     import fire
