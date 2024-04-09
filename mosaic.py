@@ -266,7 +266,7 @@ class Mosaic(object):
             yield Project(mosaic=self, project_data=pdata)
 
 
-    def create_project(self, name, reference='GRCh38', family_members=None, privacy_level=None):
+    def create_project(self, name, reference='GRCh38', family_members=None, privacy_level=None, family_name=None):
         """
         family_members looks like e.g.
         [
@@ -289,8 +289,14 @@ class Mosaic(object):
         # TODO: support other optional fields.
         data = { 'name': name, 'reference': reference }
 
-        if family_members: data['family_members'] = family_members
-        if privacy_level: data['privacy_level'] = privacy_level
+        if family_members: 
+            data['family_members'] = family_members
+
+        if privacy_level: 
+            data['privacy_level'] = privacy_level
+
+        if family_name:
+            data['family_name'] = family_name
 
         project_data = self.post('projects', data=data)
 
