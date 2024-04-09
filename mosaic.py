@@ -451,6 +451,9 @@ class Project(object):
     GENES
     """
 
+    def delete_gene_set(self, gene_set_id):
+        return self._mosaic.delete(f'{self._path}/genes/sets/{gene_set_id}')
+
     def get_gene_sets(self):
         return self._mosaic.get(f'{self._path}/genes/sets')
 
