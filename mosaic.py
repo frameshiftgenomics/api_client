@@ -492,6 +492,14 @@ class Project(object):
 
 
     """
+    PEDIGREE
+    """
+
+    def get_pedigree(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/pedigree')
+
+
+    """
     PROJECT ATTRIBUTES
     """
 
@@ -499,11 +507,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/attributes')
 
 
-    def put_project_attributes(self, attribute_id, *, description=None, is_public=None, name=None, predefined_values=None, value=None, is_editable=None):
+    def put_project_attributes(self, attribute_id, *, description=None, name=None, predefined_values=None, value=None, is_editable=None):
         data = { }
 
         if description: data['description'] = description
-        if is_public: data['is_public'] = is_public
         if is_editable: data['is_editable'] = is_editable
         if name: data['name'] = name
         if predefined_values: data['predefined_values'] = predefined_values
@@ -523,7 +530,7 @@ class Project(object):
     def post_project_dashboard(self, *, dashboard_type=None, is_active=None, should_show_name_in_badge=None, chart_id=None, attribute_id=None, project_analysis_id=None, project_conversation_id=None, variant_set_id=None):
         data = { }
 
-        if dashboard_type: data['dashboard_type'] = dashboard_type 
+        if dashboard_type: data['type'] = dashboard_type 
         if is_active: data['is_active'] = is_active 
         if should_show_name_in_badge: data['should_show_name_in_badge'] = should_show_name_in_badge 
         if chart_id: data['chart_id'] = chart_id 
@@ -819,26 +826,13 @@ class Project(object):
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
 
-        if value_type:
-            data['value_type'] = value_type
-
-        if privacy_level:
-            data['privacy_level'] = privacy_level
-
-        if display_type:
-            data['display_type'] = display_type
-
-        if severity:
-            data['severity'] = severity
-
-        if category:
-            data['category'] = category
-
-        if value_truncate_type:
-            data['value_truncate_type'] = value_truncate_type
-
-        if value_max_length:
-            data['value_max_length'] = value_max_length
+        if value_type: data['value_type'] = value_type
+        if privacy_level: data['privacy_level'] = privacy_level
+        if display_type: data['display_type'] = display_type
+        if severity: data['severity'] = severity
+        if category: data['category'] = category
+        if value_truncate_type: data['value_truncate_type'] = value_truncate_type
+        if value_max_length: data['value_max_length'] = value_max_length
 
         return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
 
@@ -852,26 +846,14 @@ class Project(object):
 
     def post_variant_filter(self, *, name=None, description=None, category=None, column_uids=None, sort_column_uid=None, sort_direction=None, filter_data=None):
         data = { 'name': name, 'filter': filter_data }
-        if name:
-            data['name'] = name
 
-        if description:
-            data['description'] = description
-
-        if category:
-            data['category'] = category
-
-        if column_uids:
-            data['selected_variant_column_uids'] = column_uids
-
-        if sort_column_uid:
-            data['sort_by_column_uid'] = sort_column_uid
-
-        if sort_direction:
-            data['sort_dir'] = sort_direction
-
-        if filter_data:
-            data['filter'] = filter_data
+        if name: data['name'] = name
+        if description: data['description'] = description
+        if category: data['category'] = category
+        if column_uids: data['selected_variant_column_uids'] = column_uids
+        if sort_column_uid: data['sort_by_column_uid'] = sort_column_uid
+        if sort_direction: data['sort_dir'] = sort_direction
+        if filter_data: data['filter'] = filter_data
 
         return self._mosaic.post(f'{self._path}/variants/filters', data=data)
 
@@ -888,8 +870,31 @@ class Project(object):
     VARIANTS
     """
 
-    #def get_variant_set(self):
-    #    return self._mosaic.get(f'{self._path}/variants/filters')
+    def get_variant_set(self, variant_set_id):
+        return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}')
+
+
+    def get_variant_sets(self):
+        return self._mosaic.get(f'{self._path}/variants/sets')
+
+
+    def post_upload_variants(self, *, name=None, description=None, vcf_file=None, upload_type=None, create_variant_set=None, disable_successful_notification=None):
+        data = { }
+
+        if name: 
+          data['name'] = name
+        if description:
+          data['description'] = description
+        if vcf_file: 
+          data['file'] = vcf_file
+        if upload_type:
+          data['type'] = upload_type
+        if create_variant_set:
+          data['create_variant_set'] = create_variant_set
+        if disable_successful_notification:
+          data['disable_successful_notification'] = disable_successful_notification
+
+        return self._mosaic.post(f'{self._path}/variants/upload', data=data)
 
 if __name__ == '__main__':
     import fire
