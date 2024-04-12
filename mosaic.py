@@ -139,11 +139,21 @@ class Mosaic(object):
     """
     Mosaic HTTP request methods.
     """
-    def _http_request(self, method, resource, *, params=None, data=None):
+    def _http_request(self, method, resource, *, params=None, data=None, file_upload=None):
         kwargs = {
                 'headers': self._headers, 
                 'verify': self._verify, 
                 'params': params
+                }
+
+        if file_upload:
+            # setting Content-Type to None lets
+            # requests generate the header correctly
+            # from the 'files' dict
+            kwargs['headers']['Content-Type'] = None
+
+            kwargs['files'] = {
+                'file': open(file_upload, "rb")
                 }
 
         if data:
@@ -180,8 +190,8 @@ class Mosaic(object):
         return self._http_request(requests.get, resource, params=params)
 
 
-    def post(self, resource, *, params=None, data=None):
-        return self._http_request(requests.post, resource, params=params, data=data)
+    def post(self, resource, *, params=None, data=None, file_path=None):
+        return self._http_request(requests.post, resource, params=params, data=data, file_upload=file_path)
 
 
     def patch(self, resource, *, params=None, data=None):
@@ -895,6 +905,11 @@ class Project(object):
           data['disable_successful_notification'] = disable_successful_notification
 
         return self._mosaic.post(f'{self._path}/variants/upload', data=data)
+
+
+    def post_variant_file(self, file_path):
+        self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path)
+
 
 if __name__ == '__main__':
     import fire
