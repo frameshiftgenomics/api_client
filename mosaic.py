@@ -156,7 +156,11 @@ class Mosaic(object):
                 'file': open(file_upload, "rb")
                 }
 
-        if data:
+            if data:
+                # if Content-Type set in this way,
+                # we don't the json.dumps as below.
+                kwargs['data'] = data
+        elif data:
             # json.dumps prevents form encoding
             kwargs['data'] = json.dumps(data)
 
@@ -892,23 +896,33 @@ class Project(object):
         data = { }
 
         if name: 
-          data['name'] = name
+            data['name'] = name
         if description:
-          data['description'] = description
+            data['description'] = description
         if vcf_file: 
-          data['file'] = vcf_file
+            data['file'] = vcf_file
         if upload_type:
-          data['type'] = upload_type
+            data['type'] = upload_type
         if create_variant_set:
-          data['create_variant_set'] = create_variant_set
+            data['create_variant_set'] = create_variant_set
         if disable_successful_notification:
-          data['disable_successful_notification'] = disable_successful_notification
+            data['disable_successful_notification'] = disable_successful_notification
 
         return self._mosaic.post(f'{self._path}/variants/upload', data=data)
 
 
-    def post_variant_file(self, file_path):
-        self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path)
+    def post_variant_file(self, file_path, upload_type=None, disable_successful_notification=None):
+        data = { }
+
+        if upload_type:
+            data['upload_type'] = upload_type
+        if disable_successful_notification:
+            if disable_successful_notification == 'true':
+              data['disable_successful_notification'] = True
+            else:
+              data['disable_successful_notification'] = False
+
+        return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data)
 
 
 if __name__ == '__main__':
