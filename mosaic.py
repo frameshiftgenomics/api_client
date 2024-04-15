@@ -900,42 +900,17 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/sets')
 
 
-    def post_upload_variants(self, *, name=None, description=None, vcf_file=None, upload_type=None, create_variant_set=None, disable_successful_notification=None):
-        data = { }
-
-        if name: 
-            data['name'] = name
-        if description:
-            data['description'] = description
-        if vcf_file: 
-            data['file'] = vcf_file
-        if upload_type:
-            data['type'] = upload_type
-        if create_variant_set:
-            data['create_variant_set'] = create_variant_set
-        if disable_successful_notification:
-            data['disable_successful_notification'] = disable_successful_notification
-
-        return self._mosaic.post(f'{self._path}/variants/upload', data=data)
-
-
     def post_variant_file(self, file_path, upload_type=None, disable_successful_notification=None):
         data = { }
 
         if upload_type:
-            data['upload_type'] = upload_type
+            data['type'] = upload_type
         if disable_successful_notification:
             if disable_successful_notification == 'true':
               data['disable_successful_notification'] = True
             else:
               data['disable_successful_notification'] = False
 
-        print('API')
-        print('{self._path}/variants/upload')
-        print(file_path)
-        from pprint import pprint
-        pprint(data)
-        exit(0)
         return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data)
 
 
