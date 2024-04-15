@@ -506,6 +506,14 @@ class Project(object):
 
 
     """
+    JOBS
+    """
+
+    def get_job_status(self, job_id):
+        return self._mosaic.get(f'{self._path}/jobs/{job_id}')
+
+
+    """
     PEDIGREE
     """
 
@@ -922,6 +930,12 @@ class Project(object):
             else:
               data['disable_successful_notification'] = False
 
+        print('API')
+        print('{self._path}/variants/upload')
+        print(file_path)
+        from pprint import pprint
+        pprint(data)
+        exit(0)
         return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data)
 
 
