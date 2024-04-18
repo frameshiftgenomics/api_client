@@ -473,10 +473,14 @@ class Project(object):
     def put_experiment(self, *, name=None, description=None, experiment_type=None, file_ids=None):
         data = { }
 
-        if name: data['name'] = name
-        if description: data['description'] = description
-        if experiment_type: data['type'] = experiment_type
-        if not file_ids: data['file_ids'] = []
+        if name:
+            data['name'] = name
+        if description:
+            data['description'] = description
+        if experiment_type:
+            data['type'] = experiment_type
+        if not file_ids:
+            data['file_ids'] = []
 
         return self._mosaic.put(f'{self._path}/experiments', data=data)
 
@@ -495,11 +499,16 @@ class Project(object):
     def post_gene_set(self, *, name=None, description=None, is_public_to_project=None, gene_ids=None, gene_names=None):
         data = { }
 
-        if name: data['name'] = name
-        if description: data['description'] = description
-        if is_public_to_project: data['is_public_to_project'] = is_public_to_project
-        if gene_ids: data['gene_ids'] = gene_ids
-        if gene_names: data['gene_names'] = gene_names
+        if name:
+            data['name'] = name
+        if description:
+            data['description'] = description
+        if is_public_to_project:
+            data['is_public_to_project'] = is_public_to_project
+        if gene_ids:
+            data['gene_ids'] = gene_ids
+        if gene_names:
+            data['gene_names'] = gene_names
 
         return self._mosaic.post(f'{self._path}/genes/sets', data=data)
 
@@ -525,18 +534,36 @@ class Project(object):
     PROJECT ATTRIBUTES
     """
 
+    def delete_project_attribute(self, attribute_id):
+        return self._mosaic.delete(f'{self._path}/attributes/{attribute_id}')
+
+
     def get_project_attributes(self):
         return self._mosaic.get(f'{self._path}/attributes')
+
+
+    def post_import_project_attribute(self, attribute_id, *, value=None):
+        data = { 'attribute_id': attribute_id}
+
+        if value:
+            data['value'] = value
+
+        return self._mosaic.post(f'{self._path}/attributes/import', data=data)
 
 
     def put_project_attributes(self, attribute_id, *, description=None, name=None, predefined_values=None, value=None, is_editable=None):
         data = { }
 
-        if description: data['description'] = description
-        if is_editable: data['is_editable'] = is_editable
-        if name: data['name'] = name
-        if predefined_values: data['predefined_values'] = predefined_values
-        if value: data['value'] = value
+        if description:
+            data['description'] = description
+        if is_editable:
+            data['is_editable'] = is_editable
+        if name:
+            data['name'] = name
+        if predefined_values:
+            data['predefined_values'] = predefined_values
+        if value:
+            data['value'] = value
 
         return self._mosaic.put(f'{self._path}/attributes/{attribute_id}', data=data)
 
@@ -552,14 +579,22 @@ class Project(object):
     def post_project_dashboard(self, *, dashboard_type=None, is_active=None, should_show_name_in_badge=None, chart_id=None, attribute_id=None, project_analysis_id=None, project_conversation_id=None, variant_set_id=None):
         data = { }
 
-        if dashboard_type: data['type'] = dashboard_type 
-        if is_active: data['is_active'] = is_active 
-        if should_show_name_in_badge: data['should_show_name_in_badge'] = should_show_name_in_badge 
-        if chart_id: data['chart_id'] = chart_id 
-        if attribute_id: data['attribute_id'] = attribute_id 
-        if project_analysis_id: data['project_analysis_id'] = project_analysis_id 
-        if project_conversation_id: data['project_conversation_id'] = project_conversation_id 
-        if variant_set_id: data['variant_set_id'] = variant_set_id 
+        if dashboard_type:
+            data['type'] = dashboard_type 
+        if is_active:
+            data['is_active'] = is_active 
+        if should_show_name_in_badge:
+            data['should_show_name_in_badge'] = should_show_name_in_badge 
+        if chart_id:
+            data['chart_id'] = chart_id 
+        if attribute_id:
+            data['attribute_id'] = attribute_id 
+        if project_analysis_id:
+            data['project_analysis_id'] = project_analysis_id 
+        if project_conversation_id:
+            data['project_conversation_id'] = project_conversation_id 
+        if variant_set_id:
+            data['variant_set_id'] = variant_set_id 
 
         return self._mosaic.post(f'{self._path}/dashboard', data=data)
 
@@ -777,13 +812,20 @@ class Project(object):
             'uri': uri
         }
 
-        if url: data['endpoint_url'] = url
-        if experiment_id: data['experiment_id'] = experiment_id
-        if library_type: data['library_type'] = library_type
-        if nickname: data['nickname'] = nickname
-        if qc: data['qc'] = qc
-        if size: data['size'] = size
-        if vcf_sample_name: data['vcf_sample_name'] = vcf_sample_name
+        if url:
+            data['endpoint_url'] = url
+        if experiment_id:
+            data['experiment_id'] = experiment_id
+        if library_type:
+            data['library_type'] = library_type
+        if nickname:
+            data['nickname'] = nickname
+        if qc:
+            data['qc'] = qc
+        if size:
+            data['size'] = size
+        if vcf_sample_name:
+            data['vcf_sample_name'] = vcf_sample_name
 
         return self._mosaic.post(f'{self._path}/samples/{sample_id}/files', data=data)
 
@@ -791,17 +833,28 @@ class Project(object):
     def put_sample_file(self, sample_id, file_id, *, url=None, experiment_id=None, library_type=None, name=None, nickname=None, qc=None, reference=None, file_type=None, size=None, uri=None, vcf_sample_name=None):
         data = {}
 
-        if name: data['name'] = name
-        if reference: data['reference'] = reference
-        if file_type: data['type'] = file_type
-        if uri: data['uri'] = uri
-        if url: data['endpoint_url'] = url
-        if experiment_id: data['experiment_id'] = experiment_id
-        if library_type: data['library_type'] = library_type
-        if nickname: data['nickname'] = nickname
-        if qc: data['qc'] = qc
-        if size: data['size'] = size
-        if vcf_sample_name: data['vcf_sample_name'] = vcf_sample_name
+        if name:
+            data['name'] = name
+        if reference:
+            data['reference'] = reference
+        if file_type:
+            data['type'] = file_type
+        if uri:
+            data['uri'] = uri
+        if url:
+            data['endpoint_url'] = url
+        if experiment_id:
+            data['experiment_id'] = experiment_id
+        if library_type:
+            data['library_type'] = library_type
+        if nickname:
+            data['nickname'] = nickname
+        if qc:
+            data['qc'] = qc
+        if size:
+            data['size'] = size
+        if vcf_sample_name:
+            data['vcf_sample_name'] = vcf_sample_name
         if not data:
           print('No fields to update were provided. Please include at least one field to update')
           exit(1)
@@ -829,14 +882,22 @@ class Project(object):
     def post_variant_annotation(self, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { }
 
-        if name: data['name'] = name
-        if value_type: data['value_type'] = value_type
-        if privacy_level: data['privacy_level'] = privacy_level
-        if display_type: data['display_type'] = display_type
-        if severity: data['severity'] = severity
-        if category: data['category'] = category
-        if value_truncate_type: data['value_truncate_type'] = value_truncate_type
-        if value_max_length: data['value_max_length'] = value_max_length
+        if name:
+            data['name'] = name
+        if value_type:
+            data['value_type'] = value_type
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if display_type:
+            data['display_type'] = display_type
+        if severity:
+            data['severity'] = severity
+        if category:
+            data['category'] = category
+        if value_truncate_type:
+            data['value_truncate_type'] = value_truncate_type
+        if value_max_length:
+            data['value_max_length'] = value_max_length
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
@@ -848,13 +909,20 @@ class Project(object):
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
 
-        if value_type: data['value_type'] = value_type
-        if privacy_level: data['privacy_level'] = privacy_level
-        if display_type: data['display_type'] = display_type
-        if severity: data['severity'] = severity
-        if category: data['category'] = category
-        if value_truncate_type: data['value_truncate_type'] = value_truncate_type
-        if value_max_length: data['value_max_length'] = value_max_length
+        if value_type:
+            data['value_type'] = value_type
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if display_type:
+            data['display_type'] = display_type
+        if severity:
+            data['severity'] = severity
+        if category:
+            data['category'] = category
+        if value_truncate_type:
+            data['value_truncate_type'] = value_truncate_type
+        if value_max_length:
+            data['value_max_length'] = value_max_length
 
         return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
 
@@ -869,13 +937,20 @@ class Project(object):
     def post_variant_filter(self, *, name=None, description=None, category=None, column_uids=None, sort_column_uid=None, sort_direction=None, filter_data=None):
         data = { 'name': name, 'filter': filter_data }
 
-        if name: data['name'] = name
-        if description: data['description'] = description
-        if category: data['category'] = category
-        if column_uids: data['selected_variant_column_uids'] = column_uids
-        if sort_column_uid: data['sort_by_column_uid'] = sort_column_uid
-        if sort_direction: data['sort_dir'] = sort_direction
-        if filter_data: data['filter'] = filter_data
+        if name:
+            data['name'] = name
+        if description:
+            data['description'] = description
+        if category:
+            data['category'] = category
+        if column_uids:
+            data['selected_variant_column_uids'] = column_uids
+        if sort_column_uid:
+            data['sort_by_column_uid'] = sort_column_uid
+        if sort_direction:
+            data['sort_dir'] = sort_direction
+        if filter_data:
+            data['filter'] = filter_data
 
         return self._mosaic.post(f'{self._path}/variants/filters', data=data)
 
@@ -907,9 +982,9 @@ class Project(object):
             data['type'] = upload_type
         if disable_successful_notification:
             if disable_successful_notification == 'true':
-              data['disable_successful_notification'] = True
+              data['disable_successful_notification'] = 'true'
             else:
-              data['disable_successful_notification'] = False
+              data['disable_successful_notification'] = 'false'
 
         return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data)
 
