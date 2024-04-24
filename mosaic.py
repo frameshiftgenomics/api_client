@@ -796,6 +796,7 @@ class Project(object):
 
         return self._mosaic.post(f'{self._path}/samples/merge', data=data)
 
+
     """
     SAMPLE FILES
     """
@@ -901,10 +902,24 @@ class Project(object):
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
-    def post_import_variant_annotation(self, annotation_id):
-        data = {'annotation_id': annotation_id}
 
-        return self._mosaic.post(f'{self._path}/variants/annotations/import', data=data)
+    def post_annotation_file(self, file_path, allow_deletion=None, disable_successful_notification=None):
+        data = { }
+
+        if allow_deletion:
+            if allow_deletion == 'true':
+                data['allow_deletion'] = 'true'
+            else:
+                data['allow_deletion'] = 'false'
+
+        if disable_successful_notification:
+            if disable_successful_notification == 'true':
+                data['disable_successful_notification'] = 'true'
+            else:
+                data['disable_successful_notification'] = 'false'
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/upload', file_path=file_path, data=data)
+
 
     def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { 'name': name }
