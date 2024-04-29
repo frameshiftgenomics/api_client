@@ -97,8 +97,8 @@ class Mosaic(object):
 
         self._request_history = []
 
-        if not show_traceback:
-            sys.tracebacklimit = 0
+#        if not show_traceback:
+#            sys.tracebacklimit = 0
 
     def __repr__(self):
         return f"Mosaic('{self._host_type}')"
@@ -385,6 +385,19 @@ class Mosaic(object):
         yield from self.get_paged_route_iter(f'genes', params=params)
 
 
+
+    """
+    JOBS
+    """
+
+    def get_job_status(self, job_id):
+        return self.get(f'jobs/{job_id}')
+
+
+    def get_queue_status(self):
+        return self.get(f'jobs')
+
+
 class Project(object):
     def __init__(self, *, mosaic_host_type='local', mosaic=None, project_id=None, project_data=None):
         """
@@ -511,15 +524,6 @@ class Project(object):
             data['gene_names'] = gene_names
 
         return self._mosaic.post(f'{self._path}/genes/sets', data=data)
-
-
-
-    """
-    JOBS
-    """
-
-    def get_job_status(self, job_id):
-        return self._mosaic.get(f'{self._path}/jobs/{job_id}')
 
 
     """
@@ -653,17 +657,25 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/settings')
 
 
-    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
+    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
         data = { }
 
-        if default_variant_set_annotation_ids: data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
-        if privacy_level: data['privacy_level'] = privacy_level
-        if reference: data['reference'] = reference
-        if selected_sample_attribute_chart_data: data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
-        if selected_sample_attribute_column_ids: data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
-        if selected_variant_annotation_ids:data['selected_variant_annotation_ids'] = selected_variant_annotation_ids
-        if sorted_annotations:data['sorted_annotations'] = sorted_annotations
-        if is_template: data['is_template'] = is_template
+        if default_variant_set_annotation_ids:
+            data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if reference:
+            data['reference'] = reference
+        if selected_sample_attribute_chart_data:
+            data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
+        if selected_sample_attribute_column_ids:
+            data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
+        if selected_variant_annotation_version_ids:
+            data['selected_variant_annotation_version_ids'] = selected_variant_annotation_version_ids
+        if sorted_annotations:
+            data['sorted_annotations'] = sorted_annotations
+        if is_template:
+            data['is_template'] = is_template
 
         return self._mosaic.put(f'{self._path}/settings', data=data)
 
@@ -880,7 +892,10 @@ class Project(object):
     def get_variant_annotations_to_import(self): 
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
 
-    def post_variant_annotation(self, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+    def get_variant_annotation_versions(self, annotation_id):
+        return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
+
+    def post_variant_annotation(self, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, version=None):
         data = { }
 
         if name:
@@ -899,6 +914,8 @@ class Project(object):
             data['value_truncate_type'] = value_truncate_type
         if value_max_length:
             data['value_max_length'] = value_max_length
+        if version:
+            data['version'] = value_max_length
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
@@ -921,9 +938,11 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/annotations/upload', file_path=file_path, data=data)
 
 
-    def put_variant_annotation(self, annotation_id, *, name, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
-        data = { 'name': name }
+    def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+        data = { }
 
+        if name:
+            data['name'] = name
         if value_type:
             data['value_type'] = value_type
         if privacy_level:
@@ -949,7 +968,7 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/filters')
 
 
-    def post_variant_filter(self, *, name=None, description=None, category=None, column_uids=None, sort_column_uid=None, sort_direction=None, filter_data=None):
+    def post_variant_filter(self, *, name=None, description=None, category=None, column_ids=None, sort_column_id=None, sort_direction=None, filter_data=None):
         data = { 'name': name, 'filter': filter_data }
 
         if name:
@@ -958,10 +977,10 @@ class Project(object):
             data['description'] = description
         if category:
             data['category'] = category
-        if column_uids:
-            data['selected_variant_column_uids'] = column_uids
-        if sort_column_uid:
-            data['sort_by_column_uid'] = sort_column_uid
+        if column_ids:
+            data['selected_view_columns_annotation_versions'] = column_ids
+        if sort_column_id:
+            data['sort_by_column_id'] = sort_column_id
         if sort_direction:
             data['sort_dir'] = sort_direction
         if filter_data:
