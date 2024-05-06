@@ -380,7 +380,8 @@ class Mosaic(object):
 
     def get_genes(self, gene=None):
         params = { }
-        if gene: params['search'] = gene
+        if gene:
+            params['search'] = gene
 
         yield from self.get_paged_route_iter(f'genes', params=params)
 
@@ -394,8 +395,16 @@ class Mosaic(object):
         return self.get(f'jobs/{job_id}')
 
 
-    def get_queue_status(self):
-        return self.get(f'jobs')
+    def get_queue_status(self, *, job_statuses=None, per_status_start=None, per_status_end=None):
+        params = { }
+        if job_statuses:
+          params['job_statuses'] = [job_statuses]
+        if per_status_start:
+          params['per_status_start'] = per_status_start
+        if per_status_end:
+          params['per_status_end'] = per_status_end
+
+        return self.get(f'jobs', params=params)
 
 
 class Project(object):
@@ -813,6 +822,10 @@ class Project(object):
     SAMPLE FILES
     """
 
+    def delete_sample_file(self, sample_id, file_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/files/{file_id}')
+
+
     def get_sample_files(self, sample_id):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
 
@@ -875,10 +888,6 @@ class Project(object):
         return self._mosaic.put(f'{self._path}/samples/{sample_id}/files/{file_id}', data=data)
 
 
-    def delete_sample_file(self, sample_id, file_id):
-        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/files/{file_id}')
-
-
     """
     VARIANT ANNOTATIONS
     """
@@ -919,6 +928,10 @@ class Project(object):
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
+    def post_import_annotation(self, annotation_id):
+        data = {'annotation_id': annotation_id}
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/import', data=data)
 
     def post_annotation_file(self, file_path, allow_deletion=None, disable_successful_notification=None):
         data = { }
