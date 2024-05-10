@@ -457,9 +457,12 @@ class Project(object):
     def post_sub_projects(self, *, collection_projects=None, role_type_id=None, same_role=None):
         data = { }
 
-        if collection_projects: data['collection_projects'] = collection_projects
-        if role_type_id: data['role_type_id'] = role_type_id
-        if same_role: data['same_role'] = same_role
+        if collection_projects:
+            data['collection_projects'] = collection_projects
+        if role_type_id:
+            data['role_type_id'] = role_type_id
+        if same_role:
+            data['same_role'] = same_role
 
         return self._mosaic.post(f'{self._path}/sub-projects', data=data)
 
