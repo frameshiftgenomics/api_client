@@ -349,42 +349,93 @@ class Mosaic(object):
     ATTRIBUTE FORMS
     """
 
+    def delete_attribute_form(self, attribute_form_id):
+        return self.delete(f'attribute-forms/{attribute_form_id}')
+
+
     def get_attribute_forms(self):
         return self.get(f'attribute-forms')
 
 
     def post_attribute_form(self, *, name=None, attributes=None):
         data = { }
-        if name: data['name'] = name
-        if attributes: data['attribute_form_attributes'] = attributes
+        if name:
+            data['name'] = name
+        if attributes:
+            data['attribute_form_attributes'] = attributes
 
         return self.post(f'attribute-forms', data=data)
 
 
     def put_attribute_form(self, attribute_form_id, *, name=None, attributes=None):
         data = { }
-        if name: data['name'] = name
-        if attributes: data['attribute_form_attributes'] = attributes
+        if name:
+            data['name'] = name
+        if attributes:
+            data['attribute_form_attributes'] = attributes
 
         return self.put(f'attribute-forms/{attribute_form_id}', data=data)
 
 
-    def delete_attribute_form(self, attribute_form_id):
-        return self.delete(f'attribute-forms/{attribute_form_id}')
-
-
     """
-    GENES
+    CONVERSATION GROUPS
     """
 
 
-    def get_genes(self, gene=None):
+    def delete_conversation_group(self, group_id):
+        return self.delete(f'conversation-groups/{group_id}')
+
+
+    def get_conversation_group(self, group_id, include_user_info=False):
+        params = { }
+        if include_user_info:
+            params['include_user_info'] = 'true'
+
+        return self.get(f'conversation-groups/{group_id}', params=params)
+
+    def get_conversation_groups(self, include_user_info=False):
+        params = { }
+        if include_user_info:
+            params['include_user_info'] = 'true'
+
+        return self.get(f'conversation-groups', params=params)
+
+
+    def put_conversation_groups(self, group_id, *, name, description=None, user_ids):
+        data = { 'name': name,
+                 'user_ids': user_ids }
+        if description:
+            data['description'] = name
+
+        return self.post(f'conversation_groups/{group_id}', data=data)
+
+
+    def post_conversation_groups(self, *, name, description=None, user_ids):
+        data = { 'name': name,
+                 'user_ids': user_ids }
+        if description:
+            data['description'] = name
+
+        return self.post(f'conversation_groups', data=data)
+
+
+    """
+    GENES (GLOBAL)
+    """
+
+
+    def get_genes(self, gene=None, reference=None, region=None):
         params = { }
         if gene:
             params['search'] = gene
+        if region:
+            params['include_region'] = 'true'
+        if reference:
+            params['reference'] = reference
+        else:
+            params['reference'] = 'GRCh38'
 
         yield from self.get_paged_route_iter(f'genes', params=params)
-
 
 
     """
@@ -405,6 +456,32 @@ class Mosaic(object):
           params['per_status_end'] = per_status_end
 
         return self.get(f'jobs', params=params)
+
+
+    """
+    S3 Bucket
+    """
+
+    def get_s3_bucket_user(self, bucket_name):
+        return self.get(f's3-buckets/{bucket_name}/credentials')
+
+
+    def post_s3_bucket_user(self, bucket_name, access_key_id, secret_access_key, *, endpoint_url=None):
+        data = { 'access_key_id': access_key_id,
+                 'secret_access_key': secret_access_key }
+
+        if endpoint_url:
+            data['endpoint_url'] = endpoint_url
+
+        return self.post(f's3-buckets/{bucket_name}/credentials', data=data)
+
+
+    """
+    SUPER ADMIN
+    """
+
+    def get_user_by_email(self, email):
+        return self.get(f'user/email/{email}')
 
 
 class Project(object):
@@ -469,6 +546,16 @@ class Project(object):
 
 
     """
+    CONVERSATIONS
+    """
+
+    def delete_watchers(self, conversation_id, user_ids):
+        data = { 'user_ids': user_ids}
+
+        return self._mosaic.delete(f'{self._path}/conversations/{conversation_id}/watchers')
+
+
+    """
     EXPERIMENTS
     """
 
@@ -512,14 +599,16 @@ class Project(object):
 
 
     """
-    GENES
+    GENES (PROJECT)
     """
 
     def delete_gene_set(self, gene_set_id):
         return self._mosaic.delete(f'{self._path}/genes/sets/{gene_set_id}')
 
+
     def get_gene_sets(self):
         return self._mosaic.get(f'{self._path}/genes/sets')
+
 
     def post_gene_set(self, *, name=None, description=None, is_public_to_project=None, gene_ids=None, gene_names=None):
         data = { }
@@ -582,6 +671,15 @@ class Project(object):
             data['value'] = value
 
         return self._mosaic.put(f'{self._path}/attributes/{attribute_id}', data=data)
+
+
+    """
+    PROJECT CONVERSATIONS
+    """
+
+
+    def get_project_conversations(self):
+        return self._mosaic.get(f'{self._path}/conversations')
 
 
     """
@@ -718,6 +816,12 @@ class Project(object):
 
     def get_attributes_for_sample(self, sample_id):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
+
+
+    def post_import_sample_attribute(self, attribute_id):
+        data = { 'attribute_id': attribute_id}
+
+        return self._mosaic.post(f'{self._path}/samples/attributes/import', data=data)
 
 
     def post_sample_attribute_value(self, sample_id, attribute_id, value):
@@ -898,6 +1002,9 @@ class Project(object):
     def delete_variant_annotation(self, annotation_id):
         return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}')
 
+    def delete_variant_annotation_version(self, annotation_id, annotation_version_id):
+        return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}')
+
     def get_variant_annotations(self):
         return self._mosaic.get(f'{self._path}/variants/annotations')
 
@@ -1016,6 +1123,10 @@ class Project(object):
     """
     VARIANTS
     """
+
+    def delete_variant_set(self, variant_set_id):
+        return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
+
 
     def get_variant_set(self, variant_set_id):
         return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}')

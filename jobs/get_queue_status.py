@@ -49,7 +49,13 @@ def parseCommandLine():
 
 # Print information about the job
 def print_job_info(job):
-  print(job['redis_job_id'], ', id: ', job['id'], ', status: ', job['status'], ', type: ', job['job_type'], ', submitted at: ', datetime.fromtimestamp(job['timestamp'] / 1000), sep = '')
+  if 'file' in job:
+    if 'job_type' in job:
+      print(job['redis_job_id'], ', id: ', job['id'], ', status: ', job['status'], ', type: ', job['job_type'], ', file: ', job['file'], ', submitted at: ', datetime.fromtimestamp(job['timestamp'] / 1000), sep = '')
+    else:
+      print(job['redis_job_id'], ', id: ', job['id'], ', status: ', job['status'], ', file: ', job['file'], ', submitted at: ', datetime.fromtimestamp(job['timestamp'] / 1000), sep = '')
+  else:
+    print(job['redis_job_id'], ', id: ', job['id'], ', status: ', job['status'], ', type: ', job['job_type'], ', submitted at: ', datetime.fromtimestamp(job['timestamp'] / 1000), sep = '')
 
 # If the script fails, provide an error message and exit
 def fail(message):

@@ -1,7 +1,7 @@
 import os
 import argparse
-from pprint import pprint
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -18,10 +18,8 @@ def main():
   # Open an api client project object for the defined project
   project = apiMosaic.get_project(args.project_id)
 
-  # Upload the variants
-  notifications = 'false' if args.enable_notifications else 'true'
-  data = project.post_variant_file(args.vcf, upload_type = args.method, disable_successful_notification = notifications)
-  print(data['message'], '. Variant upload job id: ', data['redis_job_id'], sep = '')
+  # Delete the annotation
+  data = project.delete_variant_annotation_version(args.annotation_id, args.annotation_version_id)
 
 # Input options
 def parseCommandLine():
@@ -32,12 +30,11 @@ def parseCommandLine():
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get annotations for')
 
-  # Additional arguments
-  parser.add_argument('--method', '-m', required = True, metavar = 'string', help = 'The variant upload method: "allele, no-validation, position, raw"')
-  parser.add_argument('--vcf', '-v', required = True, metavar = 'string', help = 'The vcf file to upload variants from')
-  parser.add_argument('--enable_notifications', '-e', required = False, action = 'store_true', help = 'If set, notifications will be provided. Otherwise, notifications will only be provided for failures')
+  # The id of the annotation to delete
+  parser.add_argument('--annotation_id', '-i', required = True, metavar = 'integer', help = 'The id of the annotation to delete')
+  parser.add_argument('--annotation_version_id', '-v', required = True, metavar = 'integer', help = 'The id of the annotation version to delete')
 
   return parser.parse_args()
 

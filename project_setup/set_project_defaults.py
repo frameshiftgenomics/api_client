@@ -56,7 +56,6 @@ def main():
     for annotation in project.get_variant_annotations():
       annotations[annotation['uid']] = annotation['id']
 
-
     # Set the analytics default charts
 
   
@@ -68,7 +67,14 @@ def main():
         if uid not in sample_attributes:
           fail('Sample table defaults includes a sample attribute that is not available: ' + uid)
         samples_table_columns.append(sample_attributes[uid])
-  
+
+    # Remove any specified annotations
+    annotations_to_remove = []
+    if 'remove_annotations' in json_info:
+      for uid in json_info['remove_annotations']:
+        if uid in annotations:
+          data = project.delete_variant_annotation(annotations[uid])
+
     # Set the variants table defaults. The json file can include both annotation versions, or just annotation ids. If
     # annotation ids are provided, use the latest version
     annotation_version_ids = []
@@ -95,16 +101,19 @@ def main():
         else:
           annotation_id = annotations[uid]
 
-        # Find the latest version for this annotation
-        annotation_version_id = False
-        for annotation_version in project.get_variant_annotation_versions(annotation_id):
-          if not annotation_version_id:
-            annotation_version_id = annotation_version['id']
-          elif annotation_version['id'] > annotation_version_id:
-            annotation_version_id = annotation_version['id']
-  
-        # Store the annotation version id
-        annotation_version_ids.append(annotation_version_id)
+        # If the annotation is listed as to be displayed, get and store the annotation version id
+        if json_info['annotations'][uid]:
+
+          # Find the latest version for this annotation
+          annotation_version_id = False
+          for annotation_version in project.get_variant_annotation_versions(annotation_id):
+            if not annotation_version_id:
+              annotation_version_id = annotation_version['id']
+            elif annotation_version['id'] > annotation_version_id:
+              annotation_version_id = annotation_version['id']
+    
+          # Store the annotation version id
+          annotation_version_ids.append(annotation_version_id)
   
     if 'annotation_versions' in json_info:
       annotation_version_ids = annotation_version_ids + json_info['annotation_versions']
