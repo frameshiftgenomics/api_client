@@ -18,7 +18,8 @@ def main():
   project = apiMosaic.get_project(args.project_id)
 
   # Delete the file
-  project.post_project_file(name = args.name, file_type = args.file_type, uri = args.uri, reference = args.reference)
+  endpoint_url = args.endpoint_url if args.endpoint_url else None
+  project.post_project_file(name = args.name, file_type = args.file_type, uri = args.uri, reference = args.reference, endpoint_url = endpoint_url)
 
 # Input options
 def parseCommandLine():
@@ -36,6 +37,9 @@ def parseCommandLine():
   parser.add_argument('--file_type', '-t', required = True, metavar = 'string', help = 'The file type of the file being attached')
   parser.add_argument('--uri', '-u', required = True, metavar = 'string', help = 'The uri of the file being attached')
   parser.add_argument('--reference', '-r', required = True, metavar = 'string', help = 'The project reference')
+
+  # Optional arguments
+  parser.add_argument('--endpoint_url', '-d', required = True, metavar = 'string', help = 'The endpoint url of the file being attached')
 
   return parser.parse_args()
 

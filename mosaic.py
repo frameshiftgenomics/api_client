@@ -399,6 +399,13 @@ class Mosaic(object):
             params['include_user_info'] = 'true'
 
         return self.get(f'conversation-groups', params=params)
+    def post_conversation_groups(self, *, name, description=None, user_ids):
+        data = { 'name': name,
+                 'user_ids': user_ids }
+        if description:
+            data['description'] = name
+
+        return self.post(f'conversation_groups', data=data)
 
 
     def put_conversation_groups(self, group_id, *, name, description=None, user_ids):
@@ -410,13 +417,6 @@ class Mosaic(object):
         return self.post(f'conversation_groups/{group_id}', data=data)
 
 
-    def post_conversation_groups(self, *, name, description=None, user_ids):
-        data = { 'name': name,
-                 'user_ids': user_ids }
-        if description:
-            data['description'] = name
-
-        return self.post(f'conversation_groups', data=data)
 
 
     """
@@ -479,6 +479,10 @@ class Mosaic(object):
     """
     SUPER ADMIN
     """
+
+    def get_global_settings(self):
+        return self.get(f'settings')
+
 
     def get_user_by_email(self, email):
         return self.get(f'user/email/{email}')
@@ -544,6 +548,25 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/sub-projects', data=data)
 
 
+    def put_collection_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, selected_collections_table_columns=None, selected_collection_attributes=None):
+        data = { }
+
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if reference:
+            data['reference'] = reference
+        if selected_sample_attribute_chart_data:
+            data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
+        if selected_sample_attribute_column_ids:
+            data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
+        if selected_variant_annotation_version_ids:
+            data['selected_variant_annotation_version_ids'] = selected_variant_annotation_version_ids
+        if selected_collections_table_columns:
+            data['selected_collections_table_columns'] = selected_collections_table_columns
+        if selected_collection_attributes:
+            data['selected_collection_attributes'] = selected_collection_attributes
+
+        return self._mosaic.put(f'{self._path}/settings', data=data)
 
     """
     CONVERSATIONS
@@ -767,27 +790,6 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/settings')
 
 
-    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
-        data = { }
-
-        if default_variant_set_annotation_ids:
-            data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
-        if privacy_level:
-            data['privacy_level'] = privacy_level
-        if reference:
-            data['reference'] = reference
-        if selected_sample_attribute_chart_data:
-            data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
-        if selected_sample_attribute_column_ids:
-            data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
-        if selected_variant_annotation_version_ids:
-            data['selected_variant_annotation_version_ids'] = selected_variant_annotation_version_ids
-        if sorted_annotations:
-            data['sorted_annotations'] = sorted_annotations
-        if is_template:
-            data['is_template'] = is_template
-
-        return self._mosaic.put(f'{self._path}/settings', data=data)
 
 
     """
@@ -993,6 +995,7 @@ class Project(object):
           exit(1)
 
         return self._mosaic.put(f'{self._path}/samples/{sample_id}/files/{file_id}', data=data)
+
 
 
     """
