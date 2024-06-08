@@ -480,12 +480,31 @@ class Mosaic(object):
     SUPER ADMIN
     """
 
+    def delete_users_from_whitelist(self, *, email, delete_account=None):
+        data = { 'email': email }
+
+        if delete_account:
+          data['delete_user_account'] = 'true'
+
+        return self.delete(f'whitelist/users', data=data)
+
+
     def get_global_settings(self):
         return self.get(f'settings')
 
 
     def get_user_by_email(self, email):
         return self.get(f'user/email/{email}')
+
+
+    def get_user_info(self, user_id):
+        return self.get(f'users/{user_id}')
+
+
+    def post_to_whitelist(self, email):
+        data = { 'email': email }
+
+        return self.post(f'whitelist/users', data=data)
 
 
 class Project(object):
@@ -770,14 +789,22 @@ class Project(object):
     def put_project_file(self, file_id, *, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
         data = { }
 
-        if size: data['size'] = size
-        if uri: data['uri'] = uri
-        if endpoint_url: data['endpoint_url'] = endpoint_url
-        if library_type: data['library_type'] = library_type
-        if name: data['name'] = name
-        if nickname: data['nickname'] = nickname
-        if reference: data['reference'] = reference
-        if file_type: data['file_type'] = file_type
+        if size:
+            data['size'] = size
+        if uri:
+            data['uri'] = uri
+        if endpoint_url: 
+            data['endpoint_url'] = endpoint_url
+        if library_type:
+            data['library_type'] = library_type
+        if name:
+            data['name'] = name
+        if nickname:
+            data['nickname'] = nickname
+        if reference:
+            data['reference'] = reference
+        if file_type:
+            data['file_type'] = file_type
 
         return self._mosaic.put(f'{self._path}/files/{file_id}', data=data)
 
@@ -790,6 +817,27 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/settings')
 
 
+    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
+        data = { }
+
+        if default_variant_set_annotation_ids:
+            data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if reference:
+            data['reference'] = reference
+        if selected_sample_attribute_chart_data:
+            data['selected_sample_attribute_chart_data'] = selected_sample_attribute_chart_data
+        if selected_sample_attribute_column_ids:
+            data['selected_sample_attribute_column_ids'] = selected_sample_attribute_column_ids
+        if selected_variant_annotation_version_ids:
+            data['selected_variant_annotation_version_ids'] = selected_variant_annotation_version_ids
+        if sorted_annotations:
+            data['sorted_annotations'] = sorted_annotations
+        if is_template:
+            data['is_template'] = is_template
+
+        return self._mosaic.put(f'{self._path}/settings', data=data)
 
 
     """
