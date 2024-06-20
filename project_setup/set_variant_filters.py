@@ -545,7 +545,7 @@ def createFilters(project, projectId, annotations, annotationUids, categories, f
             sortDirection = 'DESC'
 
         filterInfo = project.post_variant_filter(name = name, category = category, column_ids = columnIds, sort_column_id = sortColumnId, sort_direction = sortDirection, filter_data = filters[name]['info']['filters'])
-        filterId   = filterInfo['id']
+        filterId = filterInfo['id']
         record['sortOrder'].append(str(filterId))
         useCategory = True
 

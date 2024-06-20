@@ -788,14 +788,22 @@ class Project(object):
     def post_project_file(self, *, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
         data = { }
 
-        if size: data['size'] = size
-        if uri: data['uri'] = uri
-        if endpoint_url: data['endpoint_url'] = endpoint_url
-        if library_type: data['library_type'] = library_type
-        if name: data['name'] = name
-        if nickname: data['nickname'] = nickname
-        if reference: data['reference'] = reference
-        if file_type: data['file_type'] = file_type
+        if size:
+            data['size'] = size
+        if uri:
+            data['uri'] = uri
+        if endpoint_url:
+            data['endpoint_url'] = endpoint_url
+        if library_type:
+            data['library_type'] = library_type
+        if name:
+            data['name'] = name
+        if nickname:
+            data['nickname'] = nickname
+        if reference:
+            data['reference'] = reference
+        if file_type:
+            data['file_type'] = file_type
 
         return self._mosaic.post(f'{self._path}/files', data=data)
 
@@ -1191,7 +1199,25 @@ class Project(object):
         if sort_column_id:
             data['sort_by_column_id'] = sort_column_id
         if sort_direction:
-            data['sort_dir'] = sort_direction
+            if sort_direction == 'asc':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'ASC':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'ascending':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'Ascending':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'desc':
+                data['sort_dir'] = 'DESC'
+            elif sort_direction == 'DESC':
+                data['sort_dir'] = 'DESC'
+            elif sort_direction == 'descending':
+                data['sort_dir'] = 'DESC'
+            elif sort_direction == 'Ddescending':
+                data['sort_dir'] = 'DESC'
+            else:
+                print('Unknown sort direction: ', sort_direction, sep = '')
+                exit(1)
         if filter_data:
             data['filter'] = filter_data
 
