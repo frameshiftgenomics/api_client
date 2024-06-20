@@ -453,9 +453,18 @@ class Mosaic(object):
         if per_status_start:
           params['per_status_start'] = per_status_start
         if per_status_end:
-          params['per_status_end'] = per_status_end
+          arams['per_status_end'] = per_status_end
 
         return self.get(f'jobs', params=params)
+
+
+    """
+    PROJECT ATTRIBUTES
+    """
+
+    def get_public_project_attributes(self):
+        yield from self.get_paged_route_iter(f'projects/attributes')
+
 
 
     """
@@ -677,6 +686,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/pedigree')
 
 
+    #def post_upload_pedigree(self, file_path):
+    #    return self._mosaic.post(f'{self._path}/attributes/import', file_path=file_path)
+
+
     """
     PROJECT ATTRIBUTES
     """
@@ -759,16 +772,17 @@ class Project(object):
     PROJECT FILES
     """
 
+
+    def delete_project_file(self, file_id):
+        return self._mosaic.delete(f'{self._path}/files/{file_id}')
+
+
     def get_project_files(self):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/files')
 
 
     def get_project_file_url(self, file_id):
         return self._mosaic.get(f'{self._path}/files/{file_id}/url')
-
-
-    def delete_project_file(self, file_id):
-        return self._mosaic.delete(f'{self._path}/files/{file_id}')
 
 
     def post_project_file(self, *, size=None, uri=None, endpoint_url=None, library_type=None, name=None, nickname=None, reference=None, file_type=None):
@@ -807,6 +821,23 @@ class Project(object):
             data['file_type'] = file_type
 
         return self._mosaic.put(f'{self._path}/files/{file_id}', data=data)
+
+
+    """
+    PROJECT ROLES
+    """
+
+    def delete_role(self, role_id):
+        return self._mosaic.delete(f'{self._path}/roles/{role_id}')
+
+
+    def get_roles(self, include_sub_project_roles=None):
+        params = { }
+
+        if include_sub_project_roles:
+            params['include_sub_project_roles'] = 'true'
+
+        return self._mosaic.get(f'{self._path}/roles', params=params)
 
 
     """
@@ -1056,8 +1087,12 @@ class Project(object):
     def delete_variant_annotation_version(self, annotation_id, annotation_version_id):
         return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}')
 
-    def get_variant_annotations(self):
-        return self._mosaic.get(f'{self._path}/variants/annotations')
+    def get_variant_annotations(self, *, annotation_ids=None):
+        params = { }
+        if annotation_ids:
+            params['annotation_ids'] = [annotation_ids]
+
+        return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
 
     def get_variant_annotations_to_import(self): 
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
