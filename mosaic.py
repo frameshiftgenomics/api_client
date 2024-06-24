@@ -510,6 +510,10 @@ class Mosaic(object):
         return self.get(f'users/{user_id}')
 
 
+    def get_user_whitelist(self):
+        return self.get(f'whitelist/users')
+
+
     def post_to_whitelist(self, email):
         data = { 'email': email }
 
