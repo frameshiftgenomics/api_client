@@ -166,6 +166,7 @@ class Mosaic(object):
 
         url = f'{self._api_host}/{resource}'
 
+        from pprint import pprint
         res = method(url, **kwargs)
 
         self._log_request(res.request)
@@ -1112,9 +1113,25 @@ class Project(object):
     def get_variant_annotation_versions(self, annotation_id):
         return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
 
-    def post_variant_annotation(self, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, version=None):
+    def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, version=None):
         data = { }
 
+        if allow_deletion:
+            if allow_deletion == 'true':
+                data['allow_deletion'] = 'true'
+            elif allow_deletion == 'True':
+                data['allow_deletion'] = 'true'
+            elif allow_deletion == True:
+                data['allow_deletion'] = 'true'
+            elif allow_deletion == 'false':
+                data['allow_deletion'] = 'false'
+            elif allow_deletion == 'false':
+                data['allow_deletion'] = 'false'
+            elif allow_deletion == True:
+                data['allow_deletion'] = 'false'
+            else:
+                print('ERROR: Upload annotations has "allow_deletion" set to ', allow_deletion, '. The value must be "true" or "false"', sep = '')
+                exit(1)
         if name:
             data['name'] = name
         if value_type:
