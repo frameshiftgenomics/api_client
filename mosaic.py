@@ -499,6 +499,10 @@ class Mosaic(object):
         return self.delete(f'whitelist/users', data=data)
 
 
+    def get_user_whitelist(self):
+        return self.get(f'whitelist/users')
+
+
     def get_global_settings(self):
         return self.get(f'settings')
 
@@ -511,8 +515,8 @@ class Mosaic(object):
         return self.get(f'users/{user_id}')
 
 
-    def get_user_whitelist(self):
-        return self.get(f'whitelist/users')
+    def get_user_project_roles(self, user_id):
+        return self.get(f'users/{user_id}/roles')
 
 
     def post_to_whitelist(self, email):

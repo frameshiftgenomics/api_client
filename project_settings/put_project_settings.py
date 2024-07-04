@@ -20,11 +20,11 @@ def main():
 
   # Set the values to update
   reference = args.reference if args.reference else None
-  privacyLevel = args.privacy_level if args.privacy_level else None
+  privacy_level = args.privacy_level if args.privacy_level else None
   is_template = args.is_template if args.is_template else None
 
   # Update the project settings
-  project.put_project_settings(privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=is_template)
+  project.put_project_settings(privacy_level=privacy_level, reference=reference, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=is_template)
 
 # Input options
 def parseCommandLine():
