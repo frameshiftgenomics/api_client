@@ -460,6 +460,19 @@ class Mosaic(object):
 
 
     """
+    PROJECTS
+    """
+
+    def get_projects(self, *, search=None):
+        params = { }
+
+        if search:
+            params['search'] = search
+
+        yield from self.get_paged_route_iter(f'projects', params=params)
+
+
+    """
     PROJECT ATTRIBUTES
     """
 
