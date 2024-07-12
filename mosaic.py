@@ -720,6 +720,30 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/import', data=data)
 
 
+    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_public=False):
+        data = { }
+
+        if description:
+            data['description'] = description
+        if is_editable:
+            data['is_editable'] = is_editable
+        if is_public:
+            data['is_public'] = is_public
+        if name:
+            data['name'] = name
+        if predefined_values:
+            data['predefined_values'] = predefined_values
+        if value:
+            data['value'] = value
+        if value_type:
+            if value_type != 'float' and value_type != 'string' and value_type != 'timestamp':
+              print('ERROR: Attempt to create a project attribute with value_type = ' + value_type)
+              exit(1)
+            data['value_type'] = value_type
+
+        return self._mosaic.post(f'{self._path}/attributes/', data=data)
+
+
     def put_project_attributes(self, attribute_id, *, description=None, name=None, predefined_values=None, value=None, is_editable=None):
         data = { }
 
