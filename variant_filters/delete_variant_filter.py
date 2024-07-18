@@ -32,7 +32,7 @@ def parseCommandLine():
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
 
   # The id of the filter to delete
-  parser.add_argument('--filter_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic id of the variant filters to delete')
+  parser.add_argument('--filter_id', '-f', required = True, metavar = 'integer', help = 'The Mosaic id of the variant filters to delete')
 
   return parser.parse_args()
 
