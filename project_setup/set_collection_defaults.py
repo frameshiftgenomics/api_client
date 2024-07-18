@@ -16,9 +16,9 @@ def main():
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  store   = Store(config_file = args.config)
-  apiMosaic  = Mosaic(config_file = args.config)
-  project = apiMosaic.get_project(args.project_id)
+  store = Store(config_file = args.config)
+  api_mosaic = Mosaic(config_file = args.config)
+  project = api_mosaic.get_project(args.project_id)
 
   # Check that the json containing the required defaults exists and read in the information
   #if not exists(args.json): fail('Json file (' + str(args.json) + ') does not exist')

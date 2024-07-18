@@ -26,21 +26,22 @@ def main():
   # Set the values to update
   reference = args.reference if args.reference else None
   privacy_level = args.privacy_level if args.privacy_level else None
-  columns = args.project_table_columns.split(',') if ',' in args.project_table_columns else [args.project_table_columns]
-
-  # Loop over the list of columns and check that they are attribute ids or one of an allowed set of values
-  allowed_columns = ['NICKNAME', 'PHI_NAME', 'DESCRIPTION', 'ROLE', 'CREATED', 'UPDATED', 'COLLABORATORS', 'REFERENCE', 'VARIANT_COUNT', 'SAMPLE_COUNT', 'ID']
   attribute_ids = []
   column_ids = []
-  for column_id in columns:
-    if column_id in allowed_columns:
-      column_ids.append(column_id)
-    else:
-      try:
-        column_ids.append(int(column_id))
-        attribute_ids.append(int(column_id))
-      except:
-        fail('Column ids must be one of the following allowed values, or a project attribute id (failed value: ' + str(column_id) + '):\n  ' + '\n  '.join(allowed_columns))
+  if args.project_table_columns:
+    columns = args.project_table_columns.split(',') if ',' in args.project_table_columns else [args.project_table_columns]
+  
+    # Loop over the list of columns and check that they are attribute ids or one of an allowed set of values
+    allowed_columns = ['NICKNAME', 'PHI_NAME', 'DESCRIPTION', 'ROLE', 'CREATED', 'UPDATED', 'COLLABORATORS', 'REFERENCE', 'VARIANT_COUNT', 'SAMPLE_COUNT', 'ID']
+    for column_id in columns:
+      if column_id in allowed_columns:
+        column_ids.append(column_id)
+      else:
+        try:
+          column_ids.append(int(column_id))
+          attribute_ids.append(int(column_id))
+        except:
+          fail('Column ids must be one of the following allowed values, or a project attribute id (failed value: ' + str(column_id) + '):\n  ' + '\n  '.join(allowed_columns))
 
   # Update the project settings
   project.put_collection_project_settings(privacy_level = privacy_level, selected_collections_table_columns = column_ids, selected_collection_attributes = attribute_ids)
