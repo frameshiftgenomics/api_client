@@ -1243,6 +1243,10 @@ class Project(object):
     VARIANT FILTERS
     """
 
+    def delete_variant_filter(self, filter_id):
+        self._mosaic.delete(f'{self._path}/variants/filters/{filter_id}')
+
+
     def get_variant_filters(self):
         return self._mosaic.get(f'{self._path}/variants/filters')
 
@@ -1288,10 +1292,6 @@ class Project(object):
     
     def update_variant_filter(self, filter_id, new_data):
         self._mosaic.put(f'{self._path}/variants/filters/{filter_id}', data=new_data)
-
-
-    def delete_variant_filter(self, filter_id):
-        self._mosaic.delete(f'{self._path}/variants/filters/{filter_id}')
 
 
     """
