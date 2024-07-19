@@ -29,6 +29,7 @@ def main():
         print('        ', version['version'], ': ', version['id'], sep = '')
       print('    privacy_level: ', annotation['privacy_level'], sep = '')
       print('    value_type: ', annotation['value_type'], sep = '')
+      print('    display_type: ', annotation['display_type'], sep = '')
       print('    severity: ', annotation['severity'], sep = '')
       print('    category: ', annotation['category'], sep = '')
 
