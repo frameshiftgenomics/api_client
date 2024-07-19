@@ -41,6 +41,7 @@ def parseCommandLine():
   parser.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The privacy level to assign to the project')
   parser.add_argument('--is_template', '-t', required = False, action='store_true', help = 'Select if the project should be a template project')
   parser.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'The genome reference to assign to the project')
+  #parser.add_argument('--annotation_columns', '-n', required = False, metavar = 'string', help = 'A comma separated list of annotation version ids to set the columnshe genome reference to assign to the project')
 
   return parser.parse_args()
 

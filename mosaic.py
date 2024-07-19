@@ -1324,6 +1324,15 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data)
 
 
+    def post_variant_set_annotations(self, variant_set_id, annotation_version_ids):
+        data = { }
+
+        if annotation_version_ids:
+            data['selected_variant_annotation_version_ids'] = annotation_version_ids
+
+        return self._mosaic.post(f'{self._path}/variants/sets/{variant_set_id}/annotations', data=data)
+
+
 if __name__ == '__main__':
     import fire
     fire.Fire({
