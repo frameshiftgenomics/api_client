@@ -908,6 +908,13 @@ class Project(object):
         if default_variant_set_annotation_ids:
             data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
         if privacy_level:
+            allowed_values = ['public',
+                              'protected',
+                              'private']
+            if privacy_level not in allowed_values:
+              print('Unknown privacy level: ', privacy_level, sep = '')
+              exit(1)
+
             data['privacy_level'] = privacy_level
         if reference:
             data['reference'] = reference
