@@ -12,26 +12,40 @@ def main():
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store  = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Get the project settings
   for annotation in project.get_variant_annotations():
-    if not args.verbose: print(annotation['name'], ': ', annotation['id'], sep = '')
+    if args.name:
+      if args.name == annotation['name']:
+        if args.verbose:
+          print_verbose(annotation)
+        else:
+          print(annotation['id'])
     else:
-      print(annotation['name'], ' (id: ', annotation['id'], ')', sep = '')
-      print('    uid: ', annotation['uid'], sep = '')
-      print('    versions: ')
-      for version in annotation['annotation_versions']:
-        print('        ', version['version'], ': ', version['id'], sep = '')
-      print('    privacy_level: ', annotation['privacy_level'], sep = '')
-      print('    value_type: ', annotation['value_type'], sep = '')
-      print('    display_type: ', annotation['display_type'], sep = '')
-      print('    severity: ', annotation['severity'], sep = '')
-      print('    category: ', annotation['category'], sep = '')
+      if args.verbose:
+        print_verbose(annotation)
+      else:
+        print_simple(annotation)
+
+def print_simple(annotation):
+  print(annotation['name'], ': ', annotation['id'], sep = '')
+
+def print_verbose(annotation):
+  print(annotation['name'], ' (id: ', annotation['id'], ')', sep = '')
+  print('    uid: ', annotation['uid'], sep = '')
+  print('    versions: ')
+  for version in annotation['annotation_versions']:
+    print('        ', version['version'], ': ', version['id'], sep = '')
+  print('    privacy_level: ', annotation['privacy_level'], sep = '')
+  print('    value_type: ', annotation['value_type'], sep = '')
+  print('    display_type: ', annotation['display_type'], sep = '')
+  print('    severity: ', annotation['severity'], sep = '')
+  print('    category: ', annotation['category'], sep = '')
 
 # Input options
 def parseCommandLine():
@@ -43,6 +57,9 @@ def parseCommandLine():
 
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get annotations for')
+
+  # If a name is supplied, just show information on the annotation with this name
+  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'If an annotation name is provided, information on this annotations will be shown')
 
   # Verbose output
   parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')
