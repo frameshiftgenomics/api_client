@@ -20,18 +20,6 @@ def main():
   api_mosaic = Mosaic(config_file = args.config)
   project = api_mosaic.get_project(args.project_id)
 
-  # Check that the json containing the required defaults exists and read in the information
-  #if not exists(args.json): fail('Json file (' + str(args.json) + ') does not exist')
-  try:
-    json_file = open(args.json, 'r')
-  except:
-    fail('Could not open the json file: ' + str(args.json))
-  try:
-    json_info = json.load(json_file)
-  except:
-    fail('Could not read contents of json file ' + str(args.json) + '. Check that this is a valid json')
-  json_file.close()
-
   # Check if this is a collection
   data = project.get_project()
   if data['is_collection']:
@@ -43,8 +31,13 @@ def main():
 
   # Loop over all the projects (for a collection) and apply the filters
   for project_id in project_ids:
+
     project = api_mosaic.get_project(project_id)
     print('Setting project defaults for ', project.name, ' (id:', project_id,')', sep = '')
+
+    # Get the json file
+    json_filename = get_json_filename(project, args)
+    json_info = read_json_file(json_filename)
 
     # Get all the sample attributes in the project
     sample_attribute_names = {}
@@ -115,15 +108,25 @@ def main():
 
     # Get the id of the variant watchlist if it is listed as to be pinned
     if 'pin_watchlist' in json_info:
+
       if json_info['pin_watchlist']:
-        print('Pinning watchlist to the dashboard')
         watchlist_id = False
         for variant_set in project.get_variant_sets():
           if variant_set['name'] == 'Variant Watchlist':
             watchlist_id = variant_set['id']
             break
+
+        # Find all pinned variant sets and check if the watchlist is already pinned
         if watchlist_id:
-          project.post_project_dashboard(dashboard_type = 'variant_set', is_active = 'true', variant_set_id = watchlist_id)
+          is_pinned = False
+          for dashboard_object in project.get_project_dashboard():
+            if dashboard_object['type'] == 'variant_set' and dashboard_object['variant_set_id'] == watchlist_id:
+              if dashboard_object['is_active']:
+                is_pinned = True
+
+          if not is_pinned:
+            print('Pinning watchlist to the dashboard')
+            project.post_project_dashboard(dashboard_type = 'variant_set', is_active = 'true', variant_set_id = watchlist_id)
 
     # Set the project settings
     data = project.put_project_settings(selected_sample_attribute_column_ids = samples_table_columns, \
@@ -140,7 +143,9 @@ def parseCommandLine():
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The directory where the Python api wrapper lives')
 
   # Optional pipeline arguments
-  parser.add_argument('--json', '-j', required = True, metavar = 'string', help = 'The json file describing the project defaults')
+  parser.add_argument('--json', '-j', required = False, metavar = 'string', help = 'The json file describing the project defaults')
+  parser.add_argument('--instance', '-i', required = False, metavar = 'string', help = 'The mosaic instance. Will be used to build the json file name')
+  parser.add_argument('--json_path', '-s', required = False, metavar = 'string', help = 'The path to the json file. Not required if --json is set, but will be used to build the json filename')
 
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
@@ -149,6 +154,39 @@ def parseCommandLine():
   parser.add_argument('--version', '-v', action="version", version='Calypso annotation pipeline version: ' + str(version))
 
   return parser.parse_args()
+
+# Build the json filename
+def get_json_filename(project, args):
+
+  # Build the name of the json file
+  if args.json:
+    json_filename = args.json
+  else:
+    if not args.json_path or not args.instance:
+      fail('No json file was supplied (--json, -j). If no json is supplied, both --json_path (-s) and --instance (-i) must be set so that the filename can be constructed')
+    if not args.json_path.endswith('/'):
+      args.json_path = args.json_path + '/'
+
+    # Get the project reference
+    data = project.get_project_settings()
+    reference = data['reference']
+    json_filename = args.json_path + 'project_defaults_' + str(args.instance) + '_' + str(reference) + '.json'
+
+  return json_filename
+  
+# Check that the json containing the required defaults exists and read in the information
+def read_json_file(json_filename):
+  try:
+    json_file = open(json_filename, 'r')
+  except:
+    fail('Could not open the json file: ' + str(json_filename))
+  try:
+    json_info = json.load(json_file)
+  except:
+    fail('Could not read contents of json file ' + str(json_filename) + '. Check that this is a valid json')
+  json_file.close()
+ 
+  return json_info
 
 # Get the annotation version ids
 def get_variant_table_ids(project, project_id, data, annotation_names, annotation_uids):
