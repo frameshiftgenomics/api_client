@@ -157,12 +157,21 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
   for annotation in data:
     annotation_uid = data[annotation]['uid']
     annotation_version = data[annotation]['version']
+    skip_missing = False
+    if 'skip_if_missing' in data[annotation]:
+      if data[annotation]['skip_if_missing']:
+        skip_missing = True
 
     # There may be private annotations that should be included in the defaults. These will have a uid of False
     if not annotation_uid:
       if annotation not in annotation_names:
-        fail('ERROR: annotation "' + str(annotation) + '" has no uid provided (assumed to be a private annotation), but no annotation of this name exists in project ' + str(project_id))
-      annotation_id = annotation_names[annotation]
+        if not skip_missing:
+          fail('ERROR: annotation "' + str(annotation) + '" has no uid provided (assumed to be a private annotation), but no annotation of this name exists in project ' + str(project_id))
+        else:
+          print('WARNING: Skipping "' + str(annotation) + '" as it is not present in the project and has no uid so cannot be imported - private annotation')
+          annotation_id = False
+      else:
+        annotation_id = annotation_names[annotation]
 
     # If the uid does not correspond to an annotation in the project it will need to be imported
     elif annotation_uid not in annotation_uids:
@@ -176,40 +185,43 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
           annotations_to_import[import_annotation['uid']] = import_annotation['id']
 
       # Get the id of the annotation to import and import it
-      annotation_id = annotations_to_import[uid]
+      annotation_id = annotations_to_import[annotation_uid]
       project.post_import_annotation(annotation_id)
 
     # Otherwise, just get the annotation id for the annotation in the project
     else:
       annotation_id = annotation_uids[annotation_uid]
 
-    # Get the annotation versions
-    annotation_versions = {}
-    for version_info in project.get_variant_annotation_versions(annotation_id):
-      annotation_versions[version_info['version']] = version_info['id']
+    # If an annotation_id has been found
+    if annotation_id: 
 
-    # Find the id for the required version, if the default version was specified...
-    if annotation_version == 'default':
-      if 'default' not in annotation_versions:
-        fail('ERROR: annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
-      annotation_version_ids.append(annotation_versions['default'])
-
-    # ... if the latest version was specified...
-    elif annotation_version == 'latest':
-      if 'latest' not in annotation_versions:
-        fail('ERROR: annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
-      annotation_version_ids.append(annotation_versions['latest'])
-
-    # ... or if the version id was specified
-    else:
-      has_version_id = False
-      for version_info in annotation_versions:
-        if annotation_version == annotation_versions[version_info]:
-          annotation_version_ids.append(annotation_version)
-          has_version_id = True
-          break
-      if not has_version_id:
-        fail('ERROR: annotation "' + str(annotation) + '" lists "' + str(annotation_version) + '" as the annotation version. This must be "default", "latest", or a valid annotation_version_id')
+      # Get the annotation versions
+      annotation_versions = {}
+      for version_info in project.get_variant_annotation_versions(annotation_id):
+        annotation_versions[version_info['version']] = version_info['id']
+  
+      # Find the id for the required version, if the default version was specified...
+      if annotation_version == 'default':
+        if 'default' not in annotation_versions:
+          fail('ERROR: annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
+        annotation_version_ids.append(annotation_versions['default'])
+  
+      # ... if the latest version was specified...
+      elif annotation_version == 'latest':
+        if 'latest' not in annotation_versions:
+          fail('ERROR: annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
+        annotation_version_ids.append(annotation_versions['latest'])
+  
+      # ... or if the version id was specified
+      else:
+        has_version_id = False
+        for version_info in annotation_versions:
+          if annotation_version == annotation_versions[version_info]:
+            annotation_version_ids.append(annotation_version)
+            has_version_id = True
+            break
+        if not has_version_id:
+          fail('ERROR: annotation "' + str(annotation) + '" lists "' + str(annotation_version) + '" as the annotation version. This must be "default", "latest", or a valid annotation_version_id')
 
   # Return the list of version ids
   return annotation_version_ids
