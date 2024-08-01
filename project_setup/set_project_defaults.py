@@ -36,8 +36,8 @@ def main():
   data = project.get_project()
   if data['is_collection']:
     project_ids = []
-    for sub_project in data['collection_projects']:
-      project_ids.append(sub_project['child_project_id'])
+    for project_id in data['collection_project_ids']:
+      project_ids.append(project_id)
   else:
     project_ids = [args.project_id]
 
@@ -109,9 +109,9 @@ def main():
     # specified. If an annotation name, uid, or id is supplied, the "latest" annotation version id will be used, or, if this
     # doesn't exist, the "default" will be used
     if 'annotations'in json_info:
-      annotation_version_ids = get_variant_table_ids(project, json_info['annotations'], annotation_names, annotation_uids)
+      annotation_version_ids = get_variant_table_ids(project, project_id, json_info['annotations'], annotation_names, annotation_uids)
     if 'watchlist_annotations'in json_info:
-      watchlist_version_ids = get_variant_table_ids(project, json_info['watchlist_annotations'], annotation_names, annotation_uids)
+      watchlist_version_ids = get_variant_table_ids(project, project_id, json_info['watchlist_annotations'], annotation_names, annotation_uids)
 
     # Get the id of the variant watchlist if it is listed as to be pinned
     if 'pin_watchlist' in json_info:
@@ -151,7 +151,7 @@ def parseCommandLine():
   return parser.parse_args()
 
 # Get the annotation version ids
-def get_variant_table_ids(project, data, annotation_names, annotation_uids):
+def get_variant_table_ids(project, project_id, data, annotation_names, annotation_uids):
   annotation_version_ids = []
   annotations_to_import = False
   for annotation in data:
