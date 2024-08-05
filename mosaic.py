@@ -454,7 +454,7 @@ class Mosaic(object):
         if per_status_start:
           params['per_status_start'] = per_status_start
         if per_status_end:
-          arams['per_status_end'] = per_status_end
+          params['per_status_end'] = per_status_end
 
         return self.get(f'jobs', params=params)
 
