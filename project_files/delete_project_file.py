@@ -18,7 +18,7 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Delete the file
-  project.delete_sample_file(args.sample_id, args.file_id)
+  project.delete_project_file(args.file_id)
 
 # Input options
 def parse_command_line():
@@ -28,11 +28,10 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to remove the sample file from')
+  # The project id
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project')
 
   # Arguments related to the file to add
-  parser.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The sample id the file is attached to')
   parser.add_argument('--file_id', '-f', required = True, metavar = 'integer', help = 'The file id to be deleted')
 
   return parser.parse_args()
