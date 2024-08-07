@@ -779,6 +779,10 @@ class Project(object):
     """
 
 
+    def get_project_conversation(self, conversation_id):
+        return self._mosaic.get(f'{self._path}/conversations/{conversation_id}')
+
+
     def get_project_conversations(self):
         return self._mosaic.get(f'{self._path}/conversations')
 

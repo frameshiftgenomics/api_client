@@ -19,8 +19,16 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Delete watchers from the specified conversation
-  data = project.get_project_conversations()
-  pprint(data['data'])
+  data = project.get_project_conversation(args.conversation_id)
+  for conversation in data:
+    print('Conversation: ', conversation['title'], sep = '')
+    for comment in conversation['comments']:
+      user_id = comment['user_id']
+      user_info = api_mosaic.get_user_info(user_id)
+      username = user_info['username']
+      first_name = user_info['first_name']
+      last_name = user_info['last_name']
+      print('  id: ', comment['id'], ', user_id: ', user_id, ', username: ', username, ' (', first_name, ' ', last_name, ')', sep = '')
 
 # Input options
 def parse_command_line():
@@ -32,6 +40,9 @@ def parse_command_line():
 
   # The project id
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The id of the project')
+
+  # The conversation id
+  parser.add_argument('--conversation_id', '-i', required = True, metavar = 'integer', help = 'The id of the conversation')
 
   return parser.parse_args()
 
