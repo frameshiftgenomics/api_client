@@ -17,12 +17,8 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Get all of the experiments
-  for experiment in project.get_experiments():
-    print(experiment['name'])
-    for info in experiment:
-      if info != 'name':
-        print('  ', info, ': ', experiment[info], sep = '')
+  # Delete the experiment
+  project.delete_experiment(args.experiment_id)
 
 # Input options
 def parse_command_line():
@@ -34,6 +30,9 @@ def parse_command_line():
 
   # The project id
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
+
+  # The experiment id
+  parser.add_argument('--experiment_id', '-e', required = True, metavar = 'integer', help = 'The experiment id')
 
   return parser.parse_args()
 

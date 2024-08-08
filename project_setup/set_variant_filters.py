@@ -27,9 +27,7 @@ def main():
   # Check if this is a collection
   data = project.get_project()
   if data['is_collection']:
-    project_ids = []
-    for sub_project in data['collection_projects']:
-      project_ids.append(sub_project['child_project_id'])
+    project_ids = data['collection_project_ids']
   else:
     project_ids = [args.project_id]
 
