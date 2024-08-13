@@ -20,9 +20,7 @@ def main():
   # Delete the file
   samples = project.get_samples()
   for sample in samples:
-    print(sample['name'])
-    for info in sample:
-      print('  ', info, ': ', sample[info], sep = '')
+    print(sample['id'])
 
 # Input options
 def parse_command_line():
