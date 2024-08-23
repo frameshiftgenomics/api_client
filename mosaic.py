@@ -854,6 +854,9 @@ class Project(object):
             data['reference'] = reference
         if file_type:
             data['type'] = file_type
+        else:
+            print('The "type" is required to POST a project file')
+            exit(1)
 
         return self._mosaic.post(f'{self._path}/files', data=data)
 
