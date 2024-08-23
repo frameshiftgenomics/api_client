@@ -17,22 +17,8 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Get all project files
-  for project_file in project.get_project_files():
-    if args.verbose:
-      print(project_file['name'])
-      print('  id: ', project_file['id'], sep = '')
-      print('  nickname: ', project_file['nickname'], sep = '')
-      print('  type: ', project_file['type'], sep = '')
-      print('  endpoint_url: ', project_file['endpoint_url'], sep = '')
-      print('  experiment_ids: ', project_file['experiment_ids'], sep = '')
-      print('  library_type: ', project_file['library_type'], sep = '')
-      print('  reference: ', project_file['reference'], sep = '')
-      print('  s3_bucket_id: ', project_file['s3_bucket_id'], sep = '')
-      print('  s3_bucket_name: ', project_file['s3_bucket_name'], sep = '')
-      print('  uri: ', project_file['uri'], sep = '')
-    else:
-      print(project_file['name'], ': ', project_file['id'], sep = '')
+  # Update the file
+  project.put_project_file(file_id = args.file_id, name = args.name, nickname = args.nickname, file_type = args.file_type, uri = args.uri, reference = args.reference, endpoint_url = args.endpoint_url)
 
 # Input options
 def parse_command_line():
@@ -42,11 +28,19 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
 
-  # The project id
+  # The project and file id
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
+  parser.add_argument('--file_id', '-f', required = True, metavar = 'integer', help = 'The Mosaic file id')
 
-  # Verbose output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'If set, provide a verbose output')
+  # Arguments related to the file to add
+  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the file being attached')
+  parser.add_argument('--nickname', '-k', required = False, metavar = 'string', help = 'The nickname of the file being attached')
+  parser.add_argument('--file_type', '-t', required = False, metavar = 'string', help = 'The file type of the file being attached')
+  parser.add_argument('--uri', '-u', required = False, metavar = 'string', help = 'The uri of the file being attached')
+  parser.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'The project reference')
+
+  # Optional arguments
+  parser.add_argument('--endpoint_url', '-d', required = False, metavar = 'string', help = 'The endpoint url of the file being attached')
 
   return parser.parse_args()
 

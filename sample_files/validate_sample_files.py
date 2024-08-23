@@ -17,9 +17,20 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Post the file
-  endpoint_url = args.endpoint_url if args.endpoint_url else None
-  project.post_project_file(name = args.name, file_type = args.file_type, uri = args.uri, reference = args.reference, endpoint_url = endpoint_url)
+  # Loop over all samples in the project
+  for sample in project.get_samples():
+    for sample_file in project.get_sample_files(sample['id']):
+
+      # If the file does not have a type, throw a warning
+      if not sample_file['type']:
+        print('WARNING: file ', sample_file['id'], ' (', sample_file['name'], ') has no type', sep = '')
+
+      # If the file is a vcf or tbi file, check that the vcf_sample_name is set
+      if sample_file['type'] == 'vcf' or sample_file['type'] == 'tbi':
+        if not sample_file['vcf_sample_name']:
+          print('WARNING: file ', sample_file['id'], ' (', sample_file['name'], ') does not have vcf_sample_name set', sep = '')
+        elif sample_file['vcf_sample_name'] != sample['name']:
+          print('WARNING: file ', sample_file['id'], ' (', sample_file['name'], ') has a different vcf_sample_name (', sample_file['vcf_sample_name'], ') to the sample name (', sample['name'], ')', sep = '')
 
 # Input options
 def parse_command_line():
@@ -29,17 +40,8 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
+  # The project id
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-
-  # Arguments related to the file to add
-  parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the file being attached')
-  parser.add_argument('--file_type', '-t', required = True, metavar = 'string', help = 'The file type of the file being attached')
-  parser.add_argument('--uri', '-u', required = True, metavar = 'string', help = 'The uri of the file being attached')
-  parser.add_argument('--reference', '-r', required = True, metavar = 'string', help = 'The project reference')
-
-  # Optional arguments
-  parser.add_argument('--endpoint_url', '-d', required = True, metavar = 'string', help = 'The endpoint url of the file being attached')
 
   return parser.parse_args()
 

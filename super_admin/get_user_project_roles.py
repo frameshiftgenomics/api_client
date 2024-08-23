@@ -16,7 +16,8 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Get the user info
-  print(api_mosaic.get_user_info(args.user_id))
+  for project in api_mosaic.get_user_project_roles(args.user_id):
+    print(project['project_name'], ': ', project['project_id'], ', ', project['role_name'], ' (', project['role_type_id'], ')', sep = '')
 
 # Input options
 def parse_command_line():

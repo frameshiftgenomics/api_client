@@ -853,7 +853,7 @@ class Project(object):
         if reference:
             data['reference'] = reference
         if file_type:
-            data['file_type'] = file_type
+            data['type'] = file_type
 
         return self._mosaic.post(f'{self._path}/files', data=data)
 
@@ -876,7 +876,7 @@ class Project(object):
         if reference:
             data['reference'] = reference
         if file_type:
-            data['file_type'] = file_type
+            data['type'] = file_type
 
         return self._mosaic.put(f'{self._path}/files/{file_id}', data=data)
 

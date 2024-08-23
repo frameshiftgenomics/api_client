@@ -6,21 +6,20 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
   if not args.write_info: args.write_info = 1
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Get all of the sample files
-  sampleFileGenerator = project.get_sample_files(args.sample_id)
-  for sample in sampleFileGenerator:
+  for sample in project.get_sample_files(args.sample_id):
     if int(args.write_info) == 1: print(sample['name'], ': ', sample['id'], ', ', sample['type'], sep = '')
     elif int(args.write_info) == 2:
       print(sample['name'])
@@ -30,7 +29,7 @@ def main():
       print('  vcf sample name: ', sample['vcf_sample_name'], sep = '')
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
@@ -50,7 +49,7 @@ def parseCommandLine():
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = "")
+  print(message, sep = '')
   exit(1)
 
 if __name__ == "__main__":
