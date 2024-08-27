@@ -42,9 +42,9 @@ def main():
     # Get information on the sample available in the Mosaic project. Some variant filters require filtering on genotype. The variant filter
     # description will contain terms like "Proband": "alt". Therefore, the term Proband needs to be converted to a Mosaic sample id. If
     # genotype based filters are being omitted, this can be skipped
-    samples    = {}
-    hasProband = False
-    proband    = False
+    samples = {}
+    has_proband = False
+    proband = False
     if not args.no_genotype_filters: 
       samples = {}
       for sample in project.get_samples():
@@ -55,16 +55,18 @@ def main():
               if value['sample_id'] == sample['id']:
                 samples[sample['name']]['relation'] = value['value']
                 if value['value'] == 'Proband':
-                  if hasProband: fail('Multiple samples in the Mosaic project are listed as the proband')
-                  hasProband = True
+                  if has_proband: fail('Multiple samples in the Mosaic project are listed as the proband')
+                  has_proband = True
                   proband    = sample['name']
                 break
   
     # Get all of the annotations in the current project. When creating a filter, the project will be checked to ensure that it has all of the
     # required annotations before creating the filter
-    annotations    = {}
+    annotations = {}
     annotationUids = {}
     for annotation in project.get_variant_annotations():
+      if annotation['name'] in annotations:
+        fail('ERROR: Multiple annotations with the name ' + str(annotation['name']) + ' exist. Only one annotation with the same name can exist in a project')
   
       # Loop over the annotation versions and get the latest (highest id)
       annotation_version_id = False
@@ -75,6 +77,7 @@ def main():
           annotation_version_id = annotation_version['id']
   
       annotations[annotation['name']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'uid': annotation['uid'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
+    exit(0)
     for annotation in annotations:
       annotationUids[annotations[annotation]['uid']] = {'name': annotation, 'type': annotations[annotation]['type'], 'annotation_version_id': annotations[annotation]['annotation_version_id']}
   
