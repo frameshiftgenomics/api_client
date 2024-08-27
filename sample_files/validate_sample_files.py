@@ -19,7 +19,9 @@ def main():
 
   # Loop over all samples in the project
   for sample in project.get_samples():
+    no_files = 0
     for sample_file in project.get_sample_files(sample['id']):
+      no_files += 1
 
       # If the file does not have a type, throw a warning
       if not sample_file['type']:
@@ -31,6 +33,11 @@ def main():
           print('WARNING: file ', sample_file['id'], ' (', sample_file['name'], ') does not have vcf_sample_name set', sep = '')
         elif sample_file['vcf_sample_name'] != sample['name']:
           print('WARNING: file ', sample_file['id'], ' (', sample_file['name'], ') has a different vcf_sample_name (', sample_file['vcf_sample_name'], ') to the sample name (', sample['name'], ')', sep = '')
+
+    # If the sample has no files attached, throw a warning
+    if no_files == 0:
+      print('WARNING: sample ', sample, ' (', sample['id'], ') has no associated files', sep = '')
+      
 
 # Input options
 def parse_command_line():

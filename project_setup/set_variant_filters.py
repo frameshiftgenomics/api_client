@@ -13,16 +13,19 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
+
+  # Get the project reference
+  reference = project.get_project_settings()['reference']
 
   # Check if this is a collection
   data = project.get_project()
@@ -33,7 +36,7 @@ def main():
 
   # Loop over all the projects (for a collection) and apply the filters
   for project_id in project_ids:
-    project = apiMosaic.get_project(project_id)
+    project = api_mosaic.get_project(project_id)
     print('Setting filters for project ', project.name, ' (id:', project_id,')', sep = '')
 
     # Get information on the sample available in the Mosaic project. Some variant filters require filtering on genotype. The variant filter
@@ -91,7 +94,7 @@ def main():
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
     # filters won't be added to projects without parents
     sampleMap                 = createSampleMap(samples)
-    annotationMap             = createAnnotationMap(annotations)
+    annotationMap             = create_annotation_map(annotations, reference)
     filtersInfo               = readVariantFiltersJson(args.variant_filters)
     filterCategories, filters = getFilterCategories(filtersInfo)
     filters                   = getFilters(filtersInfo, filterCategories, filters, samples, sampleMap, annotations, annotationUids, annotationMap, annotationUids, hpoTerms)
@@ -103,7 +106,7 @@ def main():
     createFilters(project, args.project_id, annotations, annotationUids, filterCategories, filters)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   global version
   parser = argparse.ArgumentParser(description='Process the command line')
 
@@ -137,7 +140,7 @@ def createSampleMap(samples):
 # Create an annotation map that links general names for annotations to the specific annotation available
 # in the project. For example, clinVar annotations can be regularly updated - when the filter is created,
 # it needs to point to the clinVar annotation available in that project
-def createAnnotationMap(annotations):
+def create_annotation_map(annotations, reference):
   annotationMap = {}
   clinVar       = []
 
@@ -157,7 +160,14 @@ def createAnnotationMap(annotations):
   if len(clinVar) == 1:
     annotationMap['clinvar_latest'] = annotations[clinVar[0]]['uid']
   else:
-    fail('Multiple ClinVar annotations exist in project. No logic exists to select the correct annotation')
+    default_clinvar = 'ClinVar Significance ' + str(reference)
+    uses_default = False
+    for clinvar_option in clinVar:
+      if clinvar_option == default_clinvar:
+        annotationMap['clinvar_latest'] = annotations[clinVar[0]]['uid']
+        uses_default = True
+    if not uses_default:
+      fail('Multiple ClinVar annotations exist in project. No logic exists to select the correct annotation')
 
   # Return the annotation map
   return annotationMap
