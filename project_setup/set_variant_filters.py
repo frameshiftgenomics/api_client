@@ -77,7 +77,6 @@ def main():
           annotation_version_id = annotation_version['id']
   
       annotations[annotation['name']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'uid': annotation['uid'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
-    exit(0)
     for annotation in annotations:
       annotationUids[annotations[annotation]['uid']] = {'name': annotation, 'type': annotations[annotation]['type'], 'annotation_version_id': annotations[annotation]['annotation_version_id']}
   
