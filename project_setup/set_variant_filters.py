@@ -483,8 +483,8 @@ def check_requirements(filters_info, sample_map, hpo_terms):
       use_filter = False
 
   # If this filter requires HPO terms and none are available, the filter should be skipped
-  if 'hpo_filters' in filters_info['filters'] and not hpo_terms:
-    use_filter = False
+  #if 'hpo_filters' in filters_info['filters'] and not hpo_terms:
+  #  use_filter = False
 
   # Return whether this filter passes all requirements
   return use_filter
