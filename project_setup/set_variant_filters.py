@@ -319,10 +319,15 @@ def get_filters(filters_info, categories, filters, samples, sample_map, annotati
 
               # Check the column to sort on is a valid uid, or is defined in the annotation map
               sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
-              if sort_uid not in annotation_uids:
-                fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
-              else:
+              if sort_uid in annotation_uids:
                 uid = filters_info['filters'][name]['display'][field]['column_uid']
+              else:
+
+                # Instead of a uid, this could be the name of a private annotation
+                if sort_uid in private_annotation_names:
+                  uid = private_annotation_names[sort_uid]
+                else:
+                  fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
               filters[name]['sort_column_uid'] = uid 
 
               # Check that the sort direction is valid

@@ -1158,7 +1158,7 @@ class Project(object):
     def get_variant_annotations(self, *, annotation_ids=None):
         params = { }
         if annotation_ids:
-            params['annotation_ids'] = [annotation_ids]
+            params['annotation_ids'] = annotation_ids
 
         return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
 
