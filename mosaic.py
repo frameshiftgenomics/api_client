@@ -347,7 +347,7 @@ class Mosaic(object):
         return self._request_history
 
     """
-    ATTRIBUTE FORMS
+    GLOBAL ATTRIBUTE FORMS
     """
 
     def delete_attribute_form(self, attribute_form_id):
@@ -379,7 +379,7 @@ class Mosaic(object):
 
 
     """
-    CONVERSATION GROUPS
+    GLOBAL CONVERSATION GROUPS
     """
 
 
@@ -421,7 +421,7 @@ class Mosaic(object):
 
 
     """
-    GENES (GLOBAL)
+    GLOBAL GENES
     """
 
 
@@ -440,7 +440,7 @@ class Mosaic(object):
 
 
     """
-    JOBS
+    GLOBAL JOBS
     """
 
     def get_job_status(self, job_id):
@@ -460,7 +460,7 @@ class Mosaic(object):
 
 
     """
-    PROJECTS
+    GLOBAL PROJECTS
     """
 
     def get_projects(self, *, search=None):
@@ -473,7 +473,7 @@ class Mosaic(object):
 
 
     """
-    PROJECT ATTRIBUTES
+    GLOBAL PROJECT ATTRIBUTES
     """
 
     def get_public_project_attributes(self):
@@ -482,7 +482,7 @@ class Mosaic(object):
 
 
     """
-    S3 Bucket
+    GLOBAL S3 Bucket
     """
 
     def get_s3_bucket_user(self, bucket_name):
@@ -500,7 +500,7 @@ class Mosaic(object):
 
 
     """
-    SUPER ADMIN
+    GLOBAL SUPER ADMIN
     """
 
     def delete_users_from_whitelist(self, *, email, delete_account=None):
@@ -536,6 +536,29 @@ class Mosaic(object):
         data = { 'email': email }
 
         return self.post(f'whitelist/users', data=data)
+
+
+    """
+    GLOBAL TASKS
+    """
+
+
+    def get_tasks(self, *, categories=None, completed=None, project_ids=None, types=None, order_dir=None):
+        params = { }
+        if categories:
+          params['categories'] = [categories]
+        if completed:
+          params['completed'] = completed
+        if project_ids:
+          params['project_ids'] = [project_ids]
+        if types:
+          params['types'] = [types]
+        if order_dir:
+          params['order_dir'] = order_dir
+
+        return self.get(f'tasks', params=params)
+
+
 
 
 class Project(object):
@@ -1146,6 +1169,19 @@ class Project(object):
 
 
     """
+    TASKS
+    """
+
+    def delete_task(self, task_id):
+        return self._mosaic.delete(f'{self._path}/tasks/{task_id}')
+
+
+    def get_project_tasks(self):
+        return self._mosaic.get(f'{self._path}/tasks')
+
+
+
+    """
     VARIANT ANNOTATIONS
     """
 
@@ -1231,7 +1267,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/annotations/upload', file_path=file_path, data=data)
 
 
-    def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+    def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, latest_version_id=None):
         data = { }
 
         if name:
@@ -1250,6 +1286,8 @@ class Project(object):
             data['value_truncate_type'] = value_truncate_type
         if value_max_length:
             data['value_max_length'] = value_max_length
+        if latest_version_id:
+            data['latest_annotation_version_id'] = latest_version_id
 
         return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
 

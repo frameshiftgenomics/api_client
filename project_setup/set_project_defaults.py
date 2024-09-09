@@ -95,8 +95,8 @@ def main():
     annotations_to_remove = []
     if 'remove_annotations' in json_info:
       for name in json_info['remove_annotations']:
-        if name in annotations:
-          data = project.delete_variant_annotation(annotations[name])
+        if name in annotation_names:
+          data = project.delete_variant_annotation(annotation_names[name])
 
     # Set the variants table defaults. The json file can include annotation names, ids or version ids, but they must be
     # specified. If an annotation name, uid, or id is supplied, the "latest" annotation version id will be used, or, if this

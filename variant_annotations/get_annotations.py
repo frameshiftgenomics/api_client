@@ -7,18 +7,23 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  api_store  = Store(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
   # Get the project settings
+  annotation_ids = []
+  if args.annotation_ids:
+    annotation_ids = args.annotation_ids.split(',')
+
+  #for annotation in project.get_variant_annotations(annotation_ids = annotation_ids):
   for annotation in project.get_variant_annotations():
     if args.name:
       if args.name == annotation['name']:
@@ -48,7 +53,7 @@ def print_verbose(annotation):
   print('    category: ', annotation['category'], sep = '')
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
@@ -60,6 +65,9 @@ def parseCommandLine():
 
   # If a name is supplied, just show information on the annotation with this name
   parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'If an annotation name is provided, information on this annotations will be shown')
+
+  # If a list of annotation ids is supplied, only show results for these annotations
+  parser.add_argument('--annotation_ids', '-i', required = False, metavar = 'string', help = 'An optional comman separated list of annotation ids to return')
 
   # Verbose output
   parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')

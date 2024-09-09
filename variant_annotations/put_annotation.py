@@ -19,7 +19,7 @@ def main():
   project = apiMosaic.get_project(args.project_id)
 
   # Import tha annotation
-  data = project.put_variant_annotation(args.annotation_id, name = args.name, value_type = args.type, privacy_level = args.privacy_level, display_type = args.display_type, severity = args.severity, category = args.category, value_truncate_type = args.value_truncate_type, value_max_length = args.value_max_length)
+  data = project.put_variant_annotation(args.annotation_id, name = args.name, value_type = args.type, privacy_level = args.privacy_level, display_type = args.display_type, severity = args.severity, category = args.category, value_truncate_type = args.value_truncate_type, value_max_length = args.value_max_length, latest_version_id = args.latest_version_id)
 
 # Input options
 def parseCommandLine():
@@ -44,6 +44,9 @@ def parseCommandLine():
   parser.add_argument('--category', '-g', required = False, metavar = 'string', help = 'The category of the annotation')
   parser.add_argument('--value_truncate_type', '-v', required = False, metavar = 'string', help = 'The method of truncating the annotation values')
   parser.add_argument('--value_max_length', '-m', required = False, metavar = 'string', help = 'The max length of the of the annotation values')
+
+  # Set the latest version
+  parser.add_argument('--latest_version_id', '-e', required = False, metavar = 'integer', help = 'The annotation version id to set as the latest versoin')
 
   return parser.parse_args()
 
