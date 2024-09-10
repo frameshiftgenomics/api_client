@@ -40,6 +40,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
 import sys
 from requests.exceptions import HTTPError
+from pprint import pprint
 
 # Suppress only the InsecureRequestWarning caused by using verify=False
 # (which we use for the local Mosaic instance)
@@ -166,7 +167,6 @@ class Mosaic(object):
 
         url = f'{self._api_host}/{resource}'
 
-        from pprint import pprint
         res = method(url, **kwargs)
 
         self._log_request(res.request)
@@ -478,6 +478,19 @@ class Mosaic(object):
 
     def get_public_project_attributes(self):
         yield from self.get_paged_route_iter(f'projects/attributes')
+
+
+
+    """
+    GLOBAL ROLE TYPES
+    """
+
+    def get_role_type(self, role_type_id):
+        return self.get(f'roles/types/{role_type_id}')
+
+
+    def get_role_types(self):
+        return self.get(f'roles/types')
 
 
 
@@ -911,8 +924,13 @@ class Project(object):
     PROJECT ROLES
     """
 
-    def delete_role(self, role_id):
-        return self._mosaic.delete(f'{self._path}/roles/{role_id}')
+    def delete_role(self, role_id, *, disable_cascade=None):
+        params = { 'cascade': 'true'}
+
+        if disable_cascade:
+            params['cascade'] = 'false'
+
+        return self._mosaic.delete(f'{self._path}/roles/{role_id}', params=params)
 
 
     def get_roles(self, include_sub_project_roles=None):

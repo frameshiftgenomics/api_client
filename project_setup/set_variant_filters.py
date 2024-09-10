@@ -116,7 +116,6 @@ def main():
 
 # Input options
 def parse_command_line():
-  global version
   parser = argparse.ArgumentParser(description='Process the command line')
 
   # Required arguments
@@ -127,9 +126,6 @@ def parse_command_line():
 
   # Optional mosaic arguments
   parser.add_argument('--no_genotype_filters', '-n', required = False, action = "store_true", help = 'If set, all filters that include genotypes will be omitted')
-
-  # Version
-  parser.add_argument('--version', '-v', action="version", version='Calypso annotation pipeline version: ' + str(version))
 
   return parser.parse_args()
 
@@ -813,9 +809,6 @@ def fail(message):
   exit(1)
 
 # Initialise global variables
-
-# Pipeline version
-version = "1.1.6"
 
 if __name__ == "__main__":
   main()
