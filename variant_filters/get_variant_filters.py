@@ -6,26 +6,29 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Get the list of variant filter ids
-  filters = project.get_variant_filters()
-  for variantFilter in filters:
-    print(variantFilter['name'])
-    for field in variantFilter:
-      if field != 'name': print('  ', field, ': ', variantFilter[field], sep = '')
+  for variant_filter in project.get_variant_filters():
+    if args.verbose:
+      print(variant_filter['name'])
+      for field in variant_filter:
+        if field != 'name':
+          print('  ', field, ': ', variant_filter[field], sep = '')
+    else:
+      print(variant_filter['id'])
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
@@ -35,11 +38,14 @@ def parseCommandLine():
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
 
+  # Verbose output
+  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Set for a verbose output')
+
   return parser.parse_args()
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = "")
+  print(message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

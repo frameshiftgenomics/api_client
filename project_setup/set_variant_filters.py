@@ -106,7 +106,7 @@ def main():
     filters_info = read_variant_filters_json(args.variant_filters)
     filter_categories, filters = get_filter_categories(filters_info)
     #filters = getFilters(filters_info, filter_categories, filters, samples, sample_map, annotations, annotationUids, annotation_map, annotationUids, hpo_terms)
-    filters = get_filters(filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms)
+    filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms)
   
     # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
     delete_filters(project, args.project_id, filters)
@@ -227,7 +227,7 @@ def get_filter_categories(filters_info):
   return categories, filters
 
 # Process all the information on the individual filters
-def get_filters(filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms):
+def get_filters(project, filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms):
 
   # Check all required sections and no others are present
   for section in filters_info:
@@ -256,7 +256,7 @@ def get_filters(filters_info, categories, filters, samples, sample_map, annotati
     if name not in filter_names:
       fail('Filter "' + str(name) + '" is not included in any category. Please include in a category')
 
-  # Loop over the filters are process
+  # Loop over the filters
   for category in categories:
     for position in categories[category]:
       name = categories[category][position]
@@ -275,6 +275,28 @@ def get_filters(filters_info, categories, filters, samples, sample_map, annotati
 
         # Check all of the annotation filters
         filters[name]['info'] = check_annotation_filters(filters[name]['info'], name, annotation_uids, private_annotation_names)
+
+        # Check if any variant sets are to be applied
+        if 'variant_sets' in filters[name]['info']:
+          if len(filters[name]['info']['variant_sets']) > 1:
+            fail('ERROR: Filter "' + str(name) + '" includes multiple variant sets. Only 1 (or 0) variant sets can be included in a filter.')
+          variant_set_name = filters[name]['info']['variant_sets'][0]
+          if variant_set_name:
+
+            # Get the variant sets in the project, then check that only one set is requested in the json and find its id. Also make sure
+            # that the variant set is not a Draft
+            variant_set_id = False
+            for variant_set in project.get_variant_sets():
+              if str(variant_set['name']) == str(variant_set_name):
+                if not variant_set['is_public_to_project']:
+                  fail('ERROR: Filter "' + str(name) + '" includes a Draft variant set (' + str(variant_set_name) + '). Only Published variant sets can be included in filters')
+                variant_set_id = variant_set['id']
+
+            # If the variant set does not exist, do not create the filter
+            if not variant_set_id:
+              filters[name]['use_filter'] = False
+            else:
+              filters[name]['info']['filters']['variant_set_id'] = variant_set_id
 
         # Check for any HPO information
         if 'hpo_filters' in filters[name]['info']['filters']:
@@ -302,7 +324,7 @@ def get_filters(filters_info, categories, filters, samples, sample_map, annotati
                   if value in private_annotation_names:
                     uid = private_annotation_names[value]
                   else:
-                    fail('ERROR: Unknown value (' + str(uid) + ') in "display" > "column_uids" for variant filter ' + str(name))
+                    fail('ERROR: Unknown value (' + str(value) + ') in "display" > "column_uids" for variant filter ' + str(name))
                 ordered_uids.append(uid)
               filters[name]['column_uids'] = ordered_uids
 
