@@ -11,7 +11,7 @@ def main():
   global version
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
@@ -134,7 +134,7 @@ def main():
            default_variant_set_annotation_ids = watchlist_version_ids)
   
 # Input options
-def parseCommandLine():
+def parse_command_line():
   global version
   parser = argparse.ArgumentParser(description='Process the command line')
 
@@ -223,6 +223,8 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
           annotations_to_import[import_annotation['uid']] = import_annotation['id']
 
       # Get the id of the annotation to import and import it
+      if annotation_uid not in annotations_to_import:
+        fail('ERROR: annotation "' + str(annotation) + '" with uid "' + str(annotation_uid) + '" is not available for import')
       annotation_id = annotations_to_import[annotation_uid]
       project.post_import_annotation(annotation_id)
 
@@ -246,9 +248,9 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
   
       # ... if the latest version was specified...
       elif annotation_version == 'latest':
-        if 'latest' not in annotation_versions:
+        if 'Latest' not in annotation_versions:
           fail('ERROR: annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
-        annotation_version_ids.append(annotation_versions['latest'])
+        annotation_version_ids.append(annotation_versions['Latest'])
   
       # ... or if the version id was specified
       else:
