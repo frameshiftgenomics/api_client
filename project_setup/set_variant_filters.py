@@ -62,25 +62,25 @@ def main():
   
     # Get all of the annotations in the current project. When creating a filter, the project will be checked to ensure that it has all of the
     # required annotations before creating the filter
-    #annotations = {}
-    #annotationUids = {}
     annotation_uids = {}
     for annotation in project.get_variant_annotations():
-      #if annotation['name'] in annotations:
-      #  print('WARNING: Multiple annotations with the name ' + str(annotation['name']) + ' exist. Only one annotation with the same name should exist in a project')
   
       # Loop over the annotation versions and get the latest (highest id)
-      annotation_version_id = False
+      highest_annotation_version_id = False
+      latest_annotation_version_id = False
       for annotation_version in annotation['annotation_versions']:
-        if not annotation_version_id:
-          annotation_version_id = annotation_version['id']
-        elif annotation_version['id'] > annotation_version_id:
-          annotation_version_id = annotation_version['id']
+        if annotation_version['version'] == 'Latest':
+          latest_annotation_version_id = annotation_version['id']
+        if not highest_annotation_version_id:
+          highest_annotation_version_id = annotation_version['id']
+        elif annotation_version['id'] > highest_annotation_version_id:
+          highest_annotation_version_id = annotation_version['id']
+        if latest_annotation_version_id:
+          annotation_version_id = latest_annotation_version_id
+        else:
+          annotation_version_id = highest_annotation_version_id
   
-      #annotations[annotation['name']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'uid': annotation['uid'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
       annotation_uids[annotation['uid']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'name': annotation['name'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
-    #for annotation in annotations:
-    #  annotationUids[annotations[annotation]['uid']] = {'name': annotation, 'type': annotations[annotation]['type'], 'annotation_version_id': annotations[annotation]['annotation_version_id']}
 
     # Create a dictionary of private annotation names with their uids
     private_annotation_names = {}
@@ -102,10 +102,8 @@ def main():
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
     # filters won't be added to projects without parents
     sample_map = create_sample_map(samples)
-    #annotation_map = create_annotation_map(annotations, reference)
     filters_info = read_variant_filters_json(args.variant_filters)
     filter_categories, filters = get_filter_categories(filters_info)
-    #filters = getFilters(filters_info, filter_categories, filters, samples, sample_map, annotations, annotationUids, annotation_map, annotationUids, hpo_terms)
     filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms)
   
     # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
