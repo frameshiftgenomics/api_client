@@ -7,22 +7,22 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Import tha annotation
   data = project.put_variant_annotation(args.annotation_id, name = args.name, value_type = args.type, privacy_level = args.privacy_level, display_type = args.display_type, severity = args.severity, category = args.category, value_truncate_type = args.value_truncate_type, value_max_length = args.value_max_length, latest_version_id = args.latest_version_id)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
@@ -46,13 +46,13 @@ def parseCommandLine():
   parser.add_argument('--value_max_length', '-m', required = False, metavar = 'string', help = 'The max length of the of the annotation values')
 
   # Set the latest version
-  parser.add_argument('--latest_version_id', '-e', required = False, metavar = 'integer', help = 'The annotation version id to set as the latest versoin')
+  parser.add_argument('--latest_version_id', '-e', required = False, metavar = 'integer', help = 'The annotation version id to set as the latest version')
 
   return parser.parse_args()
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = "")
+  print(message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

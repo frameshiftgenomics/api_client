@@ -15,6 +15,10 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
+  # Read the json file describing the filters
+  filters_info = read_variant_filters_json(args.variant_filters_json)
+  filter_categories, filters = get_filter_categories(filters_info)
+
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
@@ -57,7 +61,7 @@ def main():
                 if value['value'] == 'Proband':
                   if has_proband: fail('Multiple samples in the Mosaic project are listed as the proband')
                   has_proband = True
-                  proband    = sample['name']
+                  proband = sample['name']
                 break
   
     # Get all of the annotations in the current project. When creating a filter, the project will be checked to ensure that it has all of the
@@ -102,8 +106,8 @@ def main():
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
     # filters won't be added to projects without parents
     sample_map = create_sample_map(samples)
-    filters_info = read_variant_filters_json(args.variant_filters)
-    filter_categories, filters = get_filter_categories(filters_info)
+    #filters_info = read_variant_filters_json(args.variant_filters)
+    #filter_categories, filters = get_filter_categories(filters_info)
     filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms)
   
     # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
@@ -119,61 +123,13 @@ def parse_command_line():
   # Required arguments
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The project id that variants will be uploaded to')
-  parser.add_argument('--variant_filters', '-f', required = True, metavar = 'string', help = 'The json file describing the variant filters to apply to each project')
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The project id that variants will be uploaded to. Supply the id of a collection and the filters will be applied to all projects in the collection')
+  parser.add_argument('--variant_filters_json', '-f', required = True, metavar = 'string', help = 'The json file describing the variant filters to apply to each project')
 
   # Optional mosaic arguments
   parser.add_argument('--no_genotype_filters', '-n', required = False, action = "store_true", help = 'If set, all filters that include genotypes will be omitted')
 
   return parser.parse_args()
-
-## Create a mapping from the sample relation to a Mosaic sample id. The json file describing the filter
-## can include fields for requiring specific genotypes for family members, e.g. Proband must be an alt,
-## in order to be general for any project. These need to be converted to sample ids for Mosaic
-def create_sample_map(samples):
-  sample_map = {}
-  for sample in samples:
-    if not samples[sample]['relation']:
-      fail('Sample attribute "Relation" must be present and populated for all samples (no value exists for "' + str(sample) + '")')
-    sample_map[samples[sample]['relation'].lower()] = samples[sample]['id']
-
-  # Return the sample map
-  return sample_map
-
-# Create an annotation map that links general names for annotations to the specific annotation available
-# in the project. For example, clinVar annotations can be regularly updated - when the filter is created,
-# it needs to point to the clinVar annotation available in that project
-def create_annotation_map(annotations, reference):
-  annotation_map = {}
-  #clinvar = []
-
-  # Loop over all annotations in the project
-  for annotation in annotations:
-
-    # ClinVar can be regurlarly updated, so the filter can include the term 'clinvar_latest'. If this is
-    # encountered, the filter should use the clinVar annotation available in the project
-    #if 'clinvar' in annotation.lower():
-    #  clinvar.append(annotation)
-
-    # Private annotations will be referred to in the json by name, so these need to be included in the map
-    if annotations[annotation]['privacy_level'] == 'private':
-      annotation_map[annotation] = annotations[annotation]['uid']
-
-  # If there is a single available clinVar annotation use this
-  if len(clinvar) == 1:
-    annotation_map['clinvar_latest'] = annotations[clinvar[0]]['uid']
-  else:
-    default_clinvar = 'ClinVar Significance ' + str(reference)
-    uses_default = False
-    for clinvar_option in clinvar:
-      if clinvar_option == default_clinvar:
-        annotation_map['clinvar_latest'] = annotations[clinvar[0]]['uid']
-        uses_default = True
-    if not uses_default:
-      fail('Multiple ClinVar annotations exist in project. No logic exists to select the correct annotation')
-
-  # Return the annotation map
-  return annotation_map
 
 # Process the json file describing the filters to apply
 def read_variant_filters_json(variant_filters_json):
@@ -223,6 +179,54 @@ def get_filter_categories(filters_info):
 
   # Return the categories information
   return categories, filters
+
+## Create a mapping from the sample relation to a Mosaic sample id. The json file describing the filter
+## can include fields for requiring specific genotypes for family members, e.g. Proband must be an alt,
+## in order to be general for any project. These need to be converted to sample ids for Mosaic
+def create_sample_map(samples):
+  sample_map = {}
+  for sample in samples:
+    if not samples[sample]['relation']:
+      fail('Sample attribute "Relation" must be present and populated for all samples (no value exists for "' + str(sample) + '")')
+    sample_map[samples[sample]['relation'].lower()] = samples[sample]['id']
+
+  # Return the sample map
+  return sample_map
+
+# Create an annotation map that links general names for annotations to the specific annotation available
+# in the project. For example, clinVar annotations can be regularly updated - when the filter is created,
+# it needs to point to the clinVar annotation available in that project
+def create_annotation_map(annotations, reference):
+  annotation_map = {}
+  #clinvar = []
+
+  # Loop over all annotations in the project
+  for annotation in annotations:
+
+    # ClinVar can be regurlarly updated, so the filter can include the term 'clinvar_latest'. If this is
+    # encountered, the filter should use the clinVar annotation available in the project
+    #if 'clinvar' in annotation.lower():
+    #  clinvar.append(annotation)
+
+    # Private annotations will be referred to in the json by name, so these need to be included in the map
+    if annotations[annotation]['privacy_level'] == 'private':
+      annotation_map[annotation] = annotations[annotation]['uid']
+
+  # If there is a single available clinVar annotation use this
+  if len(clinvar) == 1:
+    annotation_map['clinvar_latest'] = annotations[clinvar[0]]['uid']
+  else:
+    default_clinvar = 'ClinVar Significance ' + str(reference)
+    uses_default = False
+    for clinvar_option in clinvar:
+      if clinvar_option == default_clinvar:
+        annotation_map['clinvar_latest'] = annotations[clinvar[0]]['uid']
+        uses_default = True
+    if not uses_default:
+      fail('Multiple ClinVar annotations exist in project. No logic exists to select the correct annotation')
+
+  # Return the annotation map
+  return annotation_map
 
 # Process all the information on the individual filters
 def get_filters(project, filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms):
@@ -359,137 +363,6 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
   # Return the filter information
   return filters
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Process all the information on the individual filters
-#def getFilters(filtersInfo, categories, filters, samples, sampleMap, annotations, annotationUids, annotationMap, uids, hpoTerms):
-#
-#  # Check all required sections and no others are present
-#  for section in filtersInfo:
-#    if section == 'categories':
-#      pass
-#    elif section == 'filters':
-#      pass
-#    else:
-#      fail('Unknown section (' + str(section) + ') in the variant filters json')
-#  if 'filters' not in filtersInfo:
-#    fail('The json file describing variant filters is missing the "filters" section')
-#
-#  # Now check that all of the filters defined for each category are described in detail in the "filters" section of the json
-#  # Loop over all of the filters in the category and add them to the filterNames list. Check if any of the filters in
-#  # the categories section do not have a description in the 'filters' section
-#  filterNames = []
-#  for category in categories:
-#    for position in categories[category]:
-#      name = categories[category][position]
-#      if name not in filtersInfo['filters']:
-#        fail('Filter "' + str(name) + '" appears in filter category "' + str(category) + '", but is not described in the "filters" section')
-#      filterNames.append(categories[category][position])
-#
-#  # If there are any filters that are uncategorized, throw an error
-#  for name in filtersInfo['filters']:
-#    if name not in filterNames:
-#      fail('Filter "' + str(name) + '" is not included in any category. Please include in a category')
-#
-#  # Loop over the filters are process
-#  for category in categories:
-#    for position in categories[category]:
-#      name = categories[category][position]
-#
-#      # Check if this filter has any requirements, for example, does it require that the case has parents (for e.g. de novo filters)    
-#      filters[name]['use_filter'] = checkRequirements(filtersInfo['filters'][name], sampleMap, hpoTerms)
-#
-#      # If this filter is not to be applied to the project, the rest of the filter information can be ignored - e.g. if this is a
-#      # filter that requires the parents to be present, but they are not
-#      if filters[name]['use_filter']:
-#        filters[name]['info'] = filtersInfo['filters'][name]
-#
-#        # Check the genotype information for the filter
-#        if 'genotypes' in filters[name]['info']:
-#          filters[name]['info'] = checkGenotypeFilters(filters[name]['info'], name, list(samples.keys()), sampleMap)
-#
-#        # Check all of the annotation filters
-#        filters[name]['info'] = checkAnnotationFilters(filters[name]['info'], name, annotations, annotationUids, annotationMap, uids)
-#
-#        # Check for any HPO information
-#        if 'hpo_filters' in filters[name]['info']['filters']:
-#          filters[name]['info'] = checkHpo(filters[name]['info'], name, hpoTerms)
-#
-#        # Now check if display is present. If so, this will describe how to update the variant table if this filter is applied. The only
-#        # allowable fields in this section are 'columns' which defines which column should show in the variant table, and 'sort' which
-#        # determines which annotation should be sorted on and how (ascending / descending). Set the "setDisplay" flag if this is required
-#        if 'display' in filtersInfo['filters'][name]:
-#          filters[name]['setDisplay'] = True
-#          for field in filtersInfo['filters'][name]['display']:
-#
-#            # Process the "columns" field. This must contain a list of available annotation uids
-#            if field == 'column_uids':
-#
-#              # Create a new list as some uids will need to be replaced in the list, but the order needs to be preserved
-#              orderedUids = []
-#              filters[name]['columnUids'] = filtersInfo['filters'][name]['display'][field]
-#              for uid in filters[name]['columnUids']: 
-#                if uid not in uids:
-#                  if uid in annotationMap:
-#                    orderedUids.append(annotationMap[uid])
-#                  else:
-#                    fail('Unknown uid (' + str(uid) + ') in "display" > "column_uids" for variant filter ' + str(name))
-#                else:
-#                  orderedUids.append(uid)
-#              filters[name]['columnUids'] = orderedUids
-#
-#            # Process the "sort" field which defines the annotation to sort the table on
-#            elif field == 'sort':
-#              if 'column_uid' not in filtersInfo['filters'][name]['display']['sort']:
-#                fail('Field "column_uid" is missing from the "display" > "sort" section for filter ' + str(name))
-#              if 'direction' not in filtersInfo['filters'][name]['display']['sort']:
-#                fail('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
-#
-#              # Check the column to sort on is a valid uid, or is defined in the annotation map
-#              sortUid = filtersInfo['filters'][name]['display'][field]['column_uid']
-#              if sortUid not in uids:
-#                if sortUid in annotationMap:
-#                  uid = annotationMap[sortUid]
-#                else:
-#                  fail('Unknown uid (' + str(sortUid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
-#              else:
-#                uid = filtersInfo['filters'][name]['display'][field]['column_uid']
-#              filters[name]['sortColumnUid'] = uid 
-#
-#              # Check that the sort direction is valid
-#              filters[name]['sortDirection'] = filtersInfo['filters'][name]['display'][field]['direction']
-#              if filters[name]['sortDirection'] != 'ascending' and filters[name]['sortDirection'] != 'descending':
-#                fail('Sort direction must be "ascending" or "descending" for filter ' + str(name))
-#
-#            else:
-#              fail('Unknown field in the "display" section for filter ' + str(name))
-#        else:
-#          filters[name]['setDisplay'] = False
-#
-#  # Return the filter information
-#  return filters
-
 # Check if this filter has any requirements, for example, does it require that the case has parents (for e.g. de novo filters)    
 def check_requirements(filters_info, sample_map, hpo_terms):
   use_filter = True
@@ -551,109 +424,6 @@ def check_genotype_filters(data, name, sample_ids, sample_map):
 
   # Return the updated data
   return data
-
-## Process the annotation filters
-#def checkAnnotationFilters(data, name, annotations, annotationUids, annotationMap, uids):
-#
-#  # Make sure the annotation_filters section exists
-#  if 'annotation_filters' not in data['filters']:
-#    fail('Annotation filter ' + str(name) + ' does not contain the required "annotation_filters" section')
-#
-#  # Check the filters provided in the json. The annotation filters need to extract the uids for the annotations, so
-#  # ensure that each annotation has a valid uid (e.g. it is present in the project), and that supporting information
-#  # e.g. a minimum value cannot be supplied for a string annotation, is valid
-#  for aFilter in data['filters']['annotation_filters']:
-#
-#    # The json file must contain either a valid uid for a project annotation, the name of a valid private annotation, or
-#    # have a name in the annotation map to relate a name to a uid. This is used for annotations (e.g. ClinVar) that are
-#    # regularly updated, so the template does not need to be updated for updating annotations.
-#    if 'uid' in aFilter:
-#      uid = aFilter['uid']
-#    elif 'name' in aFilter:
-#
-#      # Loop over the annotations in the annotation map and see if the requested annotation name is the beginning of any
-#      # available annotations. For example, the filter could include an annotation name of "GQ Proband", but the project
-#      # will have an annotation of the name "GQ Proband SAMPLE_NAME". As long as only a single annotation matches, this
-#      # will be the annotation to use
-#      matchedAnnotations = []
-#      for annotation in annotationMap:
-#        if aFilter['name'] in annotation:
-#          matchedAnnotations.append(annotation)
-#      if len(matchedAnnotations) == 1:
-#        aFilter['uid'] = annotationMap[matchedAnnotations[0]]
-#        del aFilter['name']
-#
-#      ## Check if this name is in the annotationMap and if so, use the mapped uid
-#      #if aFilter['name'] in annotationMap:
-#      #  aFilter['uid'] = annotationMap[aFilter['name']]
-#      #  del aFilter['name']
-#
-#      # If the name is not in the annotationMap, check if a private annotation with this name exists in the project
-#      else:
-#        for annotation in annotations:
-#          if str(annotation) == str(aFilter['name']):
-#            aFilter['uid'] = annotations[annotation]['uid']
-#            del aFilter['name']
-#            break
-#
-#    # Store the uid and check that it exists
-#    uid = aFilter['uid'] if 'uid' in aFilter else False
-#    if not uid:
-#      fail('Variant filter "' + str(name) + '" uses an unknown annotation: ' + str(aFilter['name']))
-#    if uid not in uids:
-#      fail('Variant filter "' + str(name) + '" uses an unknown annotation uid: ' + str(uid))
-#
-#    # Check that the filter defines whether or not to include null values
-#    if 'include_nulls' not in aFilter:
-#      fail('Annotation filter ' + str(name) + ' contains a filter with no "include_nulls" section')
-#
-#    # If the annotation is a string, the "values" field must be present
-#    if uids[uid]['type'] == 'string':
-#      if 'values' not in aFilter:
-#        fail('Annotation filter ' + str(name) + ' contains a string based filter with no "values" section')
-#      if type(aFilter['values']) != list:
-#        fail('Annotation filter ' + str(name) + ' contains a string based filter with a "values" section that is not a list')
-#
-#    # If the annotation is a float, check that the specified operation is valid
-#    elif uids[uid] == 'float':
-#
-#      # Loop over all the fields for the filter and check that they are valid
-#      hasRequiredValue = False
-#      for value in aFilter:
-#        if value == 'uid':
-#          continue
-#        elif value == 'include_nulls':
-#          continue
-#
-#        # The filter can define a minimum value
-#        elif value == 'min':
-#          try:
-#            float(aFilter[value])
-#          except:
-#            fail('Annotation filter ' + str(name) + ' has a "min" that is not a float')
-#          hasRequiredValue = True
-#
-#        # The filter can define a minimum value
-#        elif value == 'max':
-#          try:
-#            float(aFilter[value])
-#          except:
-#            fail('Annotation filter ' + str(name) + ' has a "max" that is not a float')
-#          hasRequiredValue = True
-#
-#        # Other fields are not recognised
-#        else:
-#          fail('Annotation filter ' + str(name) + ' contains an unrecognised field: ' + str(value))
-#
-#      # If no comparison fields were provided, fail
-#      if not hasRequiredValue:
-#        fail('Annotation filter ' + str(name) + ' contains a filter based on a float, but no comparison operators have been included')
-#
-#    # Include annotation_version_id for the selected uid
-#    aFilter['annotation_version_id'] = annotationUids[aFilter['uid']]['annotation_version_id']
-#
-#  # Return the updated annotation information
-#  return data
 
 # Process the annotation filters
 def check_annotation_filters(data, name, annotation_uids, private_annotation_names):
