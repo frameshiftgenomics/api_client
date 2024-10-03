@@ -27,9 +27,13 @@ def main():
     if args.reference:
       if project_info['reference'] != args.reference:
         display = False
-    if args.exclude_templates:
-      if project_info['is_template']:
+
+    # Ignore template projects unless told otherwise
+    if project_info['is_template']:
+      if not args.include_templates:
         display = False
+
+    # Ignore collections unless told otherwise
     if project_info['is_collection']:
       if not args.include_collections:
         display = False
@@ -56,7 +60,7 @@ def parse_command_line():
 
   # Only output project ids, or exclude specific projects
   parser.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')
-  parser.add_argument('--exclude_templates', '-e', required = False, action = 'store_true', help = 'If set, template projects will not be output')
+  parser.add_argument('--include_templates', '-t', required = False, action = 'store_true', help = 'By default, template projects will NOT be included in the output. This will include them')
   parser.add_argument('--include_collections', '-i', required = False, action = 'store_true', help = 'By default, collections will NOT be included in the output. This will include them')
   parser.add_argument('--include_system_projects', '-n', required = False, action = 'store_true', help = 'By default, system projects (Public Attribute, Globals) will NOT be included in the output. This willi include them')
 
