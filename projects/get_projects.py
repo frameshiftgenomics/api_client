@@ -2,9 +2,11 @@ import os
 import argparse
 
 from sys import path
+from pprint import pprint
 
 def main():
   global allowed_references
+  global system_projects
 
   # Parse the command line
   args = parse_command_line()
@@ -25,6 +27,19 @@ def main():
     if args.reference:
       if project_info['reference'] != args.reference:
         display = False
+    if args.exclude_templates:
+      if project_info['is_template']:
+        display = False
+    if project_info['is_collection']:
+      if not args.include_collections:
+        display = False
+
+    # By default ignore system projects. This is the Public Attributes, Mosaic <REF> Globals projects
+    if project_info['name'] in system_projects:
+      if not args.include_system_projects:
+        display = False
+
+    # Write out information
     if display:
       if args.output_ids_only:
         print(project_info['id'], sep = '')
@@ -39,8 +54,11 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
 
-  # Only output project ids
+  # Only output project ids, or exclude specific projects
   parser.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')
+  parser.add_argument('--exclude_templates', '-e', required = False, action = 'store_true', help = 'If set, template projects will not be output')
+  parser.add_argument('--include_collections', '-i', required = False, action = 'store_true', help = 'By default, collections will NOT be included in the output. This will include them')
+  parser.add_argument('--include_system_projects', '-n', required = False, action = 'store_true', help = 'By default, system projects (Public Attribute, Globals) will NOT be included in the output. This willi include them')
 
   # Only output projects of a given reference
   parser.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Only output projects with the specified reference')
@@ -58,6 +76,12 @@ def fail(message):
 allowed_references = []
 allowed_references.append('GRCh37')
 allowed_references.append('GRCh38')
+
+system_projects = []
+system_projects.append('Public Attributes')
+system_projects.append('Mosaic Globals')
+system_projects.append('Mosaic GRCh37 Globals')
+system_projects.append('Mosaic GRCh38 Globals')
 
 if __name__ == "__main__":
   main()
