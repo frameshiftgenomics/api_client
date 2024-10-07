@@ -618,6 +618,43 @@ class Project(object):
 
 
     """
+    CLINVAR
+    """
+
+    def post_add_clinvar_version(self, *, version=None):
+        data = { }
+
+        if not version:
+            print('ERROR: POST clinvar add version requires a version')
+            exit(1)
+        else:
+            data['version'] = version
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions', data=data)
+
+
+    def post_diff_clinvar_version(self, *, version_a=None, version_b=None, project_ids=None, annotation_filters=None, generate_tasks=None):
+        data = { }
+
+        if not version_a or not version_b:
+            print('ERROR: POST clinvar diff version requires two ClinVar versions')
+            exit(1)
+        data['version_A'] = version_a
+        data['version_B'] = version_b
+
+        if project_ids:
+            data['project_ids_to_check'] = project_ids
+
+        if annotation_filters:
+            data['annotation_filters'] = annotation_filters
+
+        if generate_tasks:
+            data['generate_tasks'] = generate_tasks
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions/diff', data=data)
+
+
+    """
     COLLECTIONS
     """
 

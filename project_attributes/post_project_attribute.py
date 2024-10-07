@@ -7,12 +7,12 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  api_store  = Store(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
@@ -34,7 +34,7 @@ def main():
   data = project.post_project_attribute(description = args.description, name=args.name, predefined_values=values, value=args.value, value_type=args.value_type, is_editable=is_editable, is_public=is_public)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
