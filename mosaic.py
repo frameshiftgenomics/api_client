@@ -781,8 +781,11 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/pedigree')
 
 
-    #def post_upload_pedigree(self, file_path):
-    #    return self._mosaic.post(f'{self._path}/attributes/import', file_path=file_path)
+    def post_upload_pedigree(self, *, file_path=None, create_new_samples=True):
+        data = {'create_new_samples': create_new_samples}
+
+        return self._mosaic.post(f'{self._path}/pedigree', file_path=file_path, data=data)
+
 
 
     """
@@ -1037,6 +1040,10 @@ class Project(object):
     SAMPLE ATTRIBUTES
     """
 
+    def delete_sample_attribute(self, attribute_id):
+        return self._mosaic.delete(f'{self._path}/samples/attributes/{attribute_id}')
+
+
     def get_sample_attributes(self):
         return self._mosaic.get(f'{self._path}/samples/attributes')
 
@@ -1065,10 +1072,6 @@ class Project(object):
         if value: data['value'] = value
 
         return self._mosaic.put(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
-
-
-    def delete_sample_attribute(self, data):
-        pass
 
 
     def update_sample_attribute(self, data):
