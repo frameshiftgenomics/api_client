@@ -2,6 +2,7 @@ import os
 import argparse
 import json
 import sys
+import time
 
 from os.path import exists
 from pprint import pprint
@@ -44,6 +45,9 @@ def main():
         if not task['completed'] or args.include_reviewed:
           url = 'https://udn.mosaic.frameshift.io/#/projects/' + str(project_id) + '/variants?variant_set_id=' + str(task['variant_set_id'])
           print(project.name, project_id, url, sep = ',', file = output)
+
+    # Throttle the requests to make sure we don't hit the max requests / second
+    time.sleep(0.1)
 
   # Close the output file
   output.close()

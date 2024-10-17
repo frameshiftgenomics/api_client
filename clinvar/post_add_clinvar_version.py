@@ -51,7 +51,7 @@ def main():
   # Add the ClinVar version if it doesn't already exist
   if not version_exists:
     project.post_add_clinvar_version(version = args.clinvar_version)
-    
+
     # Update the version ids with the added version
     for annotation_version in project.get_variant_annotation_versions(annotation_id):
       annotation_versions[annotation_version['version']] = annotation_version['id']
