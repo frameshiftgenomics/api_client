@@ -559,7 +559,7 @@ class Mosaic(object):
     def get_tasks(self, *, categories=None, completed=None, project_ids=None, types=None, order_dir=None):
         params = { }
         if categories:
-          params['categories'] = [categories]
+          params['categories'] = categories
         if completed:
           params['completed'] = completed
         if project_ids:
@@ -569,7 +569,7 @@ class Mosaic(object):
         if order_dir:
           params['order_dir'] = order_dir
 
-        return self.get(f'tasks', params=params)
+        yield from self.get_paged_route_iter(f'tasks', params=params)
 
 
 
