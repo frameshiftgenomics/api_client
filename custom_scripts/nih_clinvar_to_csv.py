@@ -37,7 +37,7 @@ def main():
 
   for task in api_mosaic.get_tasks(categories = None, completed = None, project_ids = project_ids, types = None, order_dir = None):
     url = 'https://udn.mosaic.frameshift.io/#/projects/' + str(task['project_id']) + '/variants?variant_set_id=' + str(task['variant_set_id'])
-    print(task['project_name'], task['project_id'], url, sep = ',')
+    print(task['project_name'], task['project_id'], url, sep = ',', file = output)
 
 #  # Loop over all the projects (for a collection) and apply the filters
 #  for project_id in project_ids:
