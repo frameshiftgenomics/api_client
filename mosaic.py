@@ -141,6 +141,19 @@ class Mosaic(object):
     Mosaic HTTP request methods.
     """
     def _http_request(self, method, resource, *, params=None, data=None, file_upload=None):
+
+        formatted_params = {}
+        """
+        By forcing square brackets onto list query params, there is no ambiguity on the type.
+        """
+        if params:
+            for key, value in params.items():
+                if isinstance(value, list):
+                    new_key = f"{key}[]"
+                    formatted_params[new_key] = value
+                else:
+                    formatted_params[key] = value
+
         kwargs = {
                 'headers': self._headers, 
                 'verify': self._verify, 
