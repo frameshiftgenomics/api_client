@@ -476,7 +476,13 @@ class Mosaic(object):
     GLOBAL PROJECT ATTRIBUTES
     """
 
-    def get_public_project_attributes(self):
+    def get_public_project_attributes(self):#, attribute_ids=None):
+        #params = { }
+
+        #if attribute_ids:
+        #  params['attribute_ids'] = attribute_ids
+        #  return self.get(f'projects/attributes', params=params)
+
         yield from self.get_paged_route_iter(f'projects/attributes')
 
 
@@ -990,9 +996,11 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/settings')
 
 
-    def put_project_settings(self, *, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
+    def put_project_settings(self, *, external_url=None, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
         data = { }
 
+        if external_url:
+            data['external_url'] = external_url
         if default_variant_set_annotation_ids:
             data['default_variant_set_annotation_ids'] = default_variant_set_annotation_ids
         if privacy_level:
@@ -1425,6 +1433,29 @@ class Project(object):
 
     def get_variant_sets(self):
         return self._mosaic.get(f'{self._path}/variants/sets')
+
+
+    def get_variant(self, variant_id, *, include_annotation_data=None, include_genotype_data=None):
+        params = { }
+        if include_annotation_data:
+          if include_annotation_data == 'true':
+              params['include_annotation_data'] = 'true'
+          elif include_annotation_data == 'false':
+              params['include_annotation_data'] = 'false'
+          else:
+              print('get_variant: include_annotation_data must be "true" or "false"')
+              exit(1)
+
+        if include_genotype_data:
+          if include_genotype_data == 'true':
+              params['include_genotype_data'] = 'true'
+          elif include_genotype_data == 'false':
+              params['include_genotype_data'] = 'false'
+          else:
+              print('get_variant: include_genotype_data must be "true" or "false"')
+              exit(1)
+
+        return self._mosaic.get(f'{self._path}/variants/{variant_id}', params=params)
 
 
     def post_variant_file(self, file_path, upload_type=None, disable_successful_notification=None):

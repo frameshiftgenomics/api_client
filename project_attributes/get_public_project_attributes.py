@@ -15,10 +15,10 @@ def main():
   api_store  = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-#  # Get the attributes ids into a list
-#  attribute_ids = None
-#  if args.attribute_ids:
-#    attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [int(args.attribute_ids)]
+  # Get the attributes ids into a list
+  attribute_ids = None
+  #if args.attribute_ids:
+  #  attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [int(args.attribute_ids)]
 
   # Get the attributes available for import
   for attribute in api_mosaic.get_public_project_attributes():#attribute_ids = attribute_ids):

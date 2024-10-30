@@ -39,20 +39,6 @@ def main():
     url = 'https://udn.mosaic.frameshift.io/#/projects/' + str(task['project_id']) + '/variants?variant_set_id=' + str(task['variant_set_id'])
     print(task['project_name'], task['project_id'], url, sep = ',', file = output)
 
-#  # Loop over all the projects (for a collection) and apply the filters
-#  for project_id in project_ids:
-#    project = api_mosaic.get_project(project_id)
-#
-#    # Get the unreviewed ClinVar tasks unless all ClinVar are requested
-#    for task in project.get_project_tasks():
-#      if task['type'] == 'primary_clinvar_review':
-#        if not task['completed'] or args.include_reviewed:
-#          url = 'https://udn.mosaic.frameshift.io/#/projects/' + str(project_id) + '/variants?variant_set_id=' + str(task['variant_set_id'])
-#          print(project.name, project_id, url, sep = ',', file = output)
-#
-#    # Throttle the requests to make sure we don't hit the max requests / second
-#    time.sleep(0.1)
-
   # Close the output file
   output.close()
 

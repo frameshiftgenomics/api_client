@@ -7,23 +7,28 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
+
+  # Get all public attributes
+  attributes = {}
+  for attribute in api_mosaic.get_public_project_attributes():
+    attributes[attribute['id']] = {'name': attribute['name'], 'uid': attribute['uid']}
 
   # Get all of the attribute forms
-  data = apiMosaic.get_attribute_forms()
+  data = api_mosaic.get_attribute_forms()
   for form in data['data']:
     print(form['name'], ': ', form['id'], sep = '')
     for attribute in form['attribute_form_attributes']:
-      print('  ', attribute['attribute_id'], ': ', attribute['type'], sep = '')
+      print('  ', attribute['attribute_id'], ': ', attributes[attribute['attribute_id']]['name'], ', ', attribute['type'], sep = '')
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file

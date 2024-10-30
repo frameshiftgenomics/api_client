@@ -39,7 +39,7 @@ def parse_command_line():
   parser.add_argument('--reference', '-r', required = True, metavar = 'string', help = 'The project reference')
 
   # Optional arguments
-  parser.add_argument('--endpoint_url', '-d', required = True, metavar = 'string', help = 'The endpoint url of the file being attached')
+  parser.add_argument('--endpoint_url', '-d', required = False, metavar = 'string', help = 'The endpoint url of the file being attached')
 
   return parser.parse_args()
 

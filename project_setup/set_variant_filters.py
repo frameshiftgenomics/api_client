@@ -15,6 +15,12 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
+  # If the api_client path was not specified, get it from the script path
+  try:
+    args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+  except:
+    fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+
   # Read the json file describing the filters
   filters_info = read_variant_filters_json(args.variant_filters_json)
   filter_categories, filters = get_filter_categories(filters_info)
@@ -106,12 +112,10 @@ def main():
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
     # filters won't be added to projects without parents
     sample_map = create_sample_map(samples)
-    #filters_info = read_variant_filters_json(args.variant_filters)
-    #filter_categories, filters = get_filter_categories(filters_info)
     filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms)
   
     # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
-    delete_filters(project, args.project_id, filters)
+    delete_filters(project, args.project_id, args.delete_existing_filters, filters)
   
     # Create all the required filters and update their categories and sort order in the project settings
     create_filters(project, annotation_uids, filter_categories, filters)
@@ -122,12 +126,15 @@ def parse_command_line():
 
   # Required arguments
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
+  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
   parser.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The project id that variants will be uploaded to. Supply the id of a collection and the filters will be applied to all projects in the collection')
   parser.add_argument('--variant_filters_json', '-f', required = True, metavar = 'string', help = 'The json file describing the variant filters to apply to each project')
 
   # Optional mosaic arguments
-  parser.add_argument('--no_genotype_filters', '-n', required = False, action = "store_true", help = 'If set, all filters that include genotypes will be omitted')
+  parser.add_argument('--no_genotype_filters', '-n', required = False, action = 'store_true', help = 'If set, all filters that include genotypes will be omitted')
+
+  # Optional mosaic arguments
+  parser.add_argument('--delete_existing_filters', '-d', required = False, action = 'store_true', help = 'If set, all filters that include genotypes will be omitted')
 
   return parser.parse_args()
 
@@ -540,10 +547,18 @@ def check_hpo(data, name, hpo_terms):
   return data
 
 # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
-def delete_filters(project, project_id, filters):
-  for existing_filter in project.get_variant_filters():
-    if existing_filter['name'] in filters.keys():
+def delete_filters(project, project_id, delete_existing, filters):
+
+  # If the user requested deleting all filters
+  if delete_existing:
+    for existing_filter in project.get_variant_filters():
       project.delete_variant_filter(existing_filter['id'])
+
+  # Otherwise, only delete those that are being recreated
+  else:
+    for existing_filter in project.get_variant_filters():
+      if existing_filter['name'] in filters.keys():
+        project.delete_variant_filter(existing_filter['id'])
 
 # Create all the required filters and update their categories and sort order in the project settings
 def create_filters(project, annotation_uids, categories, filters):

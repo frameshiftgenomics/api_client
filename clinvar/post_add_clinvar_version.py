@@ -57,9 +57,9 @@ def main():
       annotation_versions[annotation_version['version']] = annotation_version['id']
 
   # Set the version as the latest unless specifically told not to
-  if not args.disable_latest:
-    annotation_version_id = annotation_versions[args.clinvar_version]
-    project.put_variant_annotation(annotation_id, latest_version_id = annotation_version_id)
+  #if not args.disable_latest:
+  #  annotation_version_id = annotation_versions[args.clinvar_version]
+  #  project.put_variant_annotation(annotation_id, latest_version_id = annotation_version_id)
 
 # Input options
 def parse_command_line():
