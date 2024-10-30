@@ -1,5 +1,6 @@
 import os
 import argparse
+import copy
 import json
 import math
 import glob
@@ -24,6 +25,10 @@ def main():
   # Read the json file describing the filters
   filters_info = read_variant_filters_json(args.variant_filters_json)
   filter_categories, filters = get_filter_categories(filters_info)
+
+  # The filters_info can be updated based on private annotations, so maintain a clean copy to reset to
+  # after each project
+  filters_info_original = copy.deepcopy(filters_info)
 
   # Import the api client
   path.append(args.api_client)
@@ -119,6 +124,9 @@ def main():
   
     # Create all the required filters and update their categories and sort order in the project settings
     create_filters(project, annotation_uids, filter_categories, filters)
+
+    # Reset filters_info to it's original form
+    filters_info = copy.deepcopy(filters_info_original)
 
 # Input options
 def parse_command_line():
