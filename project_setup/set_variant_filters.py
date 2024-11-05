@@ -108,16 +108,16 @@ def main():
           private_annotation_names[name] = annotation_uid
   
     # Get HPO terms from Mosaic
-    hpo_terms = []
-    for hpo_term in project.get_sample_hpo_terms(samples[proband]['id']):
-      hpo_terms.append({'hpo_id': hpo_term['hpo_id'], 'label': hpo_term['label']})
+    #hpo_terms = []
+    #for hpo_term in project.get_sample_hpo_terms(samples[proband]['id']):
+    #  hpo_terms.append({'hpo_id': hpo_term['hpo_id'], 'label': hpo_term['label']})
   
     # Determine all of the variant filters that are to be added; remove any filters that already exist with the same name; fill out variant
     # filter details not in the json (e.g. the uids of private annotations); create the filters; and finally update the project settings to
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
     # filters won't be added to projects without parents
     sample_map = create_sample_map(samples)
-    filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms)
+    filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names)#, hpo_terms)
   
     # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
     delete_filters(project, args.project_id, args.delete_existing_filters, filters)
@@ -244,7 +244,7 @@ def create_annotation_map(annotations, reference):
   return annotation_map
 
 # Process all the information on the individual filters
-def get_filters(project, filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names, hpo_terms):
+def get_filters(project, filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names):#, hpo_terms):
 
   # Check all required sections and no others are present
   for section in filters_info:
@@ -279,7 +279,7 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
       name = categories[category][position]
 
       # Check if this filter has any requirements, for example, does it require that the case has parents (for e.g. de novo filters)    
-      filters[name]['use_filter'] = check_requirements(filters_info['filters'][name], sample_map, hpo_terms)
+      filters[name]['use_filter'] = check_requirements(filters_info['filters'][name], sample_map)
 
       # If this filter is not to be applied to the project, the rest of the filter information can be ignored - e.g. if this is a
       # filter that requires the parents to be present, but they are not
@@ -316,8 +316,8 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
               filters[name]['info']['filters']['variant_set_id'] = variant_set_id
 
         # Check for any HPO information
-        if 'hpo_filters' in filters[name]['info']['filters']:
-          filters[name]['info'] = check_hpo(filters[name]['info'], name, hpo_terms)
+        #if 'hpo_filters' in filters[name]['info']['filters']:
+        #  filters[name]['info'] = check_hpo(filters[name]['info'], name, hpo_terms)
 
         # Now check if display is present. If so, this will describe how to update the variant table if this filter is applied. The only
         # allowable fields in this section are 'columns' which defines which column should show in the variant table, and 'sort' which
@@ -379,7 +379,7 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
   return filters
 
 # Check if this filter has any requirements, for example, does it require that the case has parents (for e.g. de novo filters)    
-def check_requirements(filters_info, sample_map, hpo_terms):
+def check_requirements(filters_info, sample_map):
   use_filter = True
 
   # Check if parents are required for this filter. If so, check if they are present in the sample map. If not, this filter
@@ -390,10 +390,6 @@ def check_requirements(filters_info, sample_map, hpo_terms):
   if 'requires_father' in filters_info: 
     if filters_info['requires_father'] and 'father' not in sample_map:
       use_filter = False
-
-  # If this filter requires HPO terms and none are available, the filter should be skipped
-  #if 'hpo_filters' in filters_info['filters'] and not hpo_terms:
-  #  use_filter = False
 
   # Return whether this filter passes all requirements
   return use_filter

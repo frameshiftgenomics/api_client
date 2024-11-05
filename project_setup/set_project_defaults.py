@@ -226,7 +226,10 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
       if annotation_uid not in annotations_to_import:
         fail('ERROR: annotation "' + str(annotation) + '" with uid "' + str(annotation_uid) + '" is not available for import')
       annotation_id = annotations_to_import[annotation_uid]
-      project.post_import_annotation(annotation_id)
+      try:
+        project.post_import_annotation(annotation_id)
+      except:
+        continue
 
     # Otherwise, just get the annotation id for the annotation in the project
     else:

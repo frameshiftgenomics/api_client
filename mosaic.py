@@ -535,13 +535,13 @@ class Mosaic(object):
     GLOBAL SUPER ADMIN
     """
 
-    def delete_users_from_whitelist(self, *, email, delete_account=None):
-        data = { 'email': email }
+    def delete_user_from_whitelist(self, *, email=None, delete_account=None):
+        params = { 'email': email }
 
         if delete_account:
-          data['delete_user_account'] = 'true'
+          params['delete_user_account'] = 'true'
 
-        return self.delete(f'whitelist/users', data=data)
+        return self.delete(f'whitelist/users', params=params)
 
 
     def get_user_whitelist(self):
@@ -589,6 +589,16 @@ class Mosaic(object):
           params['order_dir'] = order_dir
 
         yield from self.get_paged_route_iter(f'tasks', params=params)
+
+
+    """
+    GLOBAL USERS
+    """
+
+    def delete_user(self, user_id):
+        return self.delete(f'/users/{user_id}')
+
+
 
 
 
@@ -652,7 +662,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions', data=data)
 
 
-    def post_diff_clinvar_version(self, *, version_a=None, version_b=None, project_ids=None, annotation_filters=None, generate_tasks=None):
+    def post_diff_clinvar_version(self, *, version_a=None, version_b=None, project_ids=None, annotation_filters=None, generate_tasks=None, emails=None):
         data = { }
 
         if not version_a or not version_b:
@@ -669,6 +679,9 @@ class Project(object):
 
         if generate_tasks:
             data['generate_tasks'] = generate_tasks
+
+        if emails:
+            data['emails'] = emails
 
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions/diff', data=data)
 

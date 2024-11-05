@@ -62,9 +62,14 @@ def main():
     else:
       project_ids = args.project_ids_to_check
 
+  # Generate a list of email addresses to send notifications to
+  emails = None
+  if args.emails:
+    emails = args.emails.split(',') if ',' in args.emails else [args.emails]
+
   # Perform the diff
   generate_tasks = False if args.disable_tasks else True
-  project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks)
+  project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails)
 
 # Input options
 def parse_command_line():
@@ -82,7 +87,10 @@ def parse_command_line():
   parser.add_argument('--clinvar_version_b', '-b', required = True, metavar = 'string', help = 'The new ClinVar version in the format YYYYMMDD')
 
   # A list of project ids can be supplied as a comma separated list
-  parser.add_argument('--project_ids_to_check', '-i', required = True, metavar = 'string', help = 'A comma separated lsts of project ids to check for updated ClinVar variants')
+  parser.add_argument('--project_ids_to_check', '-i', required = True, metavar = 'string', help = 'A comma separated list of project ids to check for updated ClinVar variants')
+
+  # A list of email address to notify about the update
+  parser.add_argument('--emails', '-e', required = False, metavar = 'string', help = 'A comma separated list of email address to send notifications to')
 
   # Do not create any tasks in Mosaic. By default, create tasks
   parser.add_argument('--disable_tasks', '-d', required = False, action = 'store_true', help = 'By default, tasks will be created for all ClinVar variants to review. This flag will disable task creation')

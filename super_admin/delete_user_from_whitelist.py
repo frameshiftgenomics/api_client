@@ -21,8 +21,8 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Post the email to the whitelist
-  api_mosaic.post_to_whitelist(args.email)
+  # Remove thi email from the whitelist
+  api_mosaic.delete_user_from_whitelist(email = args.email)
 
 # Input options
 def parse_command_line():

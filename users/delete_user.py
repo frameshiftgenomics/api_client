@@ -1,6 +1,9 @@
-import os
 import argparse
+import os
+import importlib
+import sys
 
+from os.path import exists
 from pprint import pprint
 from sys import path
 
@@ -20,27 +23,25 @@ def main():
   from mosaic import Mosaic, Project, Store
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
-
-  # Post the email to the whitelist
-  api_mosaic.post_to_whitelist(args.email)
+  success = api_mosaic.delete_user(args.user_id)
 
 # Input options
 def parse_command_line():
-  parser = argparse.ArgumentParser(description='Process the command line arguments')
+  parser = argparse.ArgumentParser(description='Process the command line')
 
-  # Define the location of the api_client and the ini config file
+  # Required arguments
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-
-  # The user id
-  parser.add_argument('--email', '-e', required = True, metavar = 'string', help = 'The email to add to the whitelist')
+  parser.add_argument('--user_id', '-u', required = True, metavar = 'integer', help = 'The id of the user to delete')
 
   return parser.parse_args()
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print('ERROR: ', message, sep = '')
+  print(message, sep = '')
   exit(1)
+
+# Initialise global variables
 
 if __name__ == "__main__":
   main()
