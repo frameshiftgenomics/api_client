@@ -60,7 +60,7 @@ def main():
     if ',' in args.project_ids_to_check:
       project_ids = args.project_ids_to_check.split(',')
     else:
-      project_ids = args.project_ids_to_check
+      project_ids = [args.project_ids_to_check]
 
   # Generate a list of email addresses to send notifications to
   emails = None

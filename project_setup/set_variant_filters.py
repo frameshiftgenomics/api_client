@@ -190,7 +190,7 @@ def get_filter_categories(filters_info):
       categories[category][position] = name
       if name in filters:
         fail('Filter "' + str(name) + '" appears multiple times in the filter description json')
-      filters[name] = {'category': category, 'sortPosition': position}
+      filters[name] = {'category': category, 'sort_position': position}
 
   # Return the categories information
   return categories, filters
@@ -347,28 +347,52 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
 
             # Process the "sort" field which defines the annotation to sort the table on
             elif field == 'sort':
+#              if 'column_uid' not in filters_info['filters'][name]['display']['sort']:
+#                fail('Field "column_uid" is missing from the "display" > "sort" section for filter ' + str(name))
+#              if 'direction' not in filters_info['filters'][name]['display']['sort']:
+#                fail('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
+#
+#              # Check the column to sort on is a valid uid, or is defined in the annotation map
+#              sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
+#              if sort_uid in annotation_uids:
+#                uid = filters_info['filters'][name]['display'][field]['column_uid']
+#              else:
+#
+#                # Instead of a uid, this could be the name of a private annotation
+#                if sort_uid in private_annotation_names:
+#                  uid = private_annotation_names[sort_uid]
+#                else:
+#                  fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
+#              filters[name]['sort_column_uid'] = uid 
+#
+#              # Check that the sort direction is valid
+#              filters[name]['sort_direction'] = filters_info['filters'][name]['display'][field]['direction']
+#              if filters[name]['sort_direction'] != 'ascending' and filters[name]['sort_direction'] != 'descending':
+#                fail('Sort direction must be "ascending" or "descending" for filter ' + str(name))
+
               if 'column_uid' not in filters_info['filters'][name]['display']['sort']:
-                fail('Field "column_uid" is missing from the "display" > "sort" section for filter ' + str(name))
-              if 'direction' not in filters_info['filters'][name]['display']['sort']:
-                fail('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
-
-              # Check the column to sort on is a valid uid, or is defined in the annotation map
-              sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
-              if sort_uid in annotation_uids:
-                uid = filters_info['filters'][name]['display'][field]['column_uid']
+                filters[name]['sort_column_uid'] = None
               else:
+                if 'direction' not in filters_info['filters'][name]['display']['sort']:
+                  fail('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
 
-                # Instead of a uid, this could be the name of a private annotation
-                if sort_uid in private_annotation_names:
-                  uid = private_annotation_names[sort_uid]
+                # Check the column to sort on is a valid uid, or is defined in the annotation map
+                sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
+                if sort_uid in annotation_uids:
+                  uid = filters_info['filters'][name]['display'][field]['column_uid']
                 else:
-                  fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
-              filters[name]['sort_column_uid'] = uid 
-
-              # Check that the sort direction is valid
-              filters[name]['sort_direction'] = filters_info['filters'][name]['display'][field]['direction']
-              if filters[name]['sort_direction'] != 'ascending' and filters[name]['sort_direction'] != 'descending':
-                fail('Sort direction must be "ascending" or "descending" for filter ' + str(name))
+  
+                  # Instead of a uid, this could be the name of a private annotation
+                  if sort_uid in private_annotation_names:
+                    uid = private_annotation_names[sort_uid]
+                  else:
+                    fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
+                filters[name]['sort_column_uid'] = uid 
+  
+                # Check that the sort direction is valid
+                filters[name]['sort_direction'] = filters_info['filters'][name]['display'][field]['direction']
+                if filters[name]['sort_direction'] != 'ascending' and filters[name]['sort_direction'] != 'descending':
+                  fail('Sort direction must be "ascending" or "descending" for filter ' + str(name))
 
             else:
               fail('Unknown field in the "display" section for filter ' + str(name))
@@ -584,11 +608,12 @@ def create_filters(project, annotation_uids, categories, filters):
         if filters[name]['set_display']:
           for column_uid in filters[name]['column_uids']:
             column_ids.append(annotation_uids[column_uid]['annotation_version_id'])
-          sort_column_id = str(annotation_uids[filters[name]['sort_column_uid']]['annotation_version_id'])
-          if filters[name]['sort_direction'] == 'ascending':
-            sort_direction = 'ASC'
-          elif filters[name]['sort_direction'] == 'descending':
-            sort_direction = 'DESC'
+          if filters[name]['sort_column_uid']:
+            sort_column_id = str(annotation_uids[filters[name]['sort_column_uid']]['annotation_version_id'])
+            if filters[name]['sort_direction'] == 'ascending':
+              sort_direction = 'ASC'
+            elif filters[name]['sort_direction'] == 'descending':
+              sort_direction = 'DESC'
 
         filter_info = project.post_variant_filter(name = name, category = category, column_ids = column_ids, sort_column_id = sort_column_id, sort_direction = sort_direction, filter_data = filters[name]['info']['filters'])
         filter_id = filter_info['id']

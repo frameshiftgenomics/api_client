@@ -596,7 +596,11 @@ class Mosaic(object):
     """
 
     def delete_user(self, user_id):
-        return self.delete(f'/users/{user_id}')
+        return self.delete(f'users/{user_id}')
+
+
+    def get_user(self):
+        return self.get(f'user')
 
 
 
@@ -683,6 +687,8 @@ class Project(object):
         if emails:
             data['emails'] = emails
 
+        print('hello')
+        print(data)
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions/diff', data=data)
 
 
