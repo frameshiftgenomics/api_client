@@ -107,11 +107,6 @@ def main():
         else:
           private_annotation_names[name] = annotation_uid
   
-    # Get HPO terms from Mosaic
-    #hpo_terms = []
-    #for hpo_term in project.get_sample_hpo_terms(samples[proband]['id']):
-    #  hpo_terms.append({'hpo_id': hpo_term['hpo_id'], 'label': hpo_term['label']})
-  
     # Determine all of the variant filters that are to be added; remove any filters that already exist with the same name; fill out variant
     # filter details not in the json (e.g. the uids of private annotations); create the filters; and finally update the project settings to
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
@@ -244,7 +239,7 @@ def create_annotation_map(annotations, reference):
   return annotation_map
 
 # Process all the information on the individual filters
-def get_filters(project, filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names):#, hpo_terms):
+def get_filters(project, filters_info, categories, filters, samples, sample_map, annotation_uids, private_annotation_names):
 
   # Check all required sections and no others are present
   for section in filters_info:
@@ -315,10 +310,6 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
             else:
               filters[name]['info']['filters']['variant_set_id'] = variant_set_id
 
-        # Check for any HPO information
-        #if 'hpo_filters' in filters[name]['info']['filters']:
-        #  filters[name]['info'] = check_hpo(filters[name]['info'], name, hpo_terms)
-
         # Now check if display is present. If so, this will describe how to update the variant table if this filter is applied. The only
         # allowable fields in this section are 'columns' which defines which column should show in the variant table, and 'sort' which
         # determines which annotation should be sorted on and how (ascending / descending). Set the "setDisplay" flag if this is required
@@ -333,6 +324,7 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
               ordered_uids = []
               filters[name]['column_uids'] = filters_info['filters'][name]['display'][field]
               for value in filters[name]['column_uids']: 
+                uid = False
                 if value in annotation_uids:
                   uid = value
                 else:
@@ -341,40 +333,19 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
                   if value in private_annotation_names:
                     uid = private_annotation_names[value]
                   else:
-                    fail('ERROR: Unknown value (' + str(value) + ') in "display" > "column_uids" for variant filter ' + str(name))
-                ordered_uids.append(uid)
+                    warning('unknown value (' + str(value) + ') in "display" > "column_uids" for variant filter ' + str(name))
+                if uid:
+                  ordered_uids.append(uid)
               filters[name]['column_uids'] = ordered_uids
 
             # Process the "sort" field which defines the annotation to sort the table on
             elif field == 'sort':
-#              if 'column_uid' not in filters_info['filters'][name]['display']['sort']:
-#                fail('Field "column_uid" is missing from the "display" > "sort" section for filter ' + str(name))
-#              if 'direction' not in filters_info['filters'][name]['display']['sort']:
-#                fail('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
-#
-#              # Check the column to sort on is a valid uid, or is defined in the annotation map
-#              sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
-#              if sort_uid in annotation_uids:
-#                uid = filters_info['filters'][name]['display'][field]['column_uid']
-#              else:
-#
-#                # Instead of a uid, this could be the name of a private annotation
-#                if sort_uid in private_annotation_names:
-#                  uid = private_annotation_names[sort_uid]
-#                else:
-#                  fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
-#              filters[name]['sort_column_uid'] = uid 
-#
-#              # Check that the sort direction is valid
-#              filters[name]['sort_direction'] = filters_info['filters'][name]['display'][field]['direction']
-#              if filters[name]['sort_direction'] != 'ascending' and filters[name]['sort_direction'] != 'descending':
-#                fail('Sort direction must be "ascending" or "descending" for filter ' + str(name))
-
               if 'column_uid' not in filters_info['filters'][name]['display']['sort']:
                 filters[name]['sort_column_uid'] = None
               else:
                 if 'direction' not in filters_info['filters'][name]['display']['sort']:
-                  fail('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
+                  warning('Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
+                  filters[name]['use_filter'] = False
 
                 # Check the column to sort on is a valid uid, or is defined in the annotation map
                 sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
@@ -386,16 +357,19 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
                   if sort_uid in private_annotation_names:
                     uid = private_annotation_names[sort_uid]
                   else:
-                    fail('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
+                    warning('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
+                    filters[name]['use_filter'] = False
                 filters[name]['sort_column_uid'] = uid 
   
                 # Check that the sort direction is valid
                 filters[name]['sort_direction'] = filters_info['filters'][name]['display'][field]['direction']
                 if filters[name]['sort_direction'] != 'ascending' and filters[name]['sort_direction'] != 'descending':
-                  fail('Sort direction must be "ascending" or "descending" for filter ' + str(name))
+                  warning('Sort direction must be "ascending" or "descending" for filter ' + str(name))
+                  filters[name]['use_filter'] = False
 
             else:
-              fail('Unknown field in the "display" section for filter ' + str(name))
+              warning('Unknown field in the "display" section for filter ' + str(name))
+              filters[name]['use_filter'] = False
         else:
           filters[name]['set_display'] = False
 
@@ -462,6 +436,7 @@ def check_genotype_filters(data, name, sample_ids, sample_map):
 
 # Process the annotation filters
 def check_annotation_filters(data, name, annotation_uids, private_annotation_names):
+  filters_to_delete = []
 
   # Make sure the annotation_filters section exists
   if 'annotation_filters' not in data['filters']:
@@ -470,7 +445,7 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
   # Check the filters provided in the json. The annotation filters need to extract the uids for the annotations, so
   # ensure that each annotation has a valid uid (e.g. it is present in the project), and that supporting information
   # e.g. a minimum value cannot be supplied for a string annotation, is valid
-  for annotation_filter in data['filters']['annotation_filters']:
+  for i, annotation_filter in enumerate(data['filters']['annotation_filters']):
 
     # The json file must contain either a valid uid for a project annotation, the name of a valid private annotation, or
     # have a name in the annotation map to relate a name to a uid. This is used for annotations (e.g. ClinVar) that are
@@ -484,7 +459,9 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
 
       # If no private annotation with the correct name was found, fail
       else:
-        fail('ERROR: no private annotation with the name ' + str(annotation_filter['name']) + ' found for filter ' + str(name))
+        warning('no private annotation with the name ' + str(annotation_filter['name']) + ' found for filter ' + str(name))
+        filters_to_delete.append(i)
+        continue
 
       # Delete the name field from the filter once the uid, so the information is valid for the api
       del annotation_filter['name']
@@ -545,6 +522,10 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
     # Include annotation_version_id for the selected uid
     annotation_filter['annotation_version_id'] = annotation_uids[annotation_filter['uid']]['annotation_version_id']
 
+  # Remove any annotation filters that were not available
+  for i in filters_to_delete:
+    del data['filters']['annotation_filters'][i]
+
   # Return the updated annotation information
   return data
 
@@ -598,7 +579,9 @@ def create_filters(project, annotation_uids, categories, filters):
       name = categories[category][sort_id]
 
       # Create the filter, unless it has been marked as not to be added
-      if filters[name]['use_filter']:
+      if not filters[name]['use_filter']:
+        warning('filter with name ' + str(name) + ' was not created because of errors. See previous warnings')
+      else:
 
         # If the variant table display is getting modified, get the ids of the columns to show in the table as an array,
         # the id of the column to sort on and the sort direction
@@ -638,8 +621,11 @@ def create_filters(project, annotation_uids, categories, filters):
     project_settings = project.put_project_settings(sorted_annotations = sorted_annotations)
 
 # If the script fails, provide an error message and exit
+def warning(message):
+  print('WARNING: ', message, sep = '')
+
 def fail(message):
-  print(message, sep = "")
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 # Initialise global variables
