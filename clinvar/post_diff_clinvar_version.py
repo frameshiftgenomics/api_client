@@ -64,6 +64,8 @@ def main():
 
   # Generate a list of email addresses to send notifications to
   emails = None
+  args.emails = args.emails.rstrip('"') if args.emails.endswith('"') else args.emails
+  args.emails = args.emails.lstrip('"') if args.emails.startswith('"') else args.emails
   if args.emails:
     emails = args.emails.split(',') if ',' in args.emails else [args.emails]
 
