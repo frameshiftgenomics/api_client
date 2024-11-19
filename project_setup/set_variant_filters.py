@@ -523,7 +523,7 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
     annotation_filter['annotation_version_id'] = annotation_uids[annotation_filter['uid']]['annotation_version_id']
 
   # Remove any annotation filters that were not available
-  for i in filters_to_delete:
+  for i in reversed(filters_to_delete):
     del data['filters']['annotation_filters'][i]
 
   # Return the updated annotation information
