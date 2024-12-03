@@ -686,6 +686,7 @@ class Project(object):
 
         if emails:
             data['emails'] = emails
+        print(data)
 
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions/diff', data=data)
 

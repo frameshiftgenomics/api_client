@@ -69,9 +69,40 @@ def main():
     args.emails = args.emails.lstrip('"') if args.emails.startswith('"') else args.emails
     emails = args.emails.split(',') if ',' in args.emails else [args.emails]
 
+  # If an allele frequency is given, set the annotation filters
+  annotation_filters = []
+  if args.gnomad_af:
+    if ',' not in args.gnomad_af:
+      fail('gnomAD_AF filter must be in the form "uid,value"')
+    gnomad = args.gnomad_af.split(',')
+
+    # Get the annotation from the uid
+    uid = gnomad[0]
+    value = gnomad[1]
+
+    #[{"annotation_version_id": "23", "uid" : "floattest_736a1100", "value_type": "float", "include_nulls": false, "min": "1", "max": "10"}]
+    gnomad_af_uid = False
+    for annotation in project.get_variant_annotations():
+      if str(annotation['uid']) == uid:
+        gnomad_af_uid = uid
+
+        # Get the annotation version id
+        if annotation['latest_annotation_version_id']:
+          version_id = annotation['latest_annotation_version_id']
+        elif len(annotation['annotation_versions']) == 1:
+          version_id = annotation['annotation_versions'][0]['id']
+        else:
+          fail('Unable to find the annotation version id for gnomAD AF')
+        break
+
+    # Fail if the uid was not found
+    if not gnomad_af_uid:
+      fail('the gnomAD AF annotation with the given uid was not found: ' + uid)
+    annotation_filters.append({'annotation_version_id': version_id, 'uid': str(gnomad_af_uid), 'value_type': 'float', 'max': str(value), 'include_nulls': 'true'})
+
   # Perform the diff
   generate_tasks = False if args.disable_tasks else True
-  project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails)
+  project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails, annotation_filters = annotation_filters)
 
 # Input options
 def parse_command_line():
@@ -87,6 +118,9 @@ def parse_command_line():
   # The ClinVar versions to diff
   parser.add_argument('--clinvar_version_a', '-v', required = True, metavar = 'string', help = 'The original ClinVar version in the format YYYYMMDD')
   parser.add_argument('--clinvar_version_b', '-b', required = True, metavar = 'string', help = 'The new ClinVar version in the format YYYYMMDD')
+
+  # The gnomAD allele frequency to filter on, this should be in the form "uid,value"
+  parser.add_argument('--gnomad_af', '-g', required = False, metavar = 'string', help = 'The max gnomAD allele frequency to filter out common variants')
 
   # A list of project ids can be supplied as a comma separated list
   parser.add_argument('--project_ids_to_check', '-i', required = True, metavar = 'string', help = 'A comma separated list of project ids to check for updated ClinVar variants')
