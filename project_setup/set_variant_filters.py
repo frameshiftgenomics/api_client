@@ -112,12 +112,17 @@ def main():
     # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
     # filters won't be added to projects without parents
     sample_map = create_sample_map(samples)
+    print('Processing filters...')
     filters = get_filters(project, filters_info, filter_categories, filters, samples, sample_map, annotation_uids, private_annotation_names)#, hpo_terms)
+    print()
   
     # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
+    if args.delete_existing_filters:
+      print('Deleting filters...')
     delete_filters(project, args.project_id, args.delete_existing_filters, filters)
   
     # Create all the required filters and update their categories and sort order in the project settings
+    print('Creating new filters...')
     create_filters(project, annotation_uids, filter_categories, filters)
 
     # Reset filters_info to it's original form
@@ -286,7 +291,7 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
           filters[name]['info'] = check_genotype_filters(filters[name]['info'], name, list(samples.keys()), sample_map)
 
         # Check all of the annotation filters
-        filters[name]['info'] = check_annotation_filters(filters[name]['info'], name, annotation_uids, private_annotation_names)
+        filters[name]['info'], filters[name]['use_filter'] = check_annotation_filters(filters[name]['info'], name, annotation_uids, private_annotation_names)
 
         # Check if any variant sets are to be applied
         if 'variant_sets' in filters[name]['info']:
@@ -437,6 +442,7 @@ def check_genotype_filters(data, name, sample_ids, sample_map):
 # Process the annotation filters
 def check_annotation_filters(data, name, annotation_uids, private_annotation_names):
   filters_to_delete = []
+  use_filter = True
 
   # Make sure the annotation_filters section exists
   if 'annotation_filters' not in data['filters']:
@@ -457,10 +463,18 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
       if annotation_filter['name'] in private_annotation_names:
         annotation_filter['uid'] = private_annotation_names[annotation_filter['name']]
 
-      # If no private annotation with the correct name was found, fail
+      # If no private annotation with the correct name was found, check if the filter should be created
       else:
         warning('no private annotation with the name ' + str(annotation_filter['name']) + ' found for filter ' + str(name))
         filters_to_delete.append(i)
+
+        # Check if this filter is required. If not, remove this annotation from the filter, otherwise, do not
+        # create the filter
+        if 'required_annotations' in data:
+          for annotation in data['required_annotations']:
+            if str(annotation) == annotation_filter['name']:
+              use_filter = False
+              break
         continue
 
       # Delete the name field from the filter once the uid, so the information is valid for the api
@@ -527,7 +541,7 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
     del data['filters']['annotation_filters'][i]
 
   # Return the updated annotation information
-  return data
+  return data, use_filter
 
 # Process the HPO filters. These are optional, so the script will not fail if they are not present
 def check_hpo(data, name, hpo_terms):
@@ -622,7 +636,7 @@ def create_filters(project, annotation_uids, categories, filters):
 
 # If the script fails, provide an error message and exit
 def warning(message):
-  print('WARNING: ', message, sep = '')
+  print('  WARNING: ', message, sep = '')
 
 def fail(message):
   print('ERROR: ', message, sep = '')
