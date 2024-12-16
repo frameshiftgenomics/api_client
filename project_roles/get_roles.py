@@ -33,7 +33,7 @@ def main():
       print('  can_launch_app: ', user['can_launch_app'], sep = '')
       print('  role_type: ', role_type_ids[user['role_type_id']], ' (id: ', user['role_type_id'], ')', sep = '')
     else:
-      print(user['id'])
+      print(user['user_id'])
 
 # Input options
 def parse_command_line():

@@ -544,6 +544,17 @@ class Mosaic(object):
         return self.delete(f'whitelist/users', params=params)
 
 
+    def delete_user_project_roles(self, user_id, *, project_ids=None, remove_from_all=None):
+        params = { 'remove_from_all': 'false' }
+
+        if project_ids:
+          params['project_ids'] = project_ids
+        if remove_from_all:
+          params['remove_from_all'] = 'true'
+
+        return self.delete(f'users/{user_id}/roles', params=params)
+
+
     def get_user_whitelist(self):
         return self.get(f'whitelist/users')
 

@@ -35,7 +35,7 @@ def parseCommandLine():
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
 
   # Additional arguments
-  parser.add_argument('--method', '-m', required = True, metavar = 'string', help = 'The variant upload method: "allele, no-validation, position, raw"')
+  parser.add_argument('--method', '-m', required = True, metavar = 'string', help = 'The variant upload method: "allele, no-validation, position, raw, sv-no-validation"')
   parser.add_argument('--vcf', '-v', required = True, metavar = 'string', help = 'The vcf file to upload variants from')
   parser.add_argument('--enable_notifications', '-e', required = False, action = 'store_true', help = 'If set, notifications will be provided. Otherwise, notifications will only be provided for failures')
 
