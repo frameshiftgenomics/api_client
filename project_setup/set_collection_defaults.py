@@ -8,9 +8,10 @@ from pprint import pprint
 from sys import path
 
 def main():
+  global version
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
@@ -22,24 +23,25 @@ def main():
   # Check if this is a collection
   data = project.get_project()
   if not data['is_collection']:
-    fail('Project id must be for a collection')
-
-  print('Setting project defaults for ', project.name, ' (id:', args.project_id,')', sep = '')
-  project = api_mosaic.get_project(args.project_id)
+    fail('supplied project id needs to be for a collection, not a project')
+  print('Setting collection defaults for ', project.name, ' (id:', project.id,')', sep = '')
 
   # Get the json file
   json_filename = get_json_filename(project, args)
   json_info = read_json_file(json_filename)
 
   # Get all the sample attributes in the project
-  sample_attributes = {}
+  sample_attribute_names = {}
+  sample_attribute_uids = {}
+  sample_attribute_ids = []
   for sample_attribute in project.get_sample_attributes():
-    sample_attributes[sample_attribute['uid']] = {'id': sample_attribute['id'], 'name': sample_attribute['name']}
 
-  # Get all the project attributes in the project
-  project_attributes = {}
-  for project_attribute in project.get_project_attributes():
-    project_attributes[project_attribute['uid']] = {'id': project_attribute['id'], 'name': project_attribute['name']}
+    # Check for duplicate sample attributes
+    if sample_attribute['name'] in sample_attribute_names:
+      fail('there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(project_id))
+    sample_attribute_names[sample_attribute['name']] = sample_attribute['id']
+    sample_attribute_uids[sample_attribute['uid']] = sample_attribute['id']
+    sample_attribute_ids.append(sample_attribute['id'])
 
   # Get all the annotations in the project
   annotation_uids = {}
@@ -55,25 +57,26 @@ def main():
   #######
   samples_table_columns = []
   if 'sample_table' in json_info:
-    for attribute in json_info['sample_table']:
+    for attribute_specifier in json_info['sample_table']:
+      attribute_type = json_info['sample_table'][attribute_specifier]
 
-      # If this is a uid, get and store the id
-      if attribute in sample_attributes:
-        samples_table_columns.append(sample_attributes[attribute]['id'])
+      # If the attribute name was specified
+      if attribute_type == 'name':
+        if attribute_specifier not in sample_attribute_names:
+          fail('sample table defaults includes a sample attribute specified by name that is not available: ' + attribute_specifier)
+        samples_table_columns.append(sample_attribute_names[attribute_specifier])
 
-      # If this is not a uid, check if this is the name of a unique sample attribute
-      else:
-        attribute_id = False
-        for sample_attribute in sample_attributes:
-          if attribute == sample_attributes[sample_attribute]['name']:
-            if attribute_id:
-              fail('multiple sample attributes with the name "' + str(attribute) + '" exist in the collection')
-            else:
-              attribute_id = sample_attributes[sample_attribute]['id']
-        if not attribute_id:
-          warning('sample attribute is not available in the selected collection: ' + str(attribute))
-        else:
-          samples_table_columns.append(attribute_id)
+      # If the attribute uid was specified
+      elif attribute_type == 'uid':
+        if attribute_specifier not in sample_attribute_uids:
+          fail('sample table defaults includes a sample attribute specified by uid that is not available: ' + attribute_specifier)
+        samples_table_columns.append(sample_attribute_uids[attribute_specifier])
+
+      # If the attribute id was specified
+      elif attribute_type == 'id':
+        if attribute_specifier not in sample_attribute_ids:
+          fail('sample table defaults includes a sample attribute specified by id that is not available: ' + attribute_specifier)
+        samples_table_columns.append(attribute_specifier)
 
   #######
   #######
@@ -93,7 +96,7 @@ def main():
       # Warn the user if project attributes in the json are not in the collection and ignore
       elif attribute in project_attributes:
         projects_table_columns.append(project_attributes[attribute]['id'])
-      else: 
+      else:
         attribute_id = False
         for project_attribute in project_attributes:
           if attribute == project_attributes[project_attribute]['name']:
@@ -115,13 +118,12 @@ def main():
   annotations_to_remove = []
   if 'remove_annotations' in json_info:
     for name in json_info['remove_annotations']:
-      if name in annotations:
-        data = project.delete_variant_annotation(annotations[name])
+      if name in annotation_names:
+        data = project.delete_variant_annotation(annotation_names[name])
 
   # Set the variants table defaults. The json file can include annotation names, ids or version ids, but they must be
   # specified. If an annotation name, uid, or id is supplied, the "latest" annotation version id will be used, or, if this
   # doesn't exist, the "default" will be used
-  annotation_version_ids = None
   if 'annotations' in json_info:
     annotation_version_ids = get_variant_table_ids(project, args.project_id, json_info['annotations'], annotation_names, annotation_uids)
 
@@ -132,7 +134,7 @@ def main():
          selected_variant_annotation_version_ids = annotation_version_ids)
   
 # Input options
-def parseCommandLine():
+def parse_command_line():
   global version
   parser = argparse.ArgumentParser(description='Process the command line')
 
@@ -147,6 +149,9 @@ def parseCommandLine():
 
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+
+  # Version
+  parser.add_argument('--version', '-v', action="version", version='Calypso annotation pipeline version: ' + str(version))
 
   return parser.parse_args()
 
@@ -199,7 +204,7 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
     if not annotation_uid:
       if annotation not in annotation_names:
         if not skip_missing:
-          fail('ERROR: annotation "' + str(annotation) + '" has no uid provided (assumed to be a private annotation), but no annotation of this name exists in project ' + str(project_id))
+          fail('annotation "' + str(annotation) + '" has no uid provided (assumed to be a private annotation), but no annotation of this name exists in project ' + str(project_id))
         else:
           print('WARNING: Skipping "' + str(annotation) + '" as it is not present in the project and has no uid so cannot be imported - private annotation')
           annotation_id = False
@@ -218,8 +223,13 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
           annotations_to_import[import_annotation['uid']] = import_annotation['id']
 
       # Get the id of the annotation to import and import it
+      if annotation_uid not in annotations_to_import:
+        fail('annotation "' + str(annotation) + '" with uid "' + str(annotation_uid) + '" is not available for import')
       annotation_id = annotations_to_import[annotation_uid]
-      project.post_import_annotation(annotation_id)
+      try:
+        project.post_import_annotation(annotation_id)
+      except:
+        continue
 
     # Otherwise, just get the annotation id for the annotation in the project
     else:
@@ -236,14 +246,14 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
       # Find the id for the required version, if the default version was specified...
       if annotation_version == 'default':
         if 'default' not in annotation_versions:
-          fail('ERROR: annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
+          fail('annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
         annotation_version_ids.append(annotation_versions['default'])
   
       # ... if the latest version was specified...
       elif annotation_version == 'latest':
-        if 'latest' not in annotation_versions:
-          fail('ERROR: annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
-        annotation_version_ids.append(annotation_versions['latest'])
+        if 'Latest' not in annotation_versions:
+          fail('annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
+        annotation_version_ids.append(annotation_versions['Latest'])
   
       # ... or if the version id was specified
       else:
@@ -254,7 +264,7 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
             has_version_id = True
             break
         if not has_version_id:
-          fail('ERROR: annotation "' + str(annotation) + '" lists "' + str(annotation_version) + '" as the annotation version. This must be "default", "latest", or a valid annotation_version_id')
+          fail('annotation "' + str(annotation) + '" lists "' + str(annotation_version) + '" as the annotation version. This must be "default", "latest", or a valid annotation_version_id')
 
   # Return the list of version ids
   return annotation_version_ids
@@ -269,6 +279,9 @@ def warning(message):
   print('WARNING: ', message, sep = '')
 
 # Initialise global variables
+
+# Pipeline version
+version = "0.0.1"
 
 if __name__ == "__main__":
   main()
