@@ -3,6 +3,8 @@
 ```bash
 cd api_client
 
+pip3 install requests
+
 touch config.ini
 ```
 
