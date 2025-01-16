@@ -473,6 +473,26 @@ class Mosaic(object):
 
 
     """
+    GLOBAL POLICIES
+    """
+
+    def delete_policies(self, policy_id):
+        return self.delete(f'policies/{policy_id}')
+
+
+    def get_policies(self):
+        return self.get(f'policies')
+
+
+    def post_policies(self, name, description):
+
+        data = { 'name': name,
+                 'description': description }
+
+        return self.post(f'policies', data=data)
+
+
+    """
     GLOBAL PROJECTS
     """
 
@@ -836,6 +856,33 @@ class Project(object):
 
 
     """
+    POLICIES
+    """
+
+    def delete_policy_project_attribute(self, policy_id):
+        return self._mosaic.delete(f'{self._path}/policy_attributes/{policy_id}')
+
+
+    def get_policy_project_attribute(self):
+        return self._mosaic.get(f'{self._path}/policy-attributes')
+
+
+    def post_policy_attribute(self, policy_id, attribute_id):
+
+        data = { 'policy_id': policy_id,
+                 'attribute_id': attribute_id }
+
+        return self._mosaic.post(f'{self._path}/policy-attributes', data=data)
+
+
+    def put_policy_attribute(self, policy_id, attribute_id):
+
+        data = { 'policy_id': policy_id,
+                 'attribute_id': attribute_id }
+
+        return self._mosaic.put(f'{self._path}/policy-attributes', data=data)
+
+    """
     PROJECT ATTRIBUTES
     """
 
@@ -1027,6 +1074,27 @@ class Project(object):
             params['include_sub_project_roles'] = 'true'
 
         return self._mosaic.get(f'{self._path}/roles', params=params)
+
+
+    def put_project_role(self, user_id, *, role_type_id=None, can_download=None, can_launch_app=None, policy_ids=None):
+        data = { 'user_id': user_id }
+        params = { }
+
+        if role_type_id:
+            data['role_type_id'] = role_type_id
+
+        if can_download:
+            data['can_download'] = can_download
+
+        if can_launch_app:
+            data['can_launch_app'] = can_launch_app
+
+        # Params
+        if policy_ids:
+            params['policy_ids'] = policy_ids
+
+        return self._mosaic.put(f'{self._path}/roles', data=data, params=params)
+
 
 
     """
@@ -1295,8 +1363,14 @@ class Project(object):
     def delete_variant_annotation(self, annotation_id):
         return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}')
 
+
     def delete_variant_annotation_version(self, annotation_id, annotation_version_id):
         return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}')
+
+
+    def delete_variant_annotation_version_values(self, annotation_id, annotation_version_id):
+        return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}/values')
+
 
     def get_variant_annotations(self, *, annotation_ids=None):
         params = { }
@@ -1305,8 +1379,10 @@ class Project(object):
 
         return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
 
+
     def get_variant_annotations_to_import(self): 
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
+
 
     def get_variant_annotation_versions(self, annotation_id):
         return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
@@ -1461,12 +1537,19 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
 
 
-    def get_variant_set(self, variant_set_id):
+    def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
+        params = { }
+
+        params['include_variant_data'] = 'true' if include_variant_data else 'false'
+
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+
         return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}')
 
 
     def get_variant_watchlist(self, include_variant_data):
         params = { }
+
         params['include_variant_data'] = 'true' if include_variant_data else 'false'
 
         return self._mosaic.get(f'{self._path}/variants/sets/watchlist', params=params)

@@ -76,7 +76,7 @@ def main():
 
   # Get the requested tasks
   for task in api_mosaic.get_tasks(categories = categories, completed = completed, project_ids = project_ids, types = types, order_dir=None):
-    print(task)
+    pprint(task)
 
 # Input options
 def parse_command_line():
