@@ -18,9 +18,20 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
+  # Get the role_id for the user
+  role_id = False
+  for user in project.get_roles()['data']:
+    if int(user['user_id']) == int(args.user_id):
+      role_id = user['id']
+      role_type_id = user['role_type_id']
+
+  # If the user wasn't found, fail
+  if not role_id:
+    fail('did not find user with id ' + str(args.user_id) + ' in this project')
+
   # Update the role for this project
   policy_ids = args.policy_ids.split(',') if ',' in args.policy_ids else [args.policy_ids]
-  project.put_project_role(args.user_id, policy_ids = policy_ids)
+  project.put_project_role(role_id, role_type_id, user_id = args.user_id, policy_ids = policy_ids)
 
 # Input options
 def parse_command_line():
@@ -43,7 +54,7 @@ def parse_command_line():
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = '')
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

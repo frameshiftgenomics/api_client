@@ -38,7 +38,7 @@ def main():
 
     # Check for duplicate sample attributes
     if sample_attribute['name'] in sample_attribute_names:
-      fail('there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(project_id))
+      fail('there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(args.project_id))
     sample_attribute_names[sample_attribute['name']] = sample_attribute['id']
     sample_attribute_uids[sample_attribute['uid']] = sample_attribute['id']
     sample_attribute_ids.append(sample_attribute['id'])

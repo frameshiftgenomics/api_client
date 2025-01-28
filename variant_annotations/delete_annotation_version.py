@@ -7,22 +7,22 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Delete the annotation
   data = project.delete_variant_annotation_version(args.annotation_id, args.annotation_version_id)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
@@ -40,7 +40,7 @@ def parseCommandLine():
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = "")
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

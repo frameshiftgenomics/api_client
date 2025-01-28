@@ -25,7 +25,8 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Get the attributse
-  print(project.get_policy_project_attribute())
+  for attribute in project.get_policy_project_attribute():
+    print(attribute)
 
 # Input options
 def parse_command_line():

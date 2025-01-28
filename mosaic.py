@@ -1076,12 +1076,11 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/roles', params=params)
 
 
-    def put_project_role(self, user_id, *, role_type_id=None, can_download=None, can_launch_app=None, policy_ids=None):
-        data = { 'user_id': user_id }
-        params = { }
+    def put_project_role(self, role_id, role_type_id, *, user_id=None, can_download=None, can_launch_app=None, policy_ids=None):
+        data = { 'role_type_id': role_type_id}
 
-        if role_type_id:
-            data['role_type_id'] = role_type_id
+        if user_id:
+            data['user_id'] = user_id
 
         if can_download:
             data['can_download'] = can_download
@@ -1089,11 +1088,10 @@ class Project(object):
         if can_launch_app:
             data['can_launch_app'] = can_launch_app
 
-        # Params
         if policy_ids:
-            params['policy_ids'] = policy_ids
+            data['policy_ids'] = policy_ids
 
-        return self._mosaic.put(f'{self._path}/roles', data=data, params=params)
+        return self._mosaic.put(f'{self._path}/roles/{role_id}', data=data)
 
 
 

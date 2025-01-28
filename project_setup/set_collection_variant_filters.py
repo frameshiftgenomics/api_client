@@ -27,28 +27,7 @@ def main():
   # Check if this is a collection
   data = project.get_project()
   if not data['is_collection']:
-    fail('Supplied project id (' + args.project_id + ') is for a project, not a collection')
-
-#  # Get information on the sample available in the Mosaic project. Some variant filters require filtering on genotype. The variant filter
-#  # description will contain terms like "Proband": "alt". Therefore, the term Proband needs to be converted to a Mosaic sample id. If
-#  # genotype based filters are being omitted, this can be skipped
-#  samples    = {}
-#  hasProband = False
-#  proband    = False
-#  if not args.no_genotype_filters: 
-#    samples = {}
-#    for sample in project.get_samples():
-#      samples[sample['name']] = {'id': sample['id'], 'relation': False}
-#      for attribute in project.get_attributes_for_sample(sample['id']):
-#        if attribute['uid'] == 'relation':
-#          for value in attribute['values']:
-#            if value['sample_id'] == sample['id']:
-#              samples[sample['name']]['relation'] = value['value']
-#              if value['value'] == 'Proband':
-#                if hasProband: fail('Multiple samples in the Mosaic project are listed as the proband')
-#                hasProband = True
-#                proband    = sample['name']
-#              break
+    fail('supplied project id (' + args.project_id + ') is for a project, not a collection')
 
   # Get all of the annotations in the current project. When creating a filter, the project will be checked to ensure that it has all of the
   # required annotations before creating the filter
@@ -64,35 +43,25 @@ def main():
       elif annotation_version['id'] > annotation_version_id:
         annotation_version_id = annotation_version['id']
 
-    annotations[annotation['name']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'uid': annotation['uid'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
-  for annotation in annotations:
-    annotation_uids[annotations[annotation]['uid']] = {'name': annotation, 'type': annotations[annotation]['type'], 'annotation_version_id': annotations[annotation]['annotation_version_id']}
+    #annotations[annotation['name']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'uid': annotation['uid'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
+    annotation_uids[annotation['uid']] = {'id': annotation['id'], 
+                                          'annotation_version_id': annotation_version_id,
+                                          'name': annotation['name'], 
+                                          'type': annotation['value_type'],
+                                          'privacy_level': annotation['privacy_level']}
 
-#  for annotation in project.get_variant_annotations():
-#    annotations[annotation['name']] = {'id': annotation['id'], 'uid': annotation['uid'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
-#  for annotation in annotations:
-#    annotationUids[annotations[annotation]['uid']] = {'name': annotation, 'type': annotations[annotation]['type']}
-
-  # Get HPO terms from Mosaic
-#  hpoTerms = []
-#  for hpoTerm in project.get_sample_hpo_terms(samples[proband]['id']):
-#    hpoTerms.append({'hpo_id': hpoTerm['hpo_id'], 'label': hpoTerm['label']})
-
-  # Determine all of the variant filters that are to be added; remove any filters that already exist with the same name; fill out variant
-  # filter details not in the json (e.g. the uids of private annotations); create the filters; and finally update the project settings to
-  # put the filters in the correct category and sort order. Note that the filters to be applied depend on the family structure. E.g. de novo
-  # filters won't be added to projects without parents
-#  sampleMap                 = createSampleMap(samples)
-  annotation_map = create_annotation_map(annotations)
+  annotation_map = create_annotation_map(annotation_uids)
   filters_info = read_variant_filters_json(args.variant_filters)
   filter_categories, filters = get_filter_categories(filters_info)
-  filters = get_filters(filters_info, filter_categories, filters, annotations, annotation_uids, annotation_map, annotation_uids)#, hpoTerms)
+  #filters = get_filters(filters_info, filter_categories, filters, annotations, annotation_uids, annotation_map)#, annotation_uids)#, hpoTerms)
+  filters = get_filters(filters_info, filter_categories, filters, annotation_uids, annotation_map)
 
   # Get all of the filters that exist in the project, and check which of these share a name with a filter to be created
   delete_filters(project, args.project_id, filters)
 
   # Create all the required filters and update their categories and sort order in the project settings
-  create_filters(project, args.project_id, annotations, annotation_uids, filter_categories, filters)
+  #create_filters(project, args.project_id, annotations, annotation_uids, filter_categories, filters)
+  create_filters(project, args.project_id, annotation_uids, filter_categories, filters)
 
 # Input options
 def parse_command_line():
@@ -120,7 +89,7 @@ def create_sample_map(samples):
   sample_map = {}
   for sample in samples:
     if not samples[sample]['relation']:
-      fail('Sample attribute "Relation" must be present and populated for all samples (no value exists for "' + str(sample) + '")')
+      fail('sample attribute "Relation" must be present and populated for all samples (no value exists for "' + str(sample) + '")')
     sample_map[samples[sample]['relation'].lower()] = samples[sample]['id']
 
   # Return the sample map
@@ -129,27 +98,28 @@ def create_sample_map(samples):
 # Create an annotation map that links general names for annotations to the specific annotation available
 # in the project. For example, clinVar annotations can be regularly updated - when the filter is created,
 # it needs to point to the clinVar annotation available in that project
-def create_annotation_map(annotations):
+def create_annotation_map(annotation_uids):
   annotation_map = {}
   clinvar = []
 
   # Loop over all annotations in the project
-  for annotation in annotations:
+  for annotation_uid in annotation_uids:
+    annotation_name = annotation_uids[annotation_uid]['name']
 
     # ClinVar can be regurlarly updated, so the filter can include the term 'clinvar_latest'. If this is
     # encountered, the filter should use the clinVar annotation available in the project
-    if 'clinvar' in annotation.lower():
-      clinvar.append(annotation)
+    if 'clinvar' in annotation_name.lower():
+      clinvar.append(annotation_uid)
 
     # Private annotations will be referred to in the json by name, so these need to be included in the map
-    if annotations[annotation]['privacy_level'] == 'private':
-      annotation_map[annotation] = annotations[annotation]['uid']
+    if annotation_uids[annotation_uid]['privacy_level'] == 'private':
+      annotation_map[annotation] = annotation_uid
 
   # If there is a single available clinVar annotation use this
   if len(clinvar) == 1:
-    annotation_map['clinvar_latest'] = annotations[clinvar[0]]['uid']
+    annotation_map['clinvar_latest'] = clinvar[0]
   else:
-    fail('public-utils/common_components/variant_filters.py: Multiple ClinVar annotations exist in project. No logic exists to select the correct annotation')
+    fail('multiple ClinVar annotations exist in project. No logic exists to select the correct annotation')
 
   # Return the annotation map
   return annotation_map
@@ -159,17 +129,17 @@ def read_variant_filters_json(variant_filters_json):
 
   # Check that the file defining the filters exists
   if not exists(variant_filters_json):
-    fail('Could not find the json file ' + str(variant_filters_json))
+    fail('could not find the json file ' + str(variant_filters_json))
 
   # The file describing the variant filters should be in json format. Fail if the file is not valid
   try:
     json_file = open(variant_filters_json, 'r')
   except:
-    fail('Could not open the json file: ' + str(variant_filters_json))
+    fail('could not open the json file: ' + str(variant_filters_json))
   try:
     filters_info = json.load(json_file)
   except:
-    fail('Could not read contents of json file ' + str(variant_filters_json) + '. Check that this is a valid json')
+    fail('could not read contents of json file ' + str(variant_filters_json) + '. Check that this is a valid json')
 
   # Close the file
   json_file.close()
@@ -185,7 +155,7 @@ def get_filter_categories(filters_info):
   # The json should contain a "categories" section which includes the name of all the categories that filters
   # can be assigned to as well as the order of filters within the categories. Loop over the categories and validate all information
   if 'categories' not in filters_info:
-     fail('public-utils/common_components/variant_filters.py: The json file describing variant filters is missing the "categories" section')
+     fail('the json file describing variant filters is missing the "categories" section')
   for category in filters_info['categories']:
 
     # For each category, loop over the names of the filters, and store their sort order. Check that there are no
@@ -194,17 +164,18 @@ def get_filter_categories(filters_info):
     for name in filters_info['categories'][category]:
       position = filters_info['categories'][category][name]
       if position in categories[category]:
-        fail('public-utils/common_components/variant_filters.py: Filter ' + str(name) + ' in category ' + str(category) + ' has the same sort position as a different filter')
+        fail('filter ' + str(name) + ' in category ' + str(category) + ' has the same sort position as a different filter')
       categories[category][position] = name
       if name in filters:
-        fail('public-utils/common_components/variant_filters.py: Filter "' + str(name) + '" appears multiple times in the filter description json')
+        fail('filter "' + str(name) + '" appears multiple times in the filter description json')
       filters[name] = {'category': category, 'sortPosition': position}
 
   # Return the categories information
   return categories, filters
 
 # Process all the information on the individual filters
-def get_filters(filters_info, categories, filters, annotations, annotation_uids, annotation_map, uids):#, hpoTerms):
+#def get_filters(filters_info, categories, filters, annotations, annotation_uids, annotation_map):#, uids):#, hpoTerms):
+def get_filters(filters_info, categories, filters, annotation_uids, annotation_map):
 
   # Check all required sections and no others are present
   for section in filters_info:
@@ -213,9 +184,9 @@ def get_filters(filters_info, categories, filters, annotations, annotation_uids,
     elif section == 'filters':
       pass
     else:
-      fail('Unknown section (' + str(section) + ') in the variant filters json')
+      fail('unknown section (' + str(section) + ') in the variant filters json')
   if 'filters' not in filters_info:
-    fail('public-utils/common_components/variant_filters.py: The json file describing variant filters is missing the "filters" section')
+    fail('the json file describing variant filters is missing the "filters" section')
 
   # Now check that all of the filters defined for each category are described in detail in the "filters" section of the json
   # Loop over all of the filters in the category and add them to the filterNames list. Check if any of the filters in
@@ -225,13 +196,13 @@ def get_filters(filters_info, categories, filters, annotations, annotation_uids,
     for position in categories[category]:
       name = categories[category][position]
       if name not in filters_info['filters']:
-        fail('public-utils/common_components/variant_filters.py: Filter "' + str(name) + '" appears in filter category "' + str(category) + '", but is not described in the "filters" section')
+        fail('filter "' + str(name) + '" appears in filter category "' + str(category) + '", but is not described in the "filters" section')
       filter_names.append(categories[category][position])
 
   # If there are any filters that are uncategorized, throw an error
   for name in filters_info['filters']:
     if name not in filter_names:
-      fail('public-utils/common_components/variant_filters.py: Filter "' + str(name) + '" is not included in any category. Please include in a category')
+      fail('filter "' + str(name) + '" is not included in any category. Please include in a category')
 
   # Loop over the filters are process
   for category in categories:
@@ -248,7 +219,8 @@ def get_filters(filters_info, categories, filters, annotations, annotation_uids,
         filters[name]['info'] = filters_info['filters'][name]
 
         # Check all of the annotation filters
-        filters[name]['info'] = check_annotation_filters(filters[name]['info'], name, annotations, annotation_uids, annotation_map, uids)
+        #filters[name]['info'] = check_annotation_filters(filters[name]['info'], name, annotations, annotation_uids, annotation_map)#, uids)
+        filters[name]['info'] = check_annotation_filters(filters[name]['info'], name, annotation_uids, annotation_map)
 
 #        # Check for any HPO information
 #        if 'hpo_filters' in filters[name]['info']['filters']:
@@ -268,11 +240,11 @@ def get_filters(filters_info, categories, filters, annotations, annotation_uids,
               ordered_uids = []
               filters[name]['columnUids'] = filters_info['filters'][name]['display'][field]
               for uid in filters[name]['columnUids']: 
-                if uid not in uids:
+                if uid not in annotation_uids:
                   if uid in annotation_map:
                     ordered_uids.append(annotation_map[uid])
                   else:
-                    fail('public_utils/common_components/variant_filters.py: Unknown uid (' + str(uid) + ') in "display" > "column_uids" for variant filter ' + str(name))
+                    fail('unknown uid (' + str(uid) + ') in "display" > "column_uids" for variant filter ' + str(name))
                 else:
                   ordered_uids.append(uid)
               filters[name]['columnUids'] = ordered_uids
@@ -280,17 +252,18 @@ def get_filters(filters_info, categories, filters, annotations, annotation_uids,
             # Process the "sort" field which defines the annotation to sort the table on
             elif field == 'sort':
               if 'column_uid' not in filters_info['filters'][name]['display']['sort']:
-                fail('public_utils/common_components/variant_filters.py: Field "column_uid" is missing from the "display" > "sort" section for filter ' + str(name))
+                fail('field "column_uid" is missing from the "display" > "sort" section for filter ' + str(name))
               if 'direction' not in filters_info['filters'][name]['display']['sort']:
-                fail('public_utils/common_components/variant_filters.py: Field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
+                fail('field "direction" is missing from the "display" > "sort" section for filter ' + str(name))
 
               # Check the column to sort on is a valid uid, or is defined in the annotation map
-              sortUid = filters_info['filters'][name]['display'][field]['column_uid']
-              if sort_uid not in uids:
+              sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
+
+              if sort_uid not in annotation_uids:
                 if sort_uid in annotation_map:
                   uid = annotation_map[sort_uid]
                 else:
-                  fail('public_utils/common_components/variant_filters.py: Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
+                  fail('unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
               else:
                 uid = filters_info['filters'][name]['display'][field]['column_uid']
               filters[name]['sortColumnUid'] = uid 
@@ -298,10 +271,10 @@ def get_filters(filters_info, categories, filters, annotations, annotation_uids,
               # Check that the sort direction is valid
               filters[name]['sortDirection'] = filters_info['filters'][name]['display'][field]['direction']
               if filters[name]['sortDirection'] != 'ascending' and filters[name]['sortDirection'] != 'descending':
-                fail('public_utils/common_components/variant_filters.py: Sort direction must be "ascending" or "descending" for filter ' + str(name))
+                fail('sort direction must be "ascending" or "descending" for filter ' + str(name))
 
             else:
-              fail('public_utils/common_components/variant_filters.py: Unknown field in the "display" section for filter ' + str(name))
+              fail('unknown field in the "display" section for filter ' + str(name))
         else:
           filters[name]['setDisplay'] = False
 
@@ -371,11 +344,12 @@ def check_genotype_filters(data, name, sample_ids, sample_map):
   return data
 
 # Process the annotation filters
-def check_annotation_filters(data, name, annotations, annotation_uids, annotation_map, uids):
+#def check_annotation_filters(data, name, annotations, annotation_uids, annotation_map):#, uids):
+def check_annotation_filters(data, name, annotation_uids, annotation_map):
 
   # Make sure the annotation_filters section exists
   if 'annotation_filters' not in data['filters']:
-    fail('public_utils/common_components/variant_filters.py: Annotation filter ' + str(name) + ' does not contain the required "annotation_filters" section')
+    fail('annotation filter ' + str(name) + ' does not contain the required "annotation_filters" section')
 
   # Check the filters provided in the json. The annotation filters need to extract the uids for the annotations, so
   # ensure that each annotation has a valid uid (e.g. it is present in the project), and that supporting information
@@ -401,39 +375,34 @@ def check_annotation_filters(data, name, annotations, annotation_uids, annotatio
         annotation_filter['uid'] = annotation_map[matched_annotations[0]]
         del annotation_filter['name']
 
-      ## Check if this name is in the annotationMap and if so, use the mapped uid
-      #if aFilter['name'] in annotationMap:
-      #  aFilter['uid'] = annotationMap[aFilter['name']]
-      #  del aFilter['name']
-
       # If the name is not in the annotationMap, check if a private annotation with this name exists in the project
       else:
-        for annotation in annotations:
+        for annotation_uid in annotation_uids:
           if str(annotation) == str(annotation_filter['name']):
-            annotation_filter['uid'] = annotations[annotation]['uid']
+            annotation_filter['uid'] = annotation_uid
             del annotation_filter['name']
             break
 
     # Store the uid and check that it exists
     uid = annotation_filter['uid'] if 'uid' in annotation_filter else False
     if not uid:
-      fail('public_utils/common_components/variant_filters.py: variant filter "' + str(name) + '" uses an unknown annotation: ' + str(annotation_filter['name']))
-    if uid not in uids:
-      fail('public_utils/common_components/variant_filters.py: variant filter "' + str(name) + '" uses an unknown annotation uid: ' + str(uid))
+      fail('variant filter "' + str(name) + '" uses an unknown annotation: ' + str(annotation_filter['name']))
+    if uid not in annotation_uids:
+      fail('variant filter "' + str(name) + '" uses an unknown annotation uid: ' + str(uid))
 
     # Check that the filter defines whether or not to include null values
     if 'include_nulls' not in annotation_filter:
-      fail('public_utils/common_components/variant_filters.py: Annotation filter ' + str(name) + ' contains a filter with no "include_nulls" section')
+      fail('annotation filter ' + str(name) + ' contains a filter with no "include_nulls" section')
 
     # If the annotation is a string, the "values" field must be present
-    if uids[uid]['type'] == 'string':
+    if annotation_uids[uid]['type'] == 'string':
       if 'values' not in annotation_filter:
-        fail('public_utils/common_components/variant_filters.py: Annotation filter ' + str(name) + ' contains a string based filter with no "values" section')
+        fail('annotation filter ' + str(name) + ' contains a string based filter with no "values" section')
       if type(annotation_filter['values']) != list:
-        fail('public_utils/common_components/variant_filters.py: Annotation filter ' + str(name) + ' contains a string based filter with a "values" section that is not a list')
+        fail('annotation filter ' + str(name) + ' contains a string based filter with a "values" section that is not a list')
 
     # If the annotation is a float, check that the specified operation is valid
-    elif uids[uid] == 'float':
+    elif annotation_uids[uid] == 'float':
 
       # Loop over all the fields for the filter and check that they are valid
       has_required_value = False
@@ -448,7 +417,7 @@ def check_annotation_filters(data, name, annotations, annotation_uids, annotatio
           try:
             float(annotation_filter[value])
           except:
-            fail('Annotation filter ' + str(name) + ' has a "min" that is not a float')
+            fail('annotation filter ' + str(name) + ' has a "min" that is not a float')
           has_required_value = True
 
         # The filter can define a minimum value
@@ -456,16 +425,16 @@ def check_annotation_filters(data, name, annotations, annotation_uids, annotatio
           try:
             float(annotation_filter[value])
           except:
-            fail('Annotation filter ' + str(name) + ' has a "max" that is not a float')
+            fail('annotation filter ' + str(name) + ' has a "max" that is not a float')
           has_required_value = True
 
         # Other fields are not recognised
         else:
-          fail('public_utils/common_components/variant_filters.py: Annotation filter ' + str(name) + ' contains an unrecognised field: ' + str(value))
+          fail('annotation filter ' + str(name) + ' contains an unrecognised field: ' + str(value))
 
       # If no comparison fields were provided, fail
       if not has_required_value:
-        fail('public_utils/common_components/variant_filters.py: Annotation filter ' + str(name) + ' contains a filter based on a float, but no comparison operators have been included')
+        fail('annotation filter ' + str(name) + ' contains a filter based on a float, but no comparison operators have been included')
 
     # Include annotation_version_id for the selected uid
     annotation_filter['annotation_version_id'] = annotation_uids[annotation_filter['uid']]['annotation_version_id']
@@ -490,7 +459,7 @@ def check_hpo(data, name, hpo_terms):
   # The number of overlaps is required. If this is set to a larger number than the number of available terms,
   # set the number of overlaps to the number of terms
   if 'hpo_min_overlap' not in hpo_info:
-    fail('The hpo_filters for ' + str(name) + ' includes hpo_filters, but has no, "hpo_min_overlap" field')
+    fail('the hpo_filters for ' + str(name) + ' includes hpo_filters, but has no, "hpo_min_overlap" field')
   overlaps = hpo_info['hpo_min_overlap']
   if int(overlaps) > len(hpo_terms):
     overlaps = len(hpo_terms)
@@ -506,7 +475,8 @@ def delete_filters(project, project_id, filters):
       project.delete_variant_filter(existing_filter['id'])
 
 # Create all the required filters and update their categories and sort order in the project settings
-def create_filters(project, project_id, annotations, annotation_uids, categories, filters):
+#def create_filters(project, project_id, annotations, annotation_uids, categories, filters):
+def create_filters(project, project_id, annotation_uids, categories, filters):
   sorted_filters = []
   for category in categories:
     record = {'category': category, 'sortOrder': []}
@@ -556,7 +526,7 @@ def create_filters(project, project_id, annotations, annotation_uids, categories
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = '')
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 # Initialise global variables
