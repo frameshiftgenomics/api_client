@@ -140,7 +140,7 @@ class Mosaic(object):
     """
     Mosaic HTTP request methods.
     """
-    def _http_request(self, method, resource, *, params=None, data=None, file_upload=None):
+    def _http_request(self, method, resource, *, params=None, data=None, file_upload=None, sample_map=None):
 
         formatted_params = {}
         """
@@ -174,6 +174,12 @@ class Mosaic(object):
                 # if Content-Type set in this way,
                 # we don't the json.dumps as below.
                 kwargs['data'] = data
+
+            # A sample_map is a tsv file with sample ids that should only
+            # be supplied if a file was also supplied
+            if sample_map:
+              kwargs['files']['sample_map'] = open(sample_map, "rb")
+          
         elif data:
             # json.dumps prevents form encoding
             kwargs['data'] = json.dumps(data)
@@ -208,8 +214,8 @@ class Mosaic(object):
         return self._http_request(requests.get, resource, params=params)
 
 
-    def post(self, resource, *, params=None, data=None, file_path=None):
-        return self._http_request(requests.post, resource, params=params, data=data, file_upload=file_path)
+    def post(self, resource, *, params=None, data=None, file_path=None, sample_map=None):
+        return self._http_request(requests.post, resource, params=params, data=data, file_upload=file_path, sample_map=sample_map)
 
 
     def patch(self, resource, *, params=None, data=None):
@@ -1580,7 +1586,7 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/{variant_id}', params=params)
 
 
-    def post_variant_file(self, file_path, upload_type=None, disable_successful_notification=None):
+    def post_variant_file(self, file_path, *, sample_map=None, upload_type=None, disable_successful_notification=None):
         data = { }
 
         if upload_type:
@@ -1591,7 +1597,7 @@ class Project(object):
             else:
               data['disable_successful_notification'] = 'false'
 
-        return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data)
+        return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data, sample_map=sample_map)
 
 
     def post_variant_set_annotations(self, variant_set_id, annotation_version_ids):
