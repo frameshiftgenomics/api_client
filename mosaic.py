@@ -459,6 +459,23 @@ class Mosaic(object):
 
 
     """
+    GLOBAL HPO TERMS
+    """
+
+    def get_hpo_term(self, hpo_id):
+        return self.get(f'hpo-terms/{hpo_id}')
+
+
+    def get_hpo_terms(self, hpo_ids):
+        params = { }
+        if hpo_ids:
+            params['hpo_ids'] = hpo_ids
+
+        pprint(hpo_ids)
+        yield from self.get_paged_route_iter(f'hpo-terms', params=params)
+
+
+    """
     GLOBAL JOBS
     """
 
@@ -845,7 +862,6 @@ class Project(object):
 
         return self._mosaic.post(f'{self._path}/genes/sets', data=data)
 
-
     """
     PEDIGREE
     """
@@ -1202,6 +1218,10 @@ class Project(object):
     """
     SAMPLE HPO TERMS
     """
+
+    def delete_sample_hpo_term(self, sample_id, hpo_term_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/hpo-terms/{hpo_term_id}')
+
 
     def get_sample_hpo_terms(self, sample_id):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/hpo-terms')
