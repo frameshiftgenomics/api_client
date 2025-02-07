@@ -471,7 +471,6 @@ class Mosaic(object):
         if hpo_ids:
             params['hpo_ids'] = hpo_ids
 
-        pprint(hpo_ids)
         yield from self.get_paged_route_iter(f'hpo-terms', params=params)
 
 
