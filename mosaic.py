@@ -157,7 +157,7 @@ class Mosaic(object):
         kwargs = {
                 'headers': self._headers, 
                 'verify': self._verify, 
-                'params': params
+                'params': formatted_params
                 }
 
         if file_upload:
