@@ -1560,11 +1560,17 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
 
 
+    def get_variant_by_position(self, variant_position, *, include_annotation_data=None, include_genotype_data=None):
+        params = { }
+        params['include_annotation_data'] = 'true' if include_annotation_data else 'false'
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+
+        return self._mosaic.get(f'{self._path}/variants/position/{variant_position}')
+
+
     def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
         params = { }
-
         params['include_variant_data'] = 'true' if include_variant_data else 'false'
-
         params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
 
         return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}')
