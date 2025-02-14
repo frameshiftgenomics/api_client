@@ -1473,6 +1473,12 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/annotations/upload', file_path=file_path, data=data)
 
 
+    def post_create_annotation_version(self, annotation_id, version_name):
+        data = { 'version': version_name }
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/{annotation_id}/versions', data=data)
+
+
     def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, latest_version_id=None):
         data = { }
 
