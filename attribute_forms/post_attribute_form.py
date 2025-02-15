@@ -7,40 +7,52 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
+
+  # If the api_client path was not specified, get it from the script path
+  try:
+    args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+  except:
+    fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
   # Import the api client
   path.append(args.api_client)
   from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Build the json object
-  attributesJson = []
+  attributes_json = []
   if args.required_attributes:
     attributes = args.required_attributes.split(',')
-    for attributeId in attributes: attributesJson.append({'attribute_id': int(attributeId), 'type': 'required'})
+    for attribute_id in attributes:
+      attributes_json.append({'attribute_id':
+        int(attribute_id), 'type': 'required'})
   if args.suggested_attributes:
     attributes = args.suggested_attributes.split(',')
-    for attributeId in attributes: attributesJson.append({'attribute_id': int(attributeId), 'type': 'suggested'})
+    for attribute_id in attributes:
+      attributes_json.append({'attribute_id':
+        int(attribute_id), 'type': 'suggested'})
   if args.optional_attributes:
     attributes = args.optional_attributes.split(',')
-    for attributeId in attributes: attributesJson.append({'attribute_id': int(attributeId), 'type': 'optional'})
+    for attribute_id in attributes:
+      attributes_json.append({'attribute_id':
+        int(attribute_id), 'type': 'optional'})
 
-  if len(attributesJson) == 0:
+  if len(attributes_json) == 0:
     print('WARNING: No attributes added - no attribute form created')
     exit(0)
 
   # Post an attribute form
-  data = apiMosaic.post_attribute_form(name = args.name, attributes = attributesJson)
+  data = api_mosaic.post_attribute_form(name = args.name, attributes = attributes_json)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
+  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Required arguments
   parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the attribute form')
@@ -54,7 +66,7 @@ def parseCommandLine():
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = "")
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

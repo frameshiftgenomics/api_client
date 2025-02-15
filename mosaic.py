@@ -380,7 +380,7 @@ class Mosaic(object):
     def post_attribute_form(self, *, name=None, attributes=None):
         data = { }
         if name:
-            data['name'] = name
+            data['name'] = str(name)
         if attributes:
             data['attribute_form_attributes'] = attributes
 
