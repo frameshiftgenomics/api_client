@@ -1446,7 +1446,7 @@ class Project(object):
         if value_max_length:
             data['value_max_length'] = value_max_length
         if version:
-            data['version'] = value_max_length
+            data['version'] = version
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
