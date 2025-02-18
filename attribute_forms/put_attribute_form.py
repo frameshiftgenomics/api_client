@@ -26,17 +26,17 @@ def main():
   attributes_json = []
   stored_attributes = []
   if args.required_attributes:
-    attributes = args.required_attributes.split(',')
+    attributes = args.required_attributes.split(',') if ',' in args.required_attributes else [args.required_attributes]
     for attribute_id in attributes:
       attributes_json.append({'attribute_id': int(attribute_id), 'type': 'required'})
       stored_attributes.append(int(attribute_id))
   if args.suggested_attributes:
-    attributes = args.suggested_attributes.split(',')
+    attributes = args.suggested_attributes.split(',') if ',' in args.suggested_attributes else [args.suggested_attributes]
     for attribute_id in attributes:
       attributes_json.append({'attribute_id': int(attribute_id), 'type': 'suggested'})
       stored_attributes.append(int(attribute_id))
   if args.optional_attributes:
-    attributes = args.optional_attributes.split(',')
+    attributes = args.optional_attributes.split(',') if ',' in args.optional_attributes else [args.optional_attributes]
     for attribute_id in attributes:
       attributes_json.append({'attribute_id': int(attribute_id), 'type': 'optional'})
       stored_attributes.append(int(attribute_id))
@@ -61,10 +61,18 @@ def main():
           attributes_json.append({'attribute_id': attribute['attribute_id'], 'type': attribute['type']})
   if not attribute_form_id:
     fail('no attribute form with the given id')
-  print('Updating attribute form: ', str(attribute_form_name), '... ', sep = '', end = '')
+  print('Updating attribute form: ', str(attribute_form_name), '...', sep = '', end = '')
+
+  # Remove amy requested attributes from the form
+  if args.remove_attributes:
+    attributes = args.remove_attributes.split(',') if ',' in args.remove_attributes else [args.remove_attributes]
+  updated_attributes_json = []
+  for attribute in attributes_json:
+    if str(attribute['attribute_id']) not in attributes:
+      updated_attributes_json.append(attribute)
 
   # Post an attribute form
-  data = api_mosaic.put_attribute_form(attribute_form_id, name = name, attributes = attributes_json)
+  data = api_mosaic.put_attribute_form(attribute_form_id, name = name, attributes = updated_attributes_json)
   print('complete')
 
 # Input options
@@ -83,6 +91,7 @@ def parse_command_line():
   parser.add_argument('--required_attributes', '-r', required = False, metavar = 'string', help = 'A comma separated list of the ids of all required attributes')
   parser.add_argument('--suggested_attributes', '-s', required = False, metavar = 'string', help = 'A comma separated list of the ids of all suggested attributes')
   parser.add_argument('--optional_attributes', '-o', required = False, metavar = 'string', help = 'A comma separated list of the ids of all optional attributes')
+  parser.add_argument('--remove_attributes', '-m', required = False, metavar = 'string', help = 'A comma separated list of the ids of all attributes to be removed from the form')
 
   return parser.parse_args()
 

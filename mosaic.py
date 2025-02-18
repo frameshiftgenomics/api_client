@@ -527,6 +527,25 @@ class Mosaic(object):
         yield from self.get_paged_route_iter(f'projects', params=params)
 
 
+    def post_project(self, name, reference, *, nickname=None, description=None, is_collection=False, privacy_level='private'):
+
+        data = { 'name': name,
+                 'reference': reference }
+
+        if nickname:
+          data['nickname'] = nickname
+        if description:
+          data['description'] = description
+        if is_collection:
+          data['is_collection'] = 'true'
+        else:
+          data['is_collection'] = 'false'
+        if privacy_level:
+          data['privacy_level'] = privacy_level
+
+        return self.post(f'projects', data=data)
+
+
     """
     GLOBAL PROJECT ATTRIBUTES
     """
