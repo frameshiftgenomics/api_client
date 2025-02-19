@@ -81,21 +81,34 @@ def main():
     for annotation in project.get_variant_annotations():
   
       # Loop over the annotation versions and get the latest (highest id)
-      highest_annotation_version_id = False
-      latest_annotation_version_id = False
+################
+################
+################ REMOVE
+################
+################
+################
+      #highest_annotation_version_id = False
+      #latest_annotation_version_id = False
+      annotation_versions = {}
       for annotation_version in annotation['annotation_versions']:
-        if annotation_version['version'] == 'Latest':
-          latest_annotation_version_id = annotation_version['id']
-        if not highest_annotation_version_id:
-          highest_annotation_version_id = annotation_version['id']
-        elif annotation_version['id'] > highest_annotation_version_id:
-          highest_annotation_version_id = annotation_version['id']
-        if latest_annotation_version_id:
-          annotation_version_id = latest_annotation_version_id
-        else:
-          annotation_version_id = highest_annotation_version_id
+        annotation_versions[annotation_version['version']] = annotation_version['id']
+      #  if annotation_version['version'] == 'Latest':
+      #    latest_annotation_version_id = annotation_version['id']
+      #  if not highest_annotation_version_id:
+      #    highest_annotation_version_id = annotation_version['id']
+      #  elif annotation_version['id'] > highest_annotation_version_id:
+      #    highest_annotation_version_id = annotation_version['id']
+      #  if latest_annotation_version_id:
+      #    annotation_version_id = latest_annotation_version_id
+      #  else:
+      #    annotation_version_id = highest_annotation_version_id
   
-      annotation_uids[annotation['uid']] = {'id': annotation['id'], 'annotation_version_id': annotation_version_id, 'name': annotation['name'], 'type': annotation['value_type'], 'privacy_level': annotation['privacy_level']}
+      annotation_uids[annotation['uid']] = {'id': annotation['id'], 
+                                            #'annotation_version_id': annotation_version_id, 
+                                            'annotation_versions': annotation_versions,
+                                            'name': annotation['name'], 
+                                            'type': annotation['value_type'], 
+                                            'privacy_level': annotation['privacy_level']}
 
     # Create a dictionary of private annotation names with their uids
     private_annotation_names = {}
@@ -105,7 +118,7 @@ def main():
         if name in private_annotation_names:
           fail('ERROR: Multiple private annotations with the same name (' + str(name) + ' exist in the project, but there can only be one')
         else:
-          private_annotation_names[name] = annotation_uid
+          private_annotation_names[name] = {'uid': annotation_uid, 'versions': annotation_uids[annotation_uid]['annotation_versions']}
   
     # Determine all of the variant filters that are to be added; remove any filters that already exist with the same name; fill out variant
     # filter details not in the json (e.g. the uids of private annotations); create the filters; and finally update the project settings to
@@ -330,13 +343,25 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
               filters[name]['column_uids'] = filters_info['filters'][name]['display'][field]
               for value in filters[name]['column_uids']: 
                 uid = False
+
+                # The annotation version can be encoded in the column_uid, so remove this if necessary for this check
+                version = False
+                if '@' in value:
+                  version = value.split('@')[1]
+                  value = value.split('@')[0]
                 if value in annotation_uids:
-                  uid = value
+                  if version:
+                    uid = str(value) + '@' + str(version)
+                  else:
+                    uid = str(value)
                 else:
 
                   # Instead of a uid, this could be the name of a private annotation
                   if value in private_annotation_names:
-                    uid = private_annotation_names[value]
+                    if version:
+                      uid = str(private_annotation_names[value]['uid']) + '@' + str(version)
+                    else:
+                      uid = private_annotation_names[value]['uid']
                   else:
                     warning('unknown value (' + str(value) + ') in "display" > "column_uids" for variant filter ' + str(name))
                 if uid:
@@ -353,18 +378,31 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
                   filters[name]['use_filter'] = False
 
                 # Check the column to sort on is a valid uid, or is defined in the annotation map
+                # The annotation version can be encoded in the column_uid, so remove this if necessary for this check
                 sort_uid = filters_info['filters'][name]['display'][field]['column_uid']
+                version = False
+                if '@' in sort_uid:
+                  version = sort_uid.split('@')[1]
+                  sort_uid = sort_uid.split('@')[0]
                 if sort_uid in annotation_uids:
-                  uid = filters_info['filters'][name]['display'][field]['column_uid']
+                  if version:
+                    if version not in annotation_uids[value]['versions']:
+                      fail('version "' + str(version) + '" in the sort for filter "' + str(name) + '" does not exist')
+                    sort_uid = str(sort_uid)+ '@' + str(version)
+
+                # If this annotation is a private annotation
                 else:
-  
-                  # Instead of a uid, this could be the name of a private annotation
                   if sort_uid in private_annotation_names:
-                    uid = private_annotation_names[sort_uid]
+                    if version:
+                      if version not in private_annotation_names[sort_uid]['versions']:
+                        fail('version "' + str(version) + '" in the sort for filter "' + str(name) + '" does not exist')
+                      sort_uid = private_annotation_names[sort_uid]['uid'] + '@' + version
+                    else:
+                      sort_uid = private_annotation_names[sort_uid]['uid']
                   else:
                     warning('Unknown uid (' + str(sort_uid) + ') in "display" > "sort" > "column_uid" for variant filter ' + str(name))
                     filters[name]['use_filter'] = False
-                filters[name]['sort_column_uid'] = uid 
+                filters[name]['sort_column_uid'] = sort_uid 
   
                 # Check that the sort direction is valid
                 filters[name]['sort_direction'] = filters_info['filters'][name]['display'][field]['direction']
@@ -453,6 +491,12 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
   # e.g. a minimum value cannot be supplied for a string annotation, is valid
   for i, annotation_filter in enumerate(data['filters']['annotation_filters']):
 
+    # Check if an annotation version is specified and if so, check that this exists
+    annotation_version = False
+    if 'version' in annotation_filter:
+      annotation_version = annotation_filter['version'] 
+      del annotation_filter['version']
+
     # The json file must contain either a valid uid for a project annotation, the name of a valid private annotation, or
     # have a name in the annotation map to relate a name to a uid. This is used for annotations (e.g. ClinVar) that are
     # regularly updated, so the template does not need to be updated for updating annotations.
@@ -461,7 +505,7 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
     elif 'name' in annotation_filter:
       uid = False
       if annotation_filter['name'] in private_annotation_names:
-        annotation_filter['uid'] = private_annotation_names[annotation_filter['name']]
+        annotation_filter['uid'] = private_annotation_names[annotation_filter['name']]['uid']
 
       # If no private annotation with the correct name was found, check if the filter should be created
       else:
@@ -533,8 +577,10 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
       if not has_required_value:
         fail('Annotation filter ' + str(name) + ' contains a filter based on a float, but no comparison operators have been included')
 
-    # Include annotation_version_id for the selected uid
-    annotation_filter['annotation_version_id'] = annotation_uids[annotation_filter['uid']]['annotation_version_id']
+    # Include annotation_version_id for the selected uid. If a version is specified in the json, use this. If not, 
+    # and Latest is defined, use this. Otherwise, use the highest id
+    annotation_version_id = get_annotation_version_id(annotation_uids, annotation_version, annotation_filter['uid'])
+    annotation_filter['annotation_version_id'] = annotation_version_id
 
   # Remove any annotation filters that were not available
   for i in reversed(filters_to_delete):
@@ -542,6 +588,32 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
 
   # Return the updated annotation information
   return data, use_filter
+
+# Get the annotation version id to use. This will be the one defined in the json, then Latest if it exists, otherwise
+# the highest id value
+def get_annotation_version_id(annotation_uids, version, uid):
+  version_id = False
+  if version:
+    if not version in annotation_uids[uid]['annotation_versions']:
+      fail('filter json contains the version "' + str(version) + '" for annotation with the uid "' + str(uid) + '", but this does not exist')
+    else:
+      version_id = annotation_uids[uid]['annotation_versions'][version]
+
+  # There is no defined version in the json
+  else:
+    if 'Latest' in annotation_uids[uid]['annotation_versions']:
+      version_id = annotation_uids[uid]['annotation_versions']['Latest']
+    else:
+      version_id = -1
+      for available_version in annotation_uids[uid]['annotation_versions']:
+        available_version_id = annotation_uids[uid]['annotation_versions'][available_version]
+        if int(available_version_id) > int(version_id):
+          version_id = available_version_id
+  if not version_id:
+    fail('Could not find a version_id for annotation with uid "' + str(uid) + '"')
+
+  # Return the version id
+  return version_id
 
 # Process the HPO filters. These are optional, so the script will not fail if they are not present
 def check_hpo(data, name, hpo_terms):
@@ -604,15 +676,32 @@ def create_filters(project, annotation_uids, categories, filters):
         sort_direction = None
         if filters[name]['set_display']:
           for column_uid in filters[name]['column_uids']:
-            column_ids.append(annotation_uids[column_uid]['annotation_version_id'])
+
+            # The uid can contain the version. If so, parse this out and get the annotation version id
+            annotation_version = False
+            if '@' in column_uid:
+              annotation_version = column_uid.split('@')[1]
+              column_uid = column_uid.split('@')[0]
+            annotation_version_id = get_annotation_version_id(annotation_uids, annotation_version, column_uid)
+            column_ids.append(annotation_version_id)
           if filters[name]['sort_column_uid']:
-            sort_column_id = str(annotation_uids[filters[name]['sort_column_uid']]['annotation_version_id'])
+            version = False
+            column_uid = filters[name]['sort_column_uid']
+            if '@' in column_uid:
+              annotation_version = column_uid.split('@')[1]
+              column_uid = column_uid.split('@')[0]
+            sort_column_version_id = get_annotation_version_id(annotation_uids, annotation_version, column_uid)
             if filters[name]['sort_direction'] == 'ascending':
               sort_direction = 'ASC'
             elif filters[name]['sort_direction'] == 'descending':
               sort_direction = 'DESC'
 
-        filter_info = project.post_variant_filter(name = name, category = category, column_ids = column_ids, sort_column_id = sort_column_id, sort_direction = sort_direction, filter_data = filters[name]['info']['filters'])
+        filter_info = project.post_variant_filter(name = name, 
+                                                  category = category, 
+                                                  column_ids = column_ids, 
+                                                  sort_column_id = sort_column_version_id, 
+                                                  sort_direction = sort_direction, 
+                                                  filter_data = filters[name]['info']['filters'])
         filter_id = filter_info['id']
         record['sort_order'].append(str(filter_id))
         use_category = True
