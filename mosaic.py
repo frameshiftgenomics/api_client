@@ -1334,6 +1334,10 @@ class Project(object):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
 
 
+    def get_sample_file_url(self, file_id):
+        return self._mosaic.get(f'{self._path}/files/{file_id}/url')
+
+
     def post_sample_file(self, sample_id, *, url=None, experiment_id=None, library_type=None, name, nickname=None, qc=None, reference, file_type, size=None, uri, vcf_sample_name=None):
         data = {
             'name': name,

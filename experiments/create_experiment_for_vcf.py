@@ -113,7 +113,7 @@ def parse_command_line():
   parser.add_argument('--tools_dir', '-t', required = True, metavar = 'string', help = 'The path to a tools directory (where to find bcftools')
 
   # If the file is being added to some file systems text needs to be prepended to the url
-  parser.add_argument('--url_prepend', '-u', required = False, metavar = 'string', help = 'Text to prepend to the url - e.g. file://')
+  parser.add_argument('--url_prepend', '-u', required = True, metavar = 'string', help = 'Text to prepend to the url - e.g. file://')
 
   # Information about the experiment
   parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the experiment to create')
