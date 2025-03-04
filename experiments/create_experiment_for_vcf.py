@@ -81,11 +81,11 @@ def main():
     # If the sample file is not attached to the sample in Mosaic, POST it
     if not vcf_file_in_mosaic:
       url = args.url_prepend + vcf_path + vcf_file_name if args.url_prepend else vcf_path + vcf_file_name
-      vcf_file_id = project.post_sample_file(sample_id, name = vcf_file_name, nickname = vcf_file_name, reference = reference, file_type = 'vcf.gz', uri = url, vcf_sample_name = sample)['id']
+      vcf_file_id = project.post_sample_file(sample_id, name = vcf_file_name, nickname = vcf_file_name, reference = reference, file_type = 'vcf', uri = url, vcf_sample_name = sample)['id']
       experiment_file_ids.append(vcf_file_id)
     if not tbi_file_in_mosaic:
       url = args.url_prepend + vcf_path + tbi_file_name if args.url_prepend else vcf_path + tbi_file_name
-      tbi_file_id = project.post_sample_file(sample_id, name = tbi_file_name, nickname = tbi_file_name, reference = reference, file_type = 'vcf.gz.tbi', uri = url, vcf_sample_name = sample)['id']
+      tbi_file_id = project.post_sample_file(sample_id, name = tbi_file_name, nickname = tbi_file_name, reference = reference, file_type = 'tbi', uri = url, vcf_sample_name = sample)['id']
       experiment_file_ids.append(tbi_file_id)
 
   # Set up the experiment information
