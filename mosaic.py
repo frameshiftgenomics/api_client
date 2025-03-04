@@ -828,15 +828,21 @@ class Project(object):
     def post_experiment(self, *, name=None, description=None, experiment_type=None, file_ids=None):
         data = { }
 
-        if name: data['name'] = name
-        if description: data['description'] = description
-        if experiment_type: data['type'] = experiment_type
-        if not file_ids: data['file_ids'] = []
+        if name:
+          data['name'] = name
+        if description:
+          data['description'] = description
+        if experiment_type:
+          data['type'] = experiment_type
+        if file_ids:
+          data['file_ids'] = file_ids
+        else:
+          data['file_ids'] = []
 
         return self._mosaic.post(f'{self._path}/experiments', data=data)
 
 
-    def put_experiment(self, *, name=None, description=None, experiment_type=None, file_ids=None):
+    def put_experiment(self, experiment_id, *, name=None, description=None, experiment_type=None, file_ids=None):
         data = { }
 
         if name:
@@ -845,10 +851,12 @@ class Project(object):
             data['description'] = description
         if experiment_type:
             data['type'] = experiment_type
-        if not file_ids:
+        if file_ids:
+            data['file_ids'] = file_ids
+        else:
             data['file_ids'] = []
 
-        return self._mosaic.put(f'{self._path}/experiments', data=data)
+        return self._mosaic.put(f'{self._path}/experiments/{experiment_id}', data=data)
 
 
 

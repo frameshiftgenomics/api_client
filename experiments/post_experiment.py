@@ -24,8 +24,16 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Delete the experiment
-  project.delete_experiment(args.experiment_id)
+  # Set up the experiment information
+  description = args.description if args.description else None
+  experiment_type = args.experiment_type if args.experiment_type else None
+  if args.file_ids:
+    file_ids = args.file_ids.split(',') if ',' in args.file_ids else [args.file_ids]
+  else:
+    file_ids = None
+
+  # Create the new experiment
+  project.post_experiment(name = args.name, description = description, experiment_type = experiment_type, file_ids = file_ids)
 
 # Input options
 def parse_command_line():
@@ -38,14 +46,17 @@ def parse_command_line():
   # The project id
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
 
-  # The experiment id
-  parser.add_argument('--experiment_id', '-e', required = True, metavar = 'integer', help = 'The experiment id')
+  # The things to add to the experiment
+  parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the experiment to create')
+  parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'An optional description of the experiment')
+  parser.add_argument('--experiment_type', '-t', required = False, metavar = 'string', help = 'An optional type, e.g. WGS, RNA')
+  parser.add_argument('--file_ids', '-f', required = False, metavar = 'integer', help = 'An optional (but recommended) comma separated list of file ids to add to the experiment')
 
   return parser.parse_args()
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = '')
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

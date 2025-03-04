@@ -17,10 +17,11 @@ def main():
   args = parse_command_line()
 
   # If the api_client path was not specified, get it from the script path
-  try:
-    args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-  except:
-    fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
   # Read the json file describing the filters
   filters_info = read_variant_filters_json(args.variant_filters_json)

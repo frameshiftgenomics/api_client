@@ -1,6 +1,7 @@
 import os
 import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -9,11 +10,10 @@ def main():
   args = parse_command_line()
 
   # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+  try:
+    args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+  except:
+    fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
   # Import the api client
   path.append(args.api_client)
@@ -21,11 +21,10 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
-
-  # Delete the experiment
-  project.delete_experiment(args.experiment_id)
+  # Get the policies
+  for policy in api_mosaic.get_policies():
+    print(policy['name'], ', id:', policy['id'], ', uid:', policy['uid'], ', description: ', policy['description'], sep = '')
+    print(policy)
 
 # Input options
 def parse_command_line():
@@ -35,17 +34,11 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
-
-  # The experiment id
-  parser.add_argument('--experiment_id', '-e', required = True, metavar = 'integer', help = 'The experiment id')
-
   return parser.parse_args()
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = '')
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

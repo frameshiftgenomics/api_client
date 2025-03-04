@@ -1,7 +1,6 @@
 import os
 import argparse
 
-from pprint import pprint
 from sys import path
 
 def main():
@@ -25,19 +24,16 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Check if this is a collection
-  data = project.get_project()
-  if data['is_collection']:
-    project_ids = data['collection_project_ids']
+  # Set up the experiment information
+  description = args.description if args.description else None
+  experiment_type = args.experiment_type if args.experiment_type else None
+  if args.file_ids:
+    file_ids = args.file_ids.split(',') if ',' in args.file_ids else [args.file_ids]
   else:
-    project_ids = [args.project_id]
+    file_ids = None
 
-  # Loop over all the projects
-  for project_id in project_ids:
-    print('Deleting experiments from project ', project_id, sep = '')
-    project = api_mosaic.get_project(project_id)
-    for experiment in project.get_experiments():
-      project.delete_experiment(experiment['id'])
+  # Create the new experiment
+  project.put_experiment(args.experiment_id, name = args.name, description = description, experiment_type = experiment_type, file_ids = file_ids)
 
 # Input options
 def parse_command_line():
@@ -47,8 +43,17 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
+  # the project id
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The mosaic project id')
+
+  # the experiment id to update
+  parser.add_argument('--experiment_id', '-e', required = True, metavar = 'integer', help = 'The id of the experiment to update')
+
+  # The things to add to the experiment
+  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the experiment to create')
+  parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'An optional description of the experiment')
+  parser.add_argument('--experiment_type', '-t', required = False, metavar = 'string', help = 'An optional type, e.g. WGS, RNA')
+  parser.add_argument('--file_ids', '-f', required = False, metavar = 'integer', help = 'An optional (but recommended) comma separated list of file ids to add to the experiment')
 
   return parser.parse_args()
 
