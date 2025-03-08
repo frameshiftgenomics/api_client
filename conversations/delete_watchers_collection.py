@@ -21,7 +21,10 @@ def main():
 
   # Import the api client
   path.append(args.api_client)
-  from mosaic import Mosaic, Project, Store
+  try:
+    from mosaic import Mosaic, Project, Store
+  except:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument')
   api_store = Store(config_file = args.config)
   api_mosaic = Mosaic(config_file = args.config)
   collection = api_mosaic.get_project(args.project_id)

@@ -27,7 +27,6 @@ def main():
 
   # Update the project roles
   project.put_project_role(role_id, role_type_id, user_id=None, can_download=None, can_launch_app=None, policy_ids=None)
-  data = api_mosaic.post_attribute_form(name = args.name, attributes = attributes_json)
 
 # Input options
 def parse_command_line():

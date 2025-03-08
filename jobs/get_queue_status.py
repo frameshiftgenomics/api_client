@@ -8,19 +8,29 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
+
+  # If the api_client path was not specified, get it from the script path
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
   # Import the api client
   path.append(args.api_client)
-  from mosaic import Mosaic, Project, Store
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  try:
+    from mosaic import Mosaic, Project, Store
+  except:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument')
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Get the project settings
   job_statuses = args.status if args.status else None
   per_status_start = args.per_status_start if args.per_status_start else None
   per_status_end = args.per_status_end if args.per_status_end else None
-  for job in apiMosaic.get_queue_status(per_status_start = per_status_start, per_status_end = per_status_end)['jobs']:
+  for job in api_mosaic.get_queue_status(per_status_start = per_status_start, per_status_end = per_status_end)['jobs']:
 
     # If only jobs of a particular status are to be output, check if the job has this status and only
     # output if it does
@@ -33,12 +43,12 @@ def main():
       print_job_info(job)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
+  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Optional arguments
   parser.add_argument('--status', '-s', required = False, metavar = 'string', help = 'Only show jobs with this status. Options are: waiting, active, failed, completed')
@@ -59,7 +69,7 @@ def print_job_info(job):
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = "")
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":
