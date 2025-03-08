@@ -13,9 +13,19 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
+  # If the api_client path was not specified, get it from the script path
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+
   # Import the api client
   path.append(args.api_client)
-  from mosaic import Mosaic, Project, Store
+  try:
+    from mosaic import Mosaic, Project, Store
+  except:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument')
   api_store = Store(config_file = args.config)
   api_mosaic = Mosaic(config_file = args.config)
   project = api_mosaic.get_project(args.project_id)
@@ -95,7 +105,7 @@ def parse_command_line():
 
   # Required arguments
   parser.add_argument('--config', '-c', required = True, metavar = 'string', help = 'The config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The directory where the Python api wrapper lives')
+  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The directory where the Python api wrapper lives')
 
   # Optional pipeline arguments
   parser.add_argument('--json', '-j', required = False, metavar = 'string', help = 'The json file describing the project defaults')
@@ -142,7 +152,7 @@ def read_json_file(json_filename):
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = '')
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 # Throw a warning

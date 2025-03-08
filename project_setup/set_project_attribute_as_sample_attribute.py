@@ -15,9 +15,19 @@ def main():
   # Parse the command line
   args = parseCommandLine()
 
+  # If the api_client path was not specified, get it from the script path
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+
   # Import the api client
   path.append(args.api_client)
-  from mosaic import Mosaic, Project, Store
+  try:
+    from mosaic import Mosaic, Project, Store
+  except:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument')
   apiStore  = Store(config_file = args.client_config)
   apiMosaic = Mosaic(config_file = args.client_config)
 
@@ -71,7 +81,7 @@ def parseCommandLine():
 
   # Required arguments
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = True, metavar = 'string', help = 'The api_client directory')
+  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project or collection id to add samplt attribute to
   parser.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The project id that variants will be uploaded to')

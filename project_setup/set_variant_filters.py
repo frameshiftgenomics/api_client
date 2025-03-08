@@ -23,6 +23,13 @@ def main():
     except:
       fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
+  # If the api_client path was not specified, get it from the script path
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+
   # Read the json file describing the filters
   filters_info = read_variant_filters_json(args.variant_filters_json)
   filter_categories, filters = get_filter_categories(filters_info)
@@ -33,7 +40,10 @@ def main():
 
   # Import the api client
   path.append(args.api_client)
-  from mosaic import Mosaic, Project, Store
+  try:
+    from mosaic import Mosaic, Project, Store
+  except:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument')
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
