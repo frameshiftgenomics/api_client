@@ -766,6 +766,17 @@ class Project(object):
     COLLECTIONS
     """
 
+    def post_collection_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None):
+        data = {'user_id': user_id, 'role_type_id': role_type_id}
+
+        if can_download:
+            data['can_download'] = can_download
+        if can_launch_app:
+            data['can_launch_app'] = can_launch_app
+
+        return self._mosaic.post(f'{self._path}/roles', data=data)
+
+
     def post_sub_projects(self, *, collection_projects=None, role_type_id=None, same_role=None):
         data = { }
 
