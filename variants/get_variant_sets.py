@@ -10,7 +10,7 @@ def main():
   args = parse_command_line()
 
   # If the api_client path was not specified, get it from the script path
-  if args.api_client:
+  if not args.api_client:
     try:
       args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
     except:
