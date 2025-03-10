@@ -43,7 +43,7 @@ def main():
   # Loop over all the projects
   for project_id in project_ids:
     print('Deleting annotations in project ', project.name, ': ', project_id, sep = '')
-    project = apiMosaic.get_project(project_id)
+    project = api_mosaic.get_project(project_id)
 
     # Delete the annotations
     for annotation_id in annotation_ids:

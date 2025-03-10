@@ -28,11 +28,11 @@ def main():
     from mosaic import Mosaic, Project, Store
   except:
     fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Check if this is a collection
   data = project.get_project()
@@ -45,7 +45,7 @@ def main():
 
   # Loop over all the projects (for a collection) and apply the filters
   for project_id in project_ids:
-    project = apiMosaic.get_project(project_id)
+    project = api_mosaic.get_project(project_id)
     print('Updating project ', project.name, ' (id:', project_id,')', sep = '')
 
     # Get the value of the project attribute

@@ -24,11 +24,11 @@ def main():
     from mosaic import Mosaic, Project, Store
   except:
     fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  apiStore  = Store(config_file = args.client_config)
-  apiMosaic = Mosaic(config_file = args.client_config)
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = apiMosaic.get_project(args.project_id)
+  project = api_mosaic.get_project(args.project_id)
 
   # Loop over all of the project files
   print('Project files:')

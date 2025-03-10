@@ -40,7 +40,7 @@ def main():
   # Loop over the collection projects
   for project_info in data['collection_projects']:
     project_id = project_info['child_project_id']
-    project = apiMosaic.get_project(project_id)
+    project = api_mosaic.get_project(project_id)
     print('Removing watchers from project ', str(project_id), ' - ', project.name, sep = '')
 
     # Get the conversations in the project
