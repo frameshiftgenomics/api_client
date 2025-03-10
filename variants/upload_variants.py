@@ -15,8 +15,6 @@ def main():
       args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
     except:
       fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
-  print(args.api_client)
-  exit(0)
 
   # Import the api client
   path.append(args.api_client)
