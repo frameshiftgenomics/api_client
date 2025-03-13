@@ -27,10 +27,14 @@ def main():
 
   # Get all of the attribute forms
   data = api_mosaic.get_conversation_groups()
-  for form in data['data']:
-    print(form['name'], ': ', form['id'], sep = '')
-    for attribute in form['attribute_form_attributes']:
-      print('  ', attribute['attribute_id'], ': ', attribute['type'], sep = '')
+  if data:
+    for group in data:
+      print(group['name'], ', id: ', group['id'], sep = '')
+      print('  Description: ', group['description'], sep = '')
+      print('  Members')
+      for user_id in group['user_ids']:
+        user_info = api_mosaic.get_user_info(user_id)
+        print('    ', user_info['first_name'], ' ', user_info['last_name'], ' (', user_info['username'], ')', sep = '')
 
 # Input options
 def parse_command_line():

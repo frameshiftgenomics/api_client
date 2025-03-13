@@ -413,28 +413,33 @@ class Mosaic(object):
 
         return self.get(f'conversation-groups/{group_id}', params=params)
 
+
     def get_conversation_groups(self, include_user_info=False):
         params = { }
         if include_user_info:
             params['include_user_info'] = 'true'
 
         return self.get(f'conversation-groups', params=params)
-    def post_conversation_groups(self, *, name, description=None, user_ids):
+
+
+    def post_conversation_groups(self, name, user_ids, *, description=None):
         data = { 'name': name,
                  'user_ids': user_ids }
-        if description:
-            data['description'] = name
 
-        return self.post(f'conversation_groups', data=data)
+        if description:
+            data['description'] = description
+
+        return self.post(f'conversation-groups', data=data)
 
 
     def put_conversation_groups(self, group_id, *, name, description=None, user_ids):
         data = { 'name': name,
                  'user_ids': user_ids }
+
         if description:
             data['description'] = name
 
-        return self.post(f'conversation_groups/{group_id}', data=data)
+        return self.post(f'conversation-groups/{group_id}', data=data)
 
 
 
@@ -766,15 +771,18 @@ class Project(object):
     COLLECTIONS
     """
 
-    def post_collection_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None):
+    def post_collection_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None, cascade_add=None):
         data = {'user_id': user_id, 'role_type_id': role_type_id}
+        params = {}
 
         if can_download:
             data['can_download'] = can_download
         if can_launch_app:
             data['can_launch_app'] = can_launch_app
+        if cascade_add:
+            params['cascade_add'] = cascade_add
 
-        return self._mosaic.post(f'{self._path}/roles', data=data)
+        return self._mosaic.post(f'{self._path}/roles', data=data, params=params)
 
 
     def post_sub_projects(self, *, collection_projects=None, role_type_id=None, same_role=None):
@@ -1624,7 +1632,7 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}')
 
 
-    def get_variant_watchlist(self, include_variant_data):
+    def get_variant_watchlist(self, *, include_variant_data=None):
         params = { }
 
         params['include_variant_data'] = 'true' if include_variant_data else 'false'

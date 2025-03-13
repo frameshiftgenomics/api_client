@@ -32,11 +32,8 @@ def main():
   if not collection.data['is_collection']:
     fail('Supplied project id (' + args.project_id + ') needs to be the id of a collection')
 
-  # Add the projects to the collection
-  projects_to_add = []
-  for udn_id in args.projects_to_add.split(','):
-    projects_to_add.append(str(udn_id))
-  data = collection.post_sub_projects(collection_projects = projects_to_add, same_role = 'true')
+  # Add the user to the project
+  #collection.post_collection_role(user_id, role_type_id, can_download=None, can_launch_app=None, cascade_add=None)
 
 # Input options
 def parse_command_line():

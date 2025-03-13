@@ -28,7 +28,7 @@ def main():
   # Create a new conversation group
   description = args.description if args.description else None
   user_ids = args.user_ids.split(',') if ',' in args.user_ids else [args.user_ids]
-  data = api_mosaic.post_conversation_groups(args.name, description, user_ids)
+  data = api_mosaic.post_conversation_groups(args.name,  user_ids, description = description)
 
 # Input options
 def parse_command_line():

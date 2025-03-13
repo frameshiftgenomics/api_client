@@ -36,7 +36,7 @@ def main():
     fail('ERROR: unknown privacy_level. Must be public or private')
 
   # Create the new annotation
-  data = project.post_variant_annotation(name=args.name, value_type=args.value_type, privacy_level=args.privacy_level, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None)
+  data = project.post_variant_annotation(name=args.name, value_type=args.value_type, privacy_level=args.privacy_level, display_type=None, severity=None, category=args.category, value_truncate_type=None, value_max_length=None)
 
 # Input options
 def parse_command_line():
@@ -51,6 +51,7 @@ def parse_command_line():
 
   # Information about the annotation being created
   parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The annotation name')
+  parser.add_argument('--category', '-t', required = True, metavar = 'string', help = 'The category to assign the annotation to')
   parser.add_argument('--value_type', '-v', required = True, metavar = 'string', help = 'The annotation type: string or float')
   parser.add_argument('--privacy_level', '-y', required = True, metavar = 'string', help = 'The annotation privacy: public or private')
 
