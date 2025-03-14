@@ -567,6 +567,15 @@ class Mosaic(object):
 
 
     """
+    GLOBAL PROJECT INTERVAL ATTRIBUTES
+    """
+
+    def get_public_project_interval_attributes(self):
+        return self._mosaic.get(f'{self._path}/attributes/intervals')
+
+
+
+    """
     GLOBAL ROLE TYPES
     """
 
@@ -994,11 +1003,13 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/', data=data)
 
 
-    def put_project_attributes(self, attribute_id, *, description=None, name=None, predefined_values=None, value=None, is_editable=None):
+    def put_project_attributes(self, attribute_id, *, description=None, name=None, predefined_values=None, value=None, is_editable=None, display_type=None):
         data = { }
 
         if description:
             data['description'] = description
+        if display_type:
+            data['display_type'] = display_type
         if is_editable:
             data['is_editable'] = is_editable
         if name:
@@ -1122,6 +1133,36 @@ class Project(object):
 
 
     """
+    PROJECT INTERVAL ATTRIBUTES
+    """
+
+    def delete_project_interval_attribute(self, interval_attribute_id):
+        return self._mosaic.delete(f'{self._path}/attributes/intervals/{interval_attribute_id}')
+
+
+    def get_project_interval_attributes(self):
+        return self._mosaic.get(f'{self._path}/attributes/intervals')
+
+
+    def post_project_interval_attribute(self, name, start_attribute_id, end_attribute_id, *, description=None, is_public=None, policy_ids=None):
+        data = { 'name': name,
+                 'start_attribute_id': start_attribute_id,
+                 'end_attribute_id': end_attribute_id}
+
+        if description:
+            data['description'] = description
+
+        if is_public:
+            data['is_public'] = is_public
+
+        if policy_ids:
+            data['policy_ids'] = policy_ids
+
+        return self._mosaic.post(f'{self._path}/attributes/intervals', data=data)
+
+
+
+    """
     PROJECT ROLES
     """
 
@@ -1141,6 +1182,21 @@ class Project(object):
             params['include_sub_project_roles'] = 'true'
 
         return self._mosaic.get(f'{self._path}/roles', params=params)
+
+
+    def post_project_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None, policy_ids=None):
+        data = { 'role_type_id': role_type_id}
+
+        if can_download:
+            data['can_download'] = can_download
+
+        if can_launch_app:
+            data['can_launch_app'] = can_launch_app
+
+        if policy_ids:
+            data['policy_ids'] = policy_ids
+
+        return self._mosaic.post(f'{self._path}/roles/{role_id}', data=data)
 
 
     def put_project_role(self, role_id, role_type_id, *, user_id=None, can_download=None, can_launch_app=None, policy_ids=None):

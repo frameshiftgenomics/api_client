@@ -77,7 +77,7 @@ def parse_command_line():
 
 # If the script fails, provide an error message and exit
 def fail(message):
-  print(message, sep = '')
+  print('ERROR: ', message, sep = '')
   exit(1)
 
 if __name__ == "__main__":

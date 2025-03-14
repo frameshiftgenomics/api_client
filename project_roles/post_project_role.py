@@ -26,7 +26,7 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Update the project roles
-  project.put_project_role(args.role_id, args.role_type_id, user_id=None, can_download=None, can_launch_app=None, policy_ids=None)
+  project.post_project_role(args.role_id, args.role_type_id, user_id=None, can_download=None, can_launch_app=None, policy_ids=None)
 
 # Input options
 def parse_command_line():

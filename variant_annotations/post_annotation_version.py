@@ -1,7 +1,7 @@
-import argparse
-import json
 import os
+import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -18,15 +18,18 @@ def main():
 
   # Import the api client
   path.append(args.api_client)
-  try: 
+  try:
     from mosaic import Mosaic, Project, Store
   except:
     fail('Cannot find mosaic. Please set the --api_client / -a argument')
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Update the project roles
-  project.put_project_role(args.role_id, args.role_type_id, user_id=None, can_download=None, can_launch_app=None, policy_ids=None)
+  # Open an api client project object for the defined project
+  project = api_mosaic.get_project(args.project_id)
+
+  # Create the new annotation version
+  data = project.post_create_annotation_version(args.annotation_id, args.version_name)
 
 # Input options
 def parse_command_line():
@@ -36,10 +39,12 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # Required arguments
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The id of the Mosaic project')
-  parser.add_argument('--role_id', '-r', required = True, metavar = 'string', help = 'The role id of the user to update')
-  parser.add_argument('--role_type_id', '-r', required = True, metavar = 'string', help = 'The id role to update the user to. 2: Owner, 3: Admin, 4: Member, 5: Viewer, 6: Technical Staff')
+  # The project id to which the filter is to be added is required
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+
+  # Information about the annotation being created
+  parser.add_argument('--annotation_id', '-i', required = True, metavar = 'integer', help = 'The id of the annotation to create a new version for')
+  parser.add_argument('--version_name', '-n', required = True, metavar = 'string', help = 'The name of the annotation version to create')
 
   return parser.parse_args()
 
