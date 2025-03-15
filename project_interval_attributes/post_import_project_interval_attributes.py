@@ -27,10 +27,7 @@ def main():
 
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
-
-  # Get the project settings
-  for attribute in project.get_project_interval_attributes():
-    print(attribute['name'], ', ', attribute['id'], sep = '')
+  project.post_import_project_interval_attribute(args.attribute_id)
 
 # Input options
 def parse_command_line():
@@ -43,8 +40,8 @@ def parse_command_line():
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
-  # Verbose output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')
+  # Required information about the interval
+  parser.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The id of the interval attribute to import')
 
   return parser.parse_args()
 

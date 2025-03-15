@@ -1144,6 +1144,12 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/attributes/intervals')
 
 
+    def post_import_project_interval_attribute(self, attribute_id):
+        data = { 'attribute_id': attribute_id}
+
+        return self._mosaic.post(f'{self._path}/attributes/intervals/import', data=data)
+
+
     def post_project_interval_attribute(self, name, start_attribute_id, end_attribute_id, *, description=None, is_public=None, policy_ids=None):
         data = { 'name': name,
                  'start_attribute_id': start_attribute_id,
