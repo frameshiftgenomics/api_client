@@ -519,6 +519,14 @@ class Mosaic(object):
         return self.post(f'policies', data=data)
 
 
+    def put_policies(self, policy_id, name, description):
+
+        data = { 'name': name,
+                 'description': description }
+
+        return self.post(f'policies/{policy_id}', data=data)
+
+
     """
     GLOBAL PROJECTS
     """
@@ -930,25 +938,40 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/pedigree', file_path=file_path, data=data)
 
 
-
     """
     POLICIES
     """
 
-    def delete_policy_project_attribute(self, policy_id):
-        return self._mosaic.delete(f'{self._path}/policy_attributes/{policy_id}')
+    def delete_policy_resource(self, policy_id, resource_type):
+        params = { 'resource_type': resource_type }
+
+        return self._mosaic.delete(f'{self._path}/policy-resources/{policy_id}', params=params)
 
 
-    def get_policy_project_attribute(self):
-        return self._mosaic.get(f'{self._path}/policy-attributes')
+    def get_policy_project_resources(self, resource_type):
+        params = { }
+
+        if resource_type:
+          params['type'] = resource_type
+
+        return self._mosaic.get(f'{self._path}/policy-resources', params=params)
 
 
-    def post_policy_attribute(self, policy_id, attribute_id):
+    def get_policy_summary(self):
+        return self._mosaic.get(f'{self._path}/policies/summary')
 
-        data = { 'policy_id': policy_id,
-                 'attribute_id': attribute_id }
 
-        return self._mosaic.post(f'{self._path}/policy-attributes', data=data)
+    def post_policy_project_resource(self, policy_id, *, attribute_id=None, conversation_id=None):
+
+        data = { 'policy_id': policy_id }
+
+        if attribute_id:
+          data['attribute_id'] = attribute_id
+
+        if conversation_id:
+          data['conversation_id'] = conversation_id
+
+        return self._mosaic.post(f'{self._path}/policy-resources', data=data)
 
 
     def put_policy_attribute(self, policy_id, attribute_id):
@@ -1064,6 +1087,82 @@ class Project(object):
             data['variant_set_id'] = variant_set_id 
 
         return self._mosaic.post(f'{self._path}/dashboard', data=data)
+
+
+    """
+    PROJECT DATA GROUP ATTRIBUTES
+    """
+
+
+    def delete_attribute_data_group_instance(self, attribute_id, data_group_instance_id):
+        return self._mosaic.delete(f'{self._path}/attributes/data-groups/{attribute_id}/instances/{data_group_instance_id}')
+
+
+    def delete_project_data_group_attribute(self, attribute_id):
+        return self._mosaic.delete(f'{self._path}/attributes/data-groups/{attribute_id}')
+
+
+    def get_data_group_instances(self, attribute_id):
+        return self._mosaic.get(f'{self._path}/attributes/data-groups/{attribute_id}/instances')
+
+
+    def get_project_data_group_attributes(self, *, filter_restricted_project_id=None):
+        params = { }
+        if filter_restricted_project_id:
+            params['filter_restricted_project_id'] = filter_restricted_project_id
+
+        return self._mosaic.get(f'{self._path}/attributes/data-groups', params=params)
+
+
+    def post_attribute_data_groups(self, name, *, description=None, is_public=None, is_editable=None, data_group_attributes=None):
+        data = { 'name': name }
+        if description:
+            data['description'] = description
+
+        if is_public:
+            data['is_public'] = is_public
+
+        if is_editable:
+            data['is_editable'] = is_editable
+
+        if data_group_attributes:
+            data['data_group_attributes'] = data_group_attributes
+
+        return self._mosaic.post(f'{self._path}/attributes/data-groups', data=data)
+
+
+    def post_data_group_instance(self, attribute_id, *, record_date=None, data_group_attributes=None):
+        data = { 'record_date': record_date,
+                 'data_group_attributes': data_group_attributes}
+
+        return self._mosaic.post(f'{self._path}/attributes/data-groups/{attribute_id}/instances', data=data)
+
+
+    def post_import_project_data_group_attribute(self, attribute_id):
+        data = { 'attribute_id': attribute_id }
+
+        return self._mosaic.post(f'{self._path}/attributes/data-groups/import', data=data)
+
+
+    def put_project_data_group_attribute(self, attribute_id, *, name=None, description=None, is_public=None, is_editable=None, data_group_attributes=None):
+        data = { }
+
+        if name:
+            data['name'] = name
+
+        if description:
+            data['description'] = description
+
+        if is_public:
+            data['is_public'] = is_public
+
+        if is_editable:
+            data['is_editable'] = is_editable
+
+        if data_group_attributes:
+            data['data_group_attributes'] = data_group_attributes
+
+        return self._mosaic.put(f'{self._path}/attributes/data-groups/{attribute_id}', data=data)
 
 
     """

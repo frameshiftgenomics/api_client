@@ -28,9 +28,14 @@ def main():
   # Create the project object
   project = api_mosaic.get_project(args.project_id)
 
-  # Get the attributse
-  for attribute in project.get_policy_project_attribute():
-    print(attribute)
+  # Get any attribute_ids or conversation_ids
+  attribute_id = args.attribute_id if args.attribute_id else None
+  conversation_id = args.conversation_id if args.conversation_id else None
+  if not attribute_id and not conversation_id:
+    fail('An attribute or conversation id must be provided')
+
+  # Post the attribute to the policy
+  project.post_policy_project_resource(args.policy_id, attribute_id = attribute_id, conversation_id = conversation_id)
 
 # Input options
 def parse_command_line():
@@ -40,8 +45,15 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get policy attributes for')
+  # The project id 
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
+
+  # The policy id to post attributes to
+  parser.add_argument('--policy_id', '-i', required = True, metavar = 'integer', help = 'The policy id to post attributes to')
+
+  # The attribute id to post to the policy
+  parser.add_argument('--attribute_id', '-t', required = False, metavar = 'integer', help = 'The attribute id to post to the policy')
+  parser.add_argument('--conversation_id', '-v', required = False, metavar = 'integer', help = 'The conversation id to post to the policy')
 
   return parser.parse_args()
 

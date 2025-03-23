@@ -1,6 +1,7 @@
 import os
 import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -24,22 +25,17 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
+  # Create the project object
   project = api_mosaic.get_project(args.project_id)
 
-  # Delete the file
-  samples = project.get_samples()
-  for sample in samples:
+  # Chekc the resource_type
+  allowed_types = ['project_attribute',
+                   'project_conversation']
+  resource_type = args.resource_type if args.resource_type in allowed_types else fail('Unknown resource type')
 
-    # If only output samples is set, provide the limited output
-    if args.ids_only:
-      print(sample['name'], ': ', sample['id'], sep = '')
-
-    # Output all information
-    else:
-      print(sample['name'])
-      for info in sample:
-        print('  ', info, ': ', sample[info], sep = '')
+  # Get the attributse
+  for attribute in project.get_policy_project_resources(resource_type):
+    print(attribute)
 
 # Input options
 def parse_command_line():
@@ -50,10 +46,10 @@ def parse_command_line():
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get policy attributes for')
 
-  # Output ids only
-  parser.add_argument('--ids_only', '-d', required = False, action = 'store_true', help = 'Only output sample ids')
+  # Optional resource type to get
+  parser.add_argument('--resource_type', '-t', required = True, metavar = 'string', help = 'The resource type to return: project_attribute, project_conversation')
 
   return parser.parse_args()
 

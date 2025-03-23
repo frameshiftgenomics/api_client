@@ -28,8 +28,8 @@ def main():
   # Create the project object
   project = api_mosaic.get_project(args.project_id)
 
-  # Post the attribute to the policy
-  project.post_policy_attribute(args.policy_id, args.attribute_id)
+  # Get the attributse
+  pprint(project.get_policy_summary())
 
 # Input options
 def parse_command_line():
@@ -39,14 +39,8 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id 
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
-
-  # The policy id to post attributes to
-  parser.add_argument('--policy_id', '-i', required = True, metavar = 'integer', help = 'The policy id to post attributes to')
-
-  # The attribute id to post to the policy
-  parser.add_argument('--attribute_id', '-t', required = True, metavar = 'integer', help = 'The attribute id to post to the policy')
+  # The project id to which the filter is to be added is required
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get policy attributes for')
 
   return parser.parse_args()
 

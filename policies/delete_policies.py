@@ -1,6 +1,7 @@
 import os
 import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -24,22 +25,8 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
-
-  # Delete the file
-  samples = project.get_samples()
-  for sample in samples:
-
-    # If only output samples is set, provide the limited output
-    if args.ids_only:
-      print(sample['name'], ': ', sample['id'], sep = '')
-
-    # Output all information
-    else:
-      print(sample['name'])
-      for info in sample:
-        print('  ', info, ': ', sample[info], sep = '')
+  # Delete the policy
+  project.delete_policies(args.policy_id)
 
 # Input options
 def parse_command_line():
@@ -49,11 +36,8 @@ def parse_command_line():
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-
-  # Output ids only
-  parser.add_argument('--ids_only', '-d', required = False, action = 'store_true', help = 'Only output sample ids')
+  # The policy id to delete
+  parser.add_argument('--policy_id', '-i', required = True, metavar = 'integer', help = 'The policy id to delete')
 
   return parser.parse_args()
 

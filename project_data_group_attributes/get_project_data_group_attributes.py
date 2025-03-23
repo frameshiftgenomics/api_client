@@ -1,6 +1,7 @@
 import os
 import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -27,19 +28,18 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Delete the file
-  samples = project.get_samples()
-  for sample in samples:
+  # Get all attributes in the project. When looping over data group attributes, this is needed to get the names
+  # of the data group attributes
+  project_attributes = {}
+  for attribute in project.get_project_attributes():
+    project_attributes[attribute['id']] = attribute['name']
 
-    # If only output samples is set, provide the limited output
-    if args.ids_only:
-      print(sample['name'], ': ', sample['id'], sep = '')
-
-    # Output all information
-    else:
-      print(sample['name'])
-      for info in sample:
-        print('  ', info, ': ', sample[info], sep = '')
+  # Get all data group attributes
+  for data_group in project.get_project_data_group_attributes(filter_restricted_project_id=None):
+    print(data_group['name'], ': ', data_group['id'], sep = '')
+    if args.include_attributes:
+      for attribute in data_group['data_group_attributes']:
+        print('  ', attribute['id'], ', ', project_attributes[attribute['attribute_id']], ': ', attribute['attribute_id'], sep = '')
 
 # Input options
 def parse_command_line():
@@ -52,8 +52,8 @@ def parse_command_line():
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
-  # Output ids only
-  parser.add_argument('--ids_only', '-d', required = False, action = 'store_true', help = 'Only output sample ids')
+  # Optional viewing options
+  parser.add_argument('--include_attributes', '-i', required = False, action = 'store_true', help = 'Include constituent attributes in output')
 
   return parser.parse_args()
 
