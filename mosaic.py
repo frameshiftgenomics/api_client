@@ -897,19 +897,42 @@ class Project(object):
 
 
     """
-    GENES (PROJECT)
+    GENES
     """
 
     def delete_gene_set(self, gene_set_id):
         return self._mosaic.delete(f'{self._path}/genes/sets/{gene_set_id}')
 
 
+    def get_gene_set(self, gene_set_id):
+        return self._mosaic.get(f'{self._path}/genes/sets/{gene_set_id}')
+
+
     def get_gene_sets(self):
         return self._mosaic.get(f'{self._path}/genes/sets')
 
 
-    def post_gene_set(self, *, name=None, description=None, is_public_to_project=None, gene_ids=None, gene_names=None):
-        data = { }
+    def get_genes(self):
+        yield from self.get_paged_route_iter(f'{self._path}/genes')
+
+
+    def post_gene_sets(self, name, *, description=None, is_public_to_project=None, gene_ids=None, gene_names=None):
+        data = { 'name': name }
+
+        if description:
+            data['description'] = description
+        if is_public_to_project:
+            data['is_public_to_project'] = is_public_to_project
+        if gene_ids:
+            data['gene_ids'] = gene_ids
+        if gene_names:
+            data['gene_names'] = gene_names
+
+        return self._mosaic.post(f'{self._path}/genes/sets', data=data)
+
+
+    def put_gene_sets(self, *, name=None, description=None, is_public_to_project=None, gene_ids=None, gene_names=None):
+        data = { 'name': name }
 
         if name:
             data['name'] = name
@@ -922,7 +945,7 @@ class Project(object):
         if gene_names:
             data['gene_names'] = gene_names
 
-        return self._mosaic.post(f'{self._path}/genes/sets', data=data)
+        return self._mosaic.put(f'{self._path}/genes/sets', data=data)
 
     """
     PEDIGREE
