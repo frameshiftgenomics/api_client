@@ -788,6 +788,12 @@ class Project(object):
     COLLECTIONS
     """
 
+    def delete_sub_projects(self, collection_projects):
+        params = {'collection_projects': collection_projects}
+
+        return self._mosaic.delete(f'{self._path}/sub-projects', params=params)
+
+
     def post_collection_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None, cascade_add=None):
         data = {'user_id': user_id, 'role_type_id': role_type_id}
         params = {}
@@ -1610,6 +1616,19 @@ class Project(object):
 
     def get_project_tasks(self):
         return self._mosaic.get(f'{self._path}/tasks')
+
+
+
+    """
+    USER PROJECT SETTINGS
+    """
+
+    def delete_user_project_settings(self):
+        return self._mosaic.delete(f'{self._path}/settings')
+
+
+    def get_user_project_settings(self):
+        return self._mosaic.get(f'{self._path}/settings')
 
 
 
