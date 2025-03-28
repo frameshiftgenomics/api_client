@@ -240,8 +240,8 @@ class Mosaic(object):
         return self._http_request(requests.put, resource, params=params, data=data)
 
 
-    def delete(self, resource, *, params=None):
-        return self._http_request(requests.delete, resource, params=params)
+    def delete(self, resource, *, params=None, data=None):
+        return self._http_request(requests.delete, resource, params=params, data=data)
 
 
     def get_paged_route_iter(self, resource, *, params=None):
