@@ -789,9 +789,9 @@ class Project(object):
     """
 
     def delete_sub_projects(self, collection_projects):
-        params = {'collection_projects': collection_projects}
+        data = {'collection_projects': collection_projects}
 
-        return self._mosaic.delete(f'{self._path}/sub-projects', params=params)
+        return self._mosaic.delete(f'{self._path}/sub-projects', data=data)
 
 
     def post_collection_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None, cascade_add=None):
