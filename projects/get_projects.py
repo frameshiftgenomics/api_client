@@ -31,8 +31,12 @@ def main():
     if args.reference not in allowed_references:
       fail('Unknown reference genome: ' + str(args.reference))
 
+  # If only collections are to be output, collections need to be included
+  if args.only_collections:
+    args.include_collections = True
+
   # Get all the available projects
-  for project_info in api_mosaic.get_projects(search = args.search):
+  for project_info in api_mosaic.get_projects(search = args.search, only_collections = args.only_collections):
     display = True
     if args.reference:
       if project_info['reference'] != args.reference:
@@ -67,6 +71,9 @@ def parse_command_line():
   # Define the location of the api_client and the ini config file
   parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+
+  # Only output collections
+  parser.add_argument('--only_collections', '-oc', required = False, action = 'store_true', help = 'If set, only return collections')
 
   # Only output project ids, or exclude specific projects
   parser.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')
