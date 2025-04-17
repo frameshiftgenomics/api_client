@@ -377,12 +377,14 @@ class Mosaic(object):
         return self.get(f'attribute-forms')
 
 
-    def post_attribute_form(self, *, name=None, attributes=None):
+    def post_attribute_form(self, *, name=None, attributes=None, origin_type=None):
         data = { }
         if name:
             data['name'] = str(name)
         if attributes:
             data['attribute_form_attributes'] = attributes
+        if origin_type:
+            data['origin_type'] = origin_type
 
         return self.post(f'attribute-forms', data=data)
 

@@ -47,8 +47,16 @@ def main():
     print('WARNING: No attributes added - no attribute form created')
     exit(0)
 
+  # Check if an origin_type is defined
+  origin_types = ['institutional', 'user']
+  origin_type = None
+  if args.origin_type:
+    if args.origin_type not in origin_types:
+      fail('Unknown origin type')
+    origin_type = args.origin_type
+
   # Post an attribute form
-  data = api_mosaic.post_attribute_form(name = args.name, attributes = attributes_json)
+  data = api_mosaic.post_attribute_form(name = args.name, attributes = attributes_json, origin_type = origin_type)
 
 # Input options
 def parse_command_line():
@@ -60,6 +68,9 @@ def parse_command_line():
 
   # Required arguments
   parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the attribute form')
+
+  # The type of form (institutional or user)
+  parser.add_argument('--origin_type', '-t', required = False, metavar = 'string', help = 'The origin_type: institutional or user')
 
   # Optional arguments
   parser.add_argument('--required_attributes', '-r', required = False, metavar = 'string', help = 'A comma separated list of the ids of all required attributes')
