@@ -53,6 +53,7 @@ def print_simple(annotation):
 def print_verbose(annotation):
   print(annotation['name'], ' (id: ', annotation['id'], ')', sep = '')
   print('    uid: ', annotation['uid'], sep = '')
+  print('    original_project: ', annotation['original_project_id'], sep = '')
   print('    versions: ')
   for version in annotation['annotation_versions']:
     print('        ', version['version'], ': ', version['id'], sep = '')
