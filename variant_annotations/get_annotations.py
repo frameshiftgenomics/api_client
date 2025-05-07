@@ -44,6 +44,14 @@ def main():
         else:
           print(annotation['id'])
 
+    # If we only want a specific annotation
+    elif args.uid:
+      if args.uid == annotation['uid']:
+        if args.verbose:
+          print_verbose(annotation)
+        else:
+          print(annotation['id'])
+
     # If a category is specified, check the value
     elif args.category:
       category = annotation['category']
@@ -90,6 +98,9 @@ def parse_command_line():
 
   # If a name is supplied, just show information on the annotation with this name
   parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'If an annotation name is provided, information on this annotations will be shown')
+
+  # If a name is supplied, just show information on the annotation with this name
+  parser.add_argument('--uid', '-u', required = False, metavar = 'string', help = 'If an annotation uid is provided, information on this annotations will be shown')
 
   # If a list of annotation ids is supplied, only show results for these annotations
   parser.add_argument('--annotation_ids', '-i', required = False, metavar = 'string', help = 'An optional comman separated list of annotation ids to return')
