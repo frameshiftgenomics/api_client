@@ -35,17 +35,31 @@ def main():
 
   #for annotation in project.get_variant_annotations(annotation_ids = annotation_ids):
   for annotation in project.get_variant_annotations():
+
+    # If we only want a specific annotation
     if args.name:
       if args.name == annotation['name']:
         if args.verbose:
           print_verbose(annotation)
         else:
           print(annotation['id'])
+
+    # If a category is specified, check the value
+    elif args.category:
+      category = annotation['category']
+      if args.category == category:
+        if args.verbose:
+          print_verbose(annotation)
+        else:
+          print_simple(annotation)
+
+    # Otherwise, print all annoatations
     else:
       if args.verbose:
         print_verbose(annotation)
       else:
         print_simple(annotation)
+  exit(0)
 
 def print_simple(annotation):
   print(annotation['name'], ': ', annotation['id'], sep = '')
@@ -53,6 +67,7 @@ def print_simple(annotation):
 def print_verbose(annotation):
   print(annotation['name'], ' (id: ', annotation['id'], ')', sep = '')
   print('    uid: ', annotation['uid'], sep = '')
+  print('    original_project_id: ', annotation['original_project_id'], sep = '')
   print('    versions: ')
   for version in annotation['annotation_versions']:
     print('        ', version['version'], ': ', version['id'], sep = '')
@@ -78,6 +93,9 @@ def parse_command_line():
 
   # If a list of annotation ids is supplied, only show results for these annotations
   parser.add_argument('--annotation_ids', '-i', required = False, metavar = 'string', help = 'An optional comman separated list of annotation ids to return')
+
+  # Define a category if only annotations from that category are required
+  parser.add_argument('--category', '-ca', required = False, metavar = 'string', help = 'Only view annotations from this category')
 
   # Verbose output
   parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')
