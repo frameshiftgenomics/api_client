@@ -31,7 +31,7 @@ def main():
   data = project.create_sample(args.name)
 
 # Input options
-def parseCommandLine():
+def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file

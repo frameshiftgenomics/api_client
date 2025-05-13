@@ -40,27 +40,39 @@ def main():
   # Get the project settings
   is_editable = 'false' if args.is_editable else 'true'
   values = args.predefined_values.split(',') if args.predefined_values else None
-  data = project.put_project_attributes(args.attribute_id, description=args.description, name=args.name, predefined_values=values, is_editable=is_editable, display_type=display_type, value=args.value)
+  original_project_id = args.original_project_id if args.original_project_id else None
+  data = project.put_project_attributes(args.attribute_id, \
+                                        description=args.description, 
+                                        name=args.name, \
+                                        original_project_id=original_project_id, \
+                                        predefined_values=values, \
+                                        is_editable=is_editable, \
+                                        display_type=display_type, \
+                                        value=args.value)
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments = parser.add_argument_group('API Arguments')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  parser.add_argument('--attribute_id', '-t', required = True, metavar = 'integer', help = 'The Mosaic attribute id to update')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  required_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  required_arguments.add_argument('--attribute_id', '-t', required = True, metavar = 'integer', help = 'The Mosaic attribute id to update')
 
   # Optional arguments to update
-  parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
-  parser.add_argument('--display_type', '-s', required = False, metavar = 'string', help = 'The display type for the attribute: time, date, duration, custom')
-  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the attribute')
-  parser.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
-  parser.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
-  parser.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the attribute')
+  optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
+  optional_arguments.add_argument('--original_project_id', '-o', required = False, metavar = 'string', help = 'The id of the project that the attribute should live in')
+  optional_arguments.add_argument('--display_type', '-s', required = False, metavar = 'string', help = 'The display type for the attribute: time, date, duration, custom')
+  optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
+  optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
+  optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
 
   return parser.parse_args()
 

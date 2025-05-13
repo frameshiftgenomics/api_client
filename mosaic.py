@@ -1059,7 +1059,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/', data=data)
 
 
-    def put_project_attributes(self, attribute_id, *, description=None, name=None, predefined_values=None, value=None, is_editable=None, display_type=None):
+    def put_project_attributes(self, attribute_id, *, description=None, name=None, original_project_id=None, predefined_values=None, value=None, is_editable=None, display_type=None):
         data = { }
 
         if description:
@@ -1072,6 +1072,8 @@ class Project(object):
             data['name'] = name
         if predefined_values:
             data['predefined_values'] = predefined_values
+        if original_project_id:
+            data['original_project_id'] = original_project_id
         if value:
             data['value'] = value
 
