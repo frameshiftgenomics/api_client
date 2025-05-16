@@ -33,7 +33,7 @@ def main():
   # Get all of the attribute forms
   data = api_mosaic.get_attribute_forms()
   for form in data['data']:
-    print(form['name'], ': ', form['id'], sep = '')
+    print(form['name'], ': ', form['id'], ' (', form['origin_type'], ')', sep = '')
     if args.verbose:
       for attribute in form['attribute_form_attributes']:
         print('  ', attribute['attribute_id'], ': ', attributes[attribute['attribute_id']]['name'], ', ', attribute['type'], sep = '')

@@ -1422,8 +1422,16 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/samples/attributes/{attribute_id}')
 
 
-    def get_sample_attributes(self):
-        return self._mosaic.get(f'{self._path}/samples/attributes')
+    def get_sample_attributes(self, *, is_custom=None, include_values=None, attribute_ids=None):
+        params = { }
+        if is_custom:
+              params['is_custom'] = is_custom
+        if include_values:
+              params['include_variant_data'] = include_values
+        if attribute_ids:
+              params['attribute_ids'] = attribute_ids
+
+        return self._mosaic.get(f'{self._path}/samples/attributes', params=params)
 
 
     def get_attributes_for_sample(self, sample_id):
