@@ -28,13 +28,16 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
+  # Determine whether to show values
+  include_values = 'true' if args.include_values else 'false'
+
   # Make sure the attribute ids are a list
   attribute_ids = None
   if args.attribute_ids:
     attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
 
   # Get the attributes for the sample
-  for attribute in project.get_sample_attributes(attribute_ids = attribute_ids):
+  for attribute in project.get_sample_attributes(attribute_ids = attribute_ids, include_values = include_values):
     print(attribute)
 
 # Input options
@@ -53,10 +56,8 @@ def parse_command_line():
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # The sample id to get attributes for
-  required_arguments.add_argument('--sample_id', '-i', required = True, metavar = 'integer', help = 'The id of the sample to get attributes for')
-
-  # The sample id to get attributes for
   optional_arguments.add_argument('--attribute_ids', '-t', required = False, metavar = 'integer', help = 'A comma separated list of attribute ids')
+  optional_arguments.add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Set to output values for all samples')
 
   return parser.parse_args()
 
