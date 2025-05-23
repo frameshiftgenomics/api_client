@@ -29,17 +29,36 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Get the project settings
-  annotation_ids = []
+  annotation_ids = None
   if args.annotation_ids:
     annotation_ids = args.annotation_ids.split(',')
 
-  #for annotation in project.get_variant_annotations(annotation_ids = annotation_ids):
-  for annotation in project.get_variant_annotations():
+  # If annotation_version_ids are provided, this will return the annotation ids they are associated with. Therefore
+  # annotation_ids cannot also be provided
+  version_ids = []
+  if args.annotation_version_ids:
+    if args.annotation_ids:
+      fail('If annotation version ids are provided, annotation ids cannot also be provided')
+    version_ids = args.annotation_version_ids.split(',') if ',' in args.annotation_version_ids else [args.annotation_version_ids]
+
+  # Only get the values, if their display was requested
+  include_values = 'false'
+  if args.show_values:
+    fail('Showing values is currently disabled')
+
+    # If a list of annotation ids are not provided, fail. There is too much information to get values for all annotations
+    if not args.annotation_ids:
+      fail('Annotation ids must be provided to see values')
+    args.show_detailed = True
+    include_values = 'true'
+
+  # Loop over the annotations
+  for annotation in project.get_variant_annotations(annotation_ids = annotation_ids, include_values = include_values, annotation_version_ids = version_ids):
 
     # If we only want a specific annotation
     if args.name:
       if args.name == annotation['name']:
-        if args.verbose:
+        if args.show_detailed:
           print_verbose(annotation)
         else:
           print(annotation['id'])
@@ -47,7 +66,7 @@ def main():
     # If we only want a specific annotation
     elif args.uid:
       if args.uid == annotation['uid']:
-        if args.verbose:
+        if args.show_detailed:
           print_verbose(annotation)
         else:
           print(annotation['id'])
@@ -56,18 +75,19 @@ def main():
     elif args.category:
       category = annotation['category']
       if args.category == category:
-        if args.verbose:
+        if args.show_detailed:
           print_verbose(annotation)
         else:
           print_simple(annotation)
 
-    # Otherwise, print all annoatations
+    # Otherwise, print all annotations
     else:
-      if args.verbose:
+
+      # If all information, except values were requested
+      if args.show_detailed:
         print_verbose(annotation)
       else:
         print_simple(annotation)
-  exit(0)
 
 def print_simple(annotation):
   print(annotation['name'], ': ', annotation['id'], sep = '')
@@ -88,28 +108,37 @@ def print_verbose(annotation):
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get annotations for')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get annotations for')
 
   # If a name is supplied, just show information on the annotation with this name
-  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'If an annotation name is provided, information on this annotations will be shown')
+  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'If an annotation name is provided, information on this annotations will be shown')
 
-  # If a name is supplied, just show information on the annotation with this name
-  parser.add_argument('--uid', '-u', required = False, metavar = 'string', help = 'If an annotation uid is provided, information on this annotations will be shown')
+  # If an annotation uid is supplied, just show information on the annotation with this name
+  optional_arguments.add_argument('--uid', '-u', required = False, metavar = 'string', help = 'If an annotation uid is provided, information on this annotations will be shown')
 
   # If a list of annotation ids is supplied, only show results for these annotations
-  parser.add_argument('--annotation_ids', '-i', required = False, metavar = 'string', help = 'An optional comman separated list of annotation ids to return')
+  optional_arguments.add_argument('--annotation_ids', '-i', required = False, metavar = 'string', help = 'An optional comman separated list of annotation ids to return')
+
+  # If a list of annotation version ids is supplied, return the annotations they belong to
+  optional_arguments.add_argument('--annotation_version_ids', '-vi', required = False, metavar = 'string', help = 'An optional comman separated list of annotation version ids to return their parent annotations')
 
   # Define a category if only annotations from that category are required
-  parser.add_argument('--category', '-ca', required = False, metavar = 'string', help = 'Only view annotations from this category')
+  optional_arguments.add_argument('--category', '-ca', required = False, metavar = 'string', help = 'Only view annotations from this category')
 
-  # Verbose output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')
+  # Determine what to display
+  display_arguments.add_argument('--show_detailed', '-sd', required = False, action = 'store_true', help = 'If set, will display all information except the annotation values')
+  display_arguments.add_argument('--show_values', '-sv', required = False, action = 'store_true', help = 'If set, will display all information including the annotation values. Annotation ids must be provided to get values')
 
   return parser.parse_args()
 

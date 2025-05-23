@@ -1427,7 +1427,7 @@ class Project(object):
         if is_custom:
               params['is_custom'] = is_custom
         if include_values:
-              params['include_variant_data'] = include_values
+              params['include_values'] = include_values
         if attribute_ids:
               params['attribute_ids'] = attribute_ids
 
@@ -1662,10 +1662,14 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}/values')
 
 
-    def get_variant_annotations(self, *, annotation_ids=None):
+    def get_variant_annotations(self, *, annotation_ids=None, annotation_version_ids=None, include_values=None):
         params = { }
         if annotation_ids:
             params['annotation_ids'] = annotation_ids
+        if annotation_version_ids:
+            params['annotation_version_ids'] = annotation_version_ids
+        if include_values:
+            params['include_values'] = include_values
 
         return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
 
