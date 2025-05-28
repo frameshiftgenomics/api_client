@@ -36,24 +36,49 @@ def main():
   if args.privacy_level not in allowed_privacy:
     fail('unknown privacy level')
   
+  # If collection_projects is set, make sure the is_collection is also set
+  collection_projects = None
+  if args.collection_projects:
+    if not args.is_collection:
+      fail('A list of project ids to add to the collection is provided. To create a collection, the --is_collection (-co) must be set')
+    collection_projects = args.collection_projects.split(',') if ',' in args.collection_projects else [args.collection_projects]
+
   # Create a project
-  project = api_mosaic.post_project(args.name, args.reference, nickname = args.nickname, description = args.description, is_collection = args.is_collection, privacy_level = args.privacy_level)
+  project = api_mosaic.post_project(args.name, \
+                                    args.reference, \
+                                    nickname = args.nickname, \
+                                    description = args.description, \
+                                    is_collection = args.is_collection, \
+                                    collection_projects = collection_projects, \
+                                    privacy_level = args.privacy_level, \
+                                    template_project_id = args.template_project_id)
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project information
-  parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The project name')
-  parser.add_argument('--reference', '-r', required = True, metavar = 'string', help = 'The project reference')
-  parser.add_argument('--nickname', '-m', required = False, metavar = 'string', help = 'The project nickname')
-  parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The project description')
-  parser.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The projects privacy level. Default: private')
-  parser.add_argument('--is_collection', '-co', required = False, action = 'store_true', help = 'Set if this is to be a collection, not a project')
+  required_arguments.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The project name')
+  required_arguments.add_argument('--reference', '-r', required = True, metavar = 'string', help = 'The project reference')
+  optional_arguments.add_argument('--nickname', '-m', required = False, metavar = 'string', help = 'The project nickname')
+  optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The project description')
+  optional_arguments.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The projects privacy level. Default: private')
+
+  # Information for creating a collection
+  optional_arguments.add_argument('--is_collection', '-co', required = False, action = 'store_true', help = 'Set if this is to be a collection, not a project')
+  optional_arguments.add_argument('--collection_projects', '-cp', required = False, metavar = 'string', help = 'If is_collection is set, a list of project ids to add to the collection can be set')
+
+  # Set the project template
+  optional_arguments.add_argument('--template_project_id', '-t', required = False, metavar = 'integer', help = 'Supply the id of a template project to apply this template on creation')
 
   return parser.parse_args()
 

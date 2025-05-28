@@ -544,21 +544,25 @@ class Mosaic(object):
         yield from self.get_paged_route_iter(f'projects', params=params)
 
 
-    def post_project(self, name, reference, *, nickname=None, description=None, is_collection=False, privacy_level='private'):
+    def post_project(self, name, reference, *, nickname=None, description=None, is_collection=None, collection_projects=None, privacy_level='private', template_project_id=None):
 
         data = { 'name': name,
                  'reference': reference }
 
         if nickname:
-          data['nickname'] = nickname
+            data['nickname'] = nickname
         if description:
-          data['description'] = description
+            data['description'] = description
         if is_collection:
-          data['is_collection'] = 'true'
+            data['is_collection'] = 'true'
         else:
-          data['is_collection'] = 'false'
+            data['is_collection'] = 'false'
+        if collection_projects:
+            data['collection_projects'] = collection_projects
         if privacy_level:
-          data['privacy_level'] = privacy_level
+            data['privacy_level'] = privacy_level
+        if template_project_id:
+            data['template_project_id'] = template_project_id
 
         return self.post(f'projects', data=data)
 

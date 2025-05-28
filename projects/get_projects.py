@@ -67,25 +67,30 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
-
-  # Only output collections
-  parser.add_argument('--only_collections', '-oc', required = False, action = 'store_true', help = 'If set, only return collections')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Only output project ids, or exclude specific projects
-  parser.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')
-  parser.add_argument('--include_templates', '-t', required = False, action = 'store_true', help = 'By default, template projects will NOT be included in the output. This will include them')
-  parser.add_argument('--include_collections', '-i', required = False, action = 'store_true', help = 'By default, collections will NOT be included in the output. This will include them')
-  parser.add_argument('--include_system_projects', '-n', required = False, action = 'store_true', help = 'By default, system projects (Public Attribute, Globals) will NOT be included in the output. This willi include them')
+  display_arguments.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')
+  display_arguments.add_argument('--include_templates', '-t', required = False, action = 'store_true', help = 'By default, template projects will NOT be included in the output. This will include them')
+  display_arguments.add_argument('--include_collections', '-i', required = False, action = 'store_true', help = 'By default, collections will NOT be included in the output. This will include them')
+  display_arguments.add_argument('--include_system_projects', '-n', required = False, action = 'store_true', help = 'By default, system projects (Public Attribute, Globals) will NOT be included in the output. This willi include them')
 
   # Only output projects of a given reference
-  parser.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Only output projects with the specified reference')
+  display_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Only output projects with the specified reference')
+
+  # Only output collections
+  display_arguments.add_argument('--only_collections', '-oc', required = False, action = 'store_true', help = 'If set, only return collections')
 
   # Query params
-  parser.add_argument('--search', '-s', required = False, metavar = 'string', help = 'Term to search on')
+  display_arguments.add_argument('--search', '-s', required = False, metavar = 'string', help = 'Term to search on')
 
   return parser.parse_args()
 
