@@ -45,15 +45,20 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Optional arguments
-  parser.add_argument('--status', '-s', required = False, metavar = 'string', help = 'Only show jobs with this status. Options are: waiting, active, failed, completed')
-  parser.add_argument('--per_status_start', '-t', required = False, metavar = 'integer', help = 'The start value of the job range to return')
-  parser.add_argument('--per_status_end', '-e', required = False, metavar = 'integer', help = 'The end value of the job range to return')
+  optional_arguments.add_argument('--status', '-s', required = False, metavar = 'string', help = 'Only show jobs with this status. Options are: waiting, active, failed, completed')
+  optional_arguments.add_argument('--per_status_start', '-t', required = False, metavar = 'integer', help = 'The start value of the job range to return')
+  optional_arguments.add_argument('--per_status_end', '-e', required = False, metavar = 'integer', help = 'The end value of the job range to return')
 
   return parser.parse_args()
 

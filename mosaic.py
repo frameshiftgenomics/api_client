@@ -485,6 +485,10 @@ class Mosaic(object):
     GLOBAL JOBS
     """
 
+    def delete_job(self, job_id):
+        return self.delete(f'jobs/{job_id}')
+
+
     def get_job_status(self, job_id):
         return self.get(f'jobs/{job_id}')
 

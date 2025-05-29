@@ -26,7 +26,7 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Get the project settings
-  print(api_mosaic.get_job_status(args.job_id)['status'])
+  api_mosaic.delete_job(args.job_id)
 
 # Input options
 def parse_command_line():
