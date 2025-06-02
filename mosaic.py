@@ -1500,6 +1500,10 @@ class Project(object):
     SAMPLES
     """
 
+    def delete_sample(self, sample_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}')
+
+
     def get_samples(self):
         return self._mosaic.get(f'{self._path}/samples')
 

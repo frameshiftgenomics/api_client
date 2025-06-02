@@ -27,20 +27,15 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Delete the file
-  samples = project.get_samples()
-  for sample in samples:
+  # Loop over the samples in the project and delete them all
+  for sample in project.get_samples():
 
-    # If only output samples is set, provide the limited output
-    if args.ids_only:
-      print(sample['name'], ': ', sample['id'], sep = '')
-
-    # Output all information
-    else:
-      print(sample['name'])
-      for info in sample:
-        print('  ', info, ': ', sample[info], sep = '')
-
+    # Delete the sample
+    try:
+      project.delete_sample(sample['id'])
+    except:
+      fail('Unable to delete sample with id ' + str(sample['id']))
+ 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
@@ -56,9 +51,6 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-
-  # Output ids only
-  display_arguments.add_argument('--ids_only', '-d', required = False, action = 'store_true', help = 'Only output sample ids')
 
   return parser.parse_args()
 
