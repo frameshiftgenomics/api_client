@@ -30,6 +30,7 @@ def main():
   job_statuses = args.status if args.status else None
   per_status_start = args.per_status_start if args.per_status_start else None
   per_status_end = args.per_status_end if args.per_status_end else None
+  i = 1
   for job in api_mosaic.get_queue_status(per_status_start = per_status_start, per_status_end = per_status_end)['jobs']:
 
     # If only jobs of a particular status are to be output, check if the job has this status and only
@@ -41,6 +42,12 @@ def main():
     # Otherwise output all jobs
     else:
       print_job_info(job)
+
+    # Incrememnt the number of jobs and end if the top N have been seen
+    i += 1
+    if args.show_top_n:
+      if int(i) > int(args.show_top_n):
+        break
 
 # Input options
 def parse_command_line():
@@ -59,6 +66,9 @@ def parse_command_line():
   optional_arguments.add_argument('--status', '-s', required = False, metavar = 'string', help = 'Only show jobs with this status. Options are: waiting, active, failed, completed')
   optional_arguments.add_argument('--per_status_start', '-t', required = False, metavar = 'integer', help = 'The start value of the job range to return')
   optional_arguments.add_argument('--per_status_end', '-e', required = False, metavar = 'integer', help = 'The end value of the job range to return')
+
+  # The number of jobs to show
+  display_arguments.add_argument('--show_top_n', '-n', required = False, metavar = 'integer', help = 'Show the top N jobs in the queue')
 
   return parser.parse_args()
 
