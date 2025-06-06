@@ -40,20 +40,25 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id 
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
 
   # The policy id to post attributes to
-  parser.add_argument('--policy_id', '-i', required = True, metavar = 'integer', help = 'The policy id to post attributes to')
+  required_arguments.add_argument('--policy_id', '-i', required = True, metavar = 'integer', help = 'The policy id to post attributes to')
 
   # The attribute id to post to the policy
-  parser.add_argument('--attribute_id', '-t', required = False, metavar = 'integer', help = 'The attribute id to post to the policy')
-  parser.add_argument('--conversation_id', '-v', required = False, metavar = 'integer', help = 'The conversation id to post to the policy')
+  optional_arguments.add_argument('--attribute_id', '-t', required = False, metavar = 'integer', help = 'The attribute id to post to the policy')
+  optional_arguments.add_argument('--conversation_id', '-v', required = False, metavar = 'integer', help = 'The conversation id to post to the policy')
 
   return parser.parse_args()
 

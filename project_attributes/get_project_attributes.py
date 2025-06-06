@@ -30,7 +30,7 @@ def main():
 
   # Get the project settings
   for attribute in project.get_project_attributes():
-    if not args.verbose: 
+    if not args.display_all_information:
       print(attribute['name'], ': ', attribute['id'], sep = '')
     else:
       print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
@@ -59,19 +59,24 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # Include values
-  parser.add_argument('--include_values', '-i', required = False, action = 'store_true', help = 'Include attribute values in the output. Only output when used in conjunction with --verbose')
+  display_arguments.add_argument('--include_values', '-i', required = False, action = 'store_true', help = 'Include attribute values in the output. Only output when used in conjunction with --verbose')
 
   # Verbose output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')
+  display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display Provide a verbose output')
 
   return parser.parse_args()
 

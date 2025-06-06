@@ -29,19 +29,33 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Delete watchers from the specified conversation
-  data = project.get_project_conversations()
-  pprint(data['data'])
+  for conversation in project.get_project_conversations()['data']:
+    if args.display_all_information:
+      print(conversation['title'], ':', sep = '')
+      print('  id: ', conversation['id'], sep = '')
+      print('  description: ', conversation['description'], sep = '')
+      print('  comment count: ', conversation['comment_count'], sep = '')
+    else:
+      print(conversation['id'], ':', conversation['title'], sep = '')
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The id of the project')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The id of the project')
+
+  # What should be output
+  display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'If set, all information will be displayed')
 
   return parser.parse_args()
 
