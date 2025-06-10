@@ -33,28 +33,33 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project and sample ids to which the file is to be added are required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  parser.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The sample id of the sample the file is attached to')
-  parser.add_argument('--file_id', '-f', required = True, metavar = 'integer', help = 'The file id of the file being updated')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The sample id of the sample the file is attached to')
+  project_arguments.add_argument('--file_id', '-f', required = True, metavar = 'integer', help = 'The file id of the file being updated')
 
   # Optional arguments related to the file to add
-  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the file to add')
-  parser.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'The reference genome of the project')
-  parser.add_argument('--file_type', '-t', required = False, metavar = 'string', help = 'The file type of the file being added (e.g. vcf)')
-  parser.add_argument('--uri', '-u', required = False, metavar = 'string', help = 'The location of the file being added')
-  parser.add_argument('--nickname', '-k', required = False, metavar = 'string', help = 'The nickname of the file to add')
-  parser.add_argument('--endpoint_url', '-d', required = False, metavar = 'string', help = 'The id of the experiment this file should be added to')
-  parser.add_argument('--experiment_id', '-e', required = False, metavar = 'integer', help = 'The id of the experiment this file should be added to')
-  parser.add_argument('--library_type', '-l', required = False, metavar = 'string', help = 'The library type of the sequencing data')
-  parser.add_argument('--qc', '-q', required = False, metavar = 'json', help = 'Json file containing qc information for the file')
-  parser.add_argument('--size', '-z', required = False, metavar = 'integer', help = 'The size in bytes of the file')
-  parser.add_argument('--vcf_sample_name', '-v', required = False, metavar = 'string', help = 'The sample identifier in the vcf file')
+  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the file to add')
+  optional_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'The reference genome of the project')
+  optional_arguments.add_argument('--file_type', '-t', required = False, metavar = 'string', help = 'The file type of the file being added (e.g. vcf)')
+  optional_arguments.add_argument('--uri', '-u', required = False, metavar = 'string', help = 'The location of the file being added')
+  optional_arguments.add_argument('--nickname', '-k', required = False, metavar = 'string', help = 'The nickname of the file to add')
+  optional_arguments.add_argument('--endpoint_url', '-d', required = False, metavar = 'string', help = 'The id of the experiment this file should be added to')
+  optional_arguments.add_argument('--experiment_id', '-e', required = False, metavar = 'integer', help = 'The id of the experiment this file should be added to')
+  optional_arguments.add_argument('--library_type', '-l', required = False, metavar = 'string', help = 'The library type of the sequencing data')
+  optional_arguments.add_argument('--qc', '-q', required = False, metavar = 'json', help = 'Json file containing qc information for the file')
+  optional_arguments.add_argument('--size', '-z', required = False, metavar = 'integer', help = 'The size in bytes of the file')
+  optional_arguments.add_argument('--vcf_sample_name', '-v', required = False, metavar = 'string', help = 'The sample identifier in the vcf file')
 
   return parser.parse_args()
 
