@@ -32,10 +32,15 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Required arguments
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
 
   return parser.parse_args()
 
