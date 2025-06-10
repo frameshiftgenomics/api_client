@@ -15,8 +15,6 @@ def main():
     except:
       fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
-  if not args.write_info: args.write_info = 1
-
   # Import the api client
   path.append(args.api_client)
   try:
@@ -31,8 +29,9 @@ def main():
 
   # Get all of the sample files
   for sample in project.get_sample_files(args.sample_id):
-    if int(args.write_info) == 1: print(sample['name'], ': ', sample['id'], ', ', sample['type'], sep = '')
-    elif int(args.write_info) == 2:
+    if not args.display_all_information:
+      print(sample['name'], ': ', sample['id'], ', ', sample['type'], sep = '')
+    else:
       print(sample['name'])
       print('  id: ', sample['id'], sep = '')
       print('  type: ', sample['type'], sep = '')
@@ -59,7 +58,7 @@ def parse_command_line():
   required_arguments.add_argument('--sample_id', '-s', required = True, metavar = 'string', help = 'The sample id the file is attached to')
 
   # Determine what information to print to screen
-  optional_arguments.add_argument('--write_info', '-w', required = False, metavar = 'integer', help = 'What information should be written to screen:')
+  display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display all information about the attributes')
 
   return parser.parse_args()
 
