@@ -30,34 +30,11 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Get all attributes in the project. When looping over data group attributes, this is needed to get the names
-  # of the data group attributes
-  project_attributes = {}
-  for attribute in project.get_project_attributes():
-    project_attributes[attribute['id']] = attribute['name']
-
-  # Get all data group attributes
-  for data_group in project.get_project_data_group_attributes(filter_restricted_project_id=None):
-    print(data_group['name'], ': ', data_group['id'], sep = '')
-    if args.display_all_information:
-      print('  uid: ', data_group['uid'], sep = '')
-      print('  description: ', data_group['description'], sep = '')
-      print('  original project id: ', data_group['original_project_id'], sep = '')
-      print('  is custom: ', data_group['is_custom'], sep = '')
-      print('  is editable: ', data_group['is_editable'], sep = '')
-      print('  is public: ', data_group['is_public'], sep = '')
-      print('  instance count: ', data_group['instances_count'], sep = '')
-
-      # Format the time stringds
-      format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
-      created_at = str(datetime.strptime(data_group['created_at'], format_string)).split('.')[0]
-      updated_at = str(datetime.strptime(data_group['updated_at'], format_string)).split('.')[0]
-
-      print('  created_at: ', created_at, ', updated_at: ', updated_at, sep = '')
-      print('  prdefined values: ', data_group['predefined_values'], sep = '')
-    if args.include_attributes:
-      for attribute in data_group['data_group_attributes']:
-        print('  ', attribute['id'], ': ', project_attributes[attribute['attribute_id']], ': ', attribute['attribute_id'], sep = '')
+  # Delete the instance
+  try:
+    project.delete_attribute_data_group_instance(args.attribute_id, args.data_group_instance_id)
+  except Exception as e:
+    fail('Failed to delete data group instance with the error ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -74,10 +51,8 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-
-  # Optional viewing options
-  display_arguments.add_argument('--include_attributes', '-i', required = False, action = 'store_true', help = 'Include constituent attributes in output')
-  display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Include all data group information')
+  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic id of the data group attribute')
+  project_arguments.add_argument('--data_group_instance_id', '-d', required = True, metavar = 'integer', help = 'The Mosaic id of the data group attribute instance to delete')
 
   return parser.parse_args()
 

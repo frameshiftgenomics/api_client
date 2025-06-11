@@ -37,6 +37,7 @@ def main():
   print('  username: ', user_data['username'], sep = '')
   print('  CAS username: ', user_data['cas_username'], sep = '')
 
+  # Format the time stringd
   format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
   created_at = str(datetime.strptime(user_data['created_at'], format_string)).split('.')[0]
   last_login_at = str(datetime.strptime(user_data['last_login_at'], format_string)).split('.')[0]

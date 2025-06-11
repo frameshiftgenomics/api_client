@@ -41,7 +41,10 @@ def main():
       print('    original_project_id: ', attribute['original_project_id'], sep = '')
       print('    is_custom: ', attribute['is_custom'], sep = '')
       print('    is_editable: ', attribute['is_editable'], sep = '')
+      print('    is_longitudinal: ', attribute['is_longitudinal'], sep = '')
       print('    is_public: ', attribute['is_public'], sep = '')
+      print('    custom_display_format: ', attribute['custom_display_format'], sep = '')
+      print('    display_type: ', attribute['display_type'], sep = '')
       if attribute['predefined_values']:
         print('    predefined_values:')
         for value in attribute['predefined_values']:
@@ -55,6 +58,7 @@ def main():
         print('    Values:')
         for value in attribute['values']:
           print('      ', value['value'], ': ', value['project_id'])
+      print('    policies: ', attribute['policies'], sep = '')
 
 # Input options
 def parse_command_line():

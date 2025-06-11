@@ -37,27 +37,30 @@ def main():
     project_attributes[attribute['id']] = attribute['name']
 
   # Get all data group attributes
-  for data_group in project.get_project_data_group_attributes(filter_restricted_project_id=None):
-    print(data_group['name'], ': ', data_group['id'], sep = '')
+  for data_group_instance in project.get_data_group_instances(args.attribute_id):
+    print('instance id: ', data_group_instance['id'], sep = '')
+
+    # Format the time stringds
+    format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
+    record_date = str(datetime.strptime(data_group_instance['record_date'], format_string)).split('.')[0]
+    created_at = str(datetime.strptime(data_group_instance['created_at'], format_string)).split('.')[0]
+    updated_at = str(datetime.strptime(data_group_instance['updated_at'], format_string)).split('.')[0]
     if args.display_all_information:
-      print('  uid: ', data_group['uid'], sep = '')
-      print('  description: ', data_group['description'], sep = '')
-      print('  original project id: ', data_group['original_project_id'], sep = '')
-      print('  is custom: ', data_group['is_custom'], sep = '')
-      print('  is editable: ', data_group['is_editable'], sep = '')
-      print('  is public: ', data_group['is_public'], sep = '')
-      print('  instance count: ', data_group['instances_count'], sep = '')
-
-      # Format the time stringds
-      format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
-      created_at = str(datetime.strptime(data_group['created_at'], format_string)).split('.')[0]
-      updated_at = str(datetime.strptime(data_group['updated_at'], format_string)).split('.')[0]
-
+      print('  record date: ', record_date, sep = '')
       print('  created_at: ', created_at, ', updated_at: ', updated_at, sep = '')
-      print('  prdefined values: ', data_group['predefined_values'], sep = '')
-    if args.include_attributes:
-      for attribute in data_group['data_group_attributes']:
-        print('  ', attribute['id'], ': ', project_attributes[attribute['attribute_id']], ': ', attribute['attribute_id'], sep = '')
+    for attribute in data_group_instance['data_group_attribute_values']:
+      if args.display_all_information:
+        print('  attribute id: ', attribute['attribute_id'], ', id: ', attribute['id'], sep = '')
+        format_string = '%Y-%m-%dT%H:%M:%S'
+        record_date = str(attribute['record_date']).split('+')[0]
+        record_date = str(datetime.strptime(record_date, format_string)).split('.')[0]
+        print('    record_date: ', record_date, sep = '')
+        print('    custom_display_format: ', attribute['custom_display_format'], sep = '')
+        print('    display_type: ', attribute['display_type'], sep = '')
+        print('    value_type: ', attribute['value_type'], sep = '')
+        print('    value: ', attribute['value'], sep = '')
+      else:
+        print('  attribute id: ', attribute['attribute_id'], ', id: ', attribute['id'], ', value: ', attribute['value'], sep = '')
 
 # Input options
 def parse_command_line():
@@ -74,9 +77,9 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic id of the data group attribute')
 
   # Optional viewing options
-  display_arguments.add_argument('--include_attributes', '-i', required = False, action = 'store_true', help = 'Include constituent attributes in output')
   display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Include all data group information')
 
   return parser.parse_args()

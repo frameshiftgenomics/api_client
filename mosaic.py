@@ -1176,7 +1176,7 @@ class Project(object):
 
     def post_data_group_instance(self, attribute_id, *, record_date=None, data_group_attributes=None):
         data = { 'record_date': record_date,
-                 'data_group_attributes': data_group_attributes}
+                 'data_group_attribute_values': data_group_attributes}
 
         return self._mosaic.post(f'{self._path}/attributes/data-groups/{attribute_id}/instances', data=data)
 
@@ -1185,6 +1185,12 @@ class Project(object):
         data = { 'attribute_id': attribute_id }
 
         return self._mosaic.post(f'{self._path}/attributes/data-groups/import', data=data)
+
+
+    def put_project_data_group_instance(self, attribute_id, instance_id):
+        data = { }
+
+        return self._mosaic.put(f'{self._path}/attributes/data-groups/{attribute_id}/instances/{instance_id}')#, data=data)
 
 
     def put_project_data_group_attribute(self, attribute_id, *, name=None, description=None, is_public=None, is_editable=None, data_group_attributes=None):
