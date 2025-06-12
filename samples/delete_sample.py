@@ -29,9 +29,9 @@ def main():
 
   # Delete the sample
   try:
-    project.delete_sample(sample_id)
-  except:
-    fail('Unable to delete sample')
+    project.delete_sample(args.sample_id)
+  except Exception as e:
+    fail('Unable to delete sample with error: ' + str(e))
 
 # Input options
 def parse_command_line():
