@@ -681,6 +681,10 @@ class Mosaic(object):
     """
 
 
+    def delete_task(self, task_id):
+        return self.delete(f'tasks/{task_id}')
+
+
     def get_tasks(self, *, categories=None, completed=None, project_ids=None, types=None, order_dir=None):
         params = { }
         if categories:

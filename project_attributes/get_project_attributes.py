@@ -30,6 +30,8 @@ def main():
 
   # Get the project settings
   for attribute in project.get_project_attributes():
+    pprint(attribute)
+    exit(0)
     if not args.display_all_information:
       print(attribute['name'], ': ', attribute['id'], sep = '')
     else:
