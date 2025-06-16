@@ -29,8 +29,21 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Get the HPO terms for the sample
-  for hpo_term in project.get_sample_hpo_terms(args.sample_id):
-    print(hpo_term['hpo_id'], ': ', hpo_term['label'], ' (id: ', hpo_term['id'], ')', sep = '')
+  sample_hpo = {}
+  for hpo_term in project.get_samples_hpo_terms():
+    sample_id = hpo_term['sample_id']
+    if sample_id not in sample_hpo:
+      sample_hpo[sample_id] = {}
+    sample_hpo[sample_id][hpo_term['id']] = {'label': hpo_term['label'], 'id': hpo_term['id']}
+
+  # Get the names of all the samples
+  samples = {}
+  for sample in project.get_samples():
+    samples[sample['id']] = sample['name']
+  for sample_id in sample_hpo:
+    print('sample: ', samples[sample_id], ' (', sample_id, ')', sep = '')
+    for hpo_id in sample_hpo[sample_id]:
+      print('  ', hpo_id, ': ', sample_hpo[sample_id][hpo_id]['label'], ' (id: ', sample_hpo[sample_id][hpo_id]['id'], ')', sep = '')
 
 # Input options
 def parse_command_line():
@@ -45,9 +58,8 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # Get the id of the project and the sample whose HPO terms are required
+  # Get the id of the project
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The project id')
-  project_arguments.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The id of the sample whose HPO terms are required')
 
   return parser.parse_args()
 
