@@ -28,39 +28,49 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
+  # Get the array of ids to look at
+  attribute_ids = False
+  if args.attribute_ids:
+    attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
+
   # Get the project settings
   for attribute in project.get_project_attributes():
-    pprint(attribute)
-    exit(0)
-    if not args.display_all_information:
-      print(attribute['name'], ': ', attribute['id'], sep = '')
-    else:
-      print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
-      if attribute['description']:
-        print('  description: ', attribute['description'], sep = '')
-      print('    uid: ', attribute['uid'], sep = '')
-      print('    value_type: ', attribute['value_type'], sep = '')
-      print('    original_project_id: ', attribute['original_project_id'], sep = '')
-      print('    is_custom: ', attribute['is_custom'], sep = '')
-      print('    is_editable: ', attribute['is_editable'], sep = '')
-      print('    is_longitudinal: ', attribute['is_longitudinal'], sep = '')
-      print('    is_public: ', attribute['is_public'], sep = '')
-      print('    custom_display_format: ', attribute['custom_display_format'], sep = '')
-      print('    display_type: ', attribute['display_type'], sep = '')
-      if attribute['predefined_values']:
-        print('    predefined_values:')
-        for value in attribute['predefined_values']:
-          print('      ', value, sep = '')
-      if attribute['source']:
-        print('    source: ', attribute['source'], sep = '')
-      if attribute['start_attribute_id']:
-        print('    Start id: ', attribute['start_attribute_id'], ', End id: ', attribute['end_attribute_id'], sep = '')
-      print('    created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')
-      if args.include_values:
-        print('    Values:')
-        for value in attribute['values']:
-          print('      ', value['value'], ': ', value['project_id'])
-      print('    policies: ', attribute['policies'], sep = '')
+    display = False if args.attribute_ids else True
+    if args.attribute_ids:
+      if str(attribute['id']) in attribute_ids:
+        display = True
+
+    # Only display if the attribute is requested
+    if display:
+      if not args.display_all_information:
+        print(attribute['name'], ': ', attribute['id'], sep = '')
+      else:
+        print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
+        if attribute['description']:
+          print('  description: ', attribute['description'], sep = '')
+        print('    uid: ', attribute['uid'], sep = '')
+        print('    value_type: ', attribute['value_type'], sep = '')
+        print('    original_project_id: ', attribute['original_project_id'], sep = '')
+        print('    is_custom: ', attribute['is_custom'], sep = '')
+        print('    is_editable: ', attribute['is_editable'], sep = '')
+        print('    is_longitudinal: ', attribute['is_longitudinal'], sep = '')
+        print('    is_public: ', attribute['is_public'], sep = '')
+        print('    custom_display_format: ', attribute['custom_display_format'], sep = '')
+        print('    display_type: ', attribute['display_type'], sep = '')
+        if attribute['predefined_values']:
+          print('    predefined_values:')
+          for value in attribute['predefined_values']:
+            print('      ', value, sep = '')
+        if attribute['source']:
+          print('    source: ', attribute['source'], sep = '')
+        if attribute['start_attribute_id']:
+          print('    Start id: ', attribute['start_attribute_id'], ', End id: ', attribute['end_attribute_id'], sep = '')
+        print('    created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')
+        if args.include_values:
+          print('    Values:')
+          for value in attribute['values']:
+            print('      ', value['value'], ': ', value['project_id'])
+        print('    policies: ', attribute['policies'], sep = '')
 
 # Input options
 def parse_command_line():
@@ -77,9 +87,10 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--attribute_ids', '-i', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to view. If omitted, all will be shown')
 
   # Include values
-  display_arguments.add_argument('--include_values', '-i', required = False, action = 'store_true', help = 'Include attribute values in the output. Only output when used in conjunction with --verbose')
+  display_arguments.add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Include attribute values in the output. Only output when used in conjunction with --verbose')
 
   # Verbose output
   display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display Provide a verbose output')

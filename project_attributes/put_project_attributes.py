@@ -1,5 +1,6 @@
-import os
 import argparse
+import os
+import json
 
 from pprint import pprint
 from sys import path
@@ -29,13 +30,19 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # Set the display type
-  allowed_display_types = ['time', 'date', 'duration', 'custom']
+  allowed_display_types = ['time', 'date', 'duration', 'custom', 'badge']
   if args.display_type:
     if args.display_type not in allowed_display_types:
       fail('unknown display type: ' + args.display_type)
     display_type = args.display_type
   else:
     display_type = None
+
+  # Check that the severity is a json
+  try:
+    json.loads(args.severity)
+  except Exception as e:
+    fail('Severity string is not in json format. Error: ' + str(e))
 
   # Get the project settings
   is_editable = 'false' if args.is_editable else 'true'
@@ -48,7 +55,8 @@ def main():
                                         predefined_values=values, \
                                         is_editable=is_editable, \
                                         display_type=display_type, \
-                                        value=args.value)
+                                        value=args.value, \
+                                        severity = args.severity)
 
 # Input options
 def parse_command_line():
@@ -62,7 +70,7 @@ def parse_command_line():
   # The project id to which the filter is to be added is required
   required_arguments = parser.add_argument_group('Required Arguments')
   required_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  required_arguments.add_argument('--attribute_id', '-t', required = True, metavar = 'integer', help = 'The Mosaic attribute id to update')
+  required_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic attribute id to update')
 
   # Optional arguments to update
   optional_arguments = parser.add_argument_group('Optional Arguments')
@@ -73,6 +81,7 @@ def parse_command_line():
   optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
   optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
   optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
+  optional_arguments.add_argument('--severity', '-se', required = False, metavar = 'string', help = 'A json object of severity levels')
 
   return parser.parse_args()
 
