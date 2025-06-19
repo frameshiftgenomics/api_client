@@ -25,16 +25,27 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Get all of the attribute forms
-  data = api_mosaic.get_conversation_groups()
-  if data:
-    for group in data:
-      print(group['name'], ', id: ', group['id'], sep = '')
-      print('  Description: ', group['description'], sep = '')
-      print('  Members')
-      for user_id in group['user_ids']:
-        user_info = api_mosaic.get_user_info(user_id)
-        print('    ', user_info['first_name'], ' ', user_info['last_name'], ' (', user_info['username'], ', ', user_info['id'], ')', sep = '')
+  # Get the existing conversation group
+  for group in api_mosaic.get_conversation_groups():
+    if int(group['id']) == int(args.group_id):
+      existing_name = group['name']
+      existing_description = group['description']
+      existing_user_ids = group['user_ids']
+      break
+
+  # Create a new conversation group
+  name = args.name if args.name else existing_name
+  description = args.description if args.description else existing_description
+  if args.user_ids:
+    user_ids = args.user_ids.split(',') if ',' in args.user_ids else [args.user_ids]
+  else:
+    user_ids = existing_user_ids
+
+  # Update the conversation group
+  try:
+    data = api_mosaic.put_conversation_groups(args.group_id, name = name, description = description, user_ids = user_ids)
+  except Exception as e:
+    fail('Failed to update the conversation group. Error: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -48,6 +59,14 @@ def parse_command_line():
   # Define the location of the api_client and the ini config file
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+
+  # The id of the conversation group
+  required_arguments.add_argument('--group_id', '-i', required = True, metavar = 'integer', help = 'The id of the conversation group')
+
+  # Get information on the conversation group
+  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the conversation group')
+  optional_arguments.add_argument('--user_ids', '-u', required = False, metavar = 'string', help = 'A comma separated list of user ids to add to the conversation group')
+  optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'A description of the conversation group')
 
   return parser.parse_args()
 

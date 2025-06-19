@@ -434,14 +434,17 @@ class Mosaic(object):
         return self.post(f'conversation-groups', data=data)
 
 
-    def put_conversation_groups(self, group_id, *, name, description=None, user_ids):
-        data = { 'name': name,
-                 'user_ids': user_ids }
+    def put_conversation_groups(self, group_id, *, name=None, description=None, user_ids=None):
+        data = { }
 
         if description:
-            data['description'] = name
+            data['description'] = description
+        if name:
+            data['name'] = name
+        if user_ids:
+            data['user_ids'] = user_ids
 
-        return self.post(f'conversation-groups/{group_id}', data=data)
+        return self.put(f'conversation-groups/{group_id}', data=data)
 
 
 
