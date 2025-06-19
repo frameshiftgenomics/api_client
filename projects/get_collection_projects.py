@@ -26,29 +26,35 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  collection = api_mosaic.get_project(args.collection_id)
+  if not collection.get_project()['is_collection']:
+    fail('Collection id is for a project, not a collection')
 
   # Get all projects in the collection
-  projects = project.get_collection_projects()
-  for collection_project in projects:
-    print(collection_project['name'], ': ', collection_project['id'], sep = '')
-    if args.verbose:
-      print('  nickname: ', collection_project['nickname'], sep = '')
-      print('  description: ', collection_project['description'], sep = '')
+  for project in collection.get_collection_projects():
+    print(project['name'], ': ', project['id'], sep = '')
+    if args.display_all:
+      print('  nickname: ', project['nickname'], sep = '')
+      print('  description: ', project['description'], sep = '')
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  # The collection id
+  project_arguments.add_argument('--collection_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic collection id to get projects for')
 
   # Concise output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Provide a verbose output')
+  display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Display all project information')
 
   return parser.parse_args()
 
