@@ -1,6 +1,7 @@
 import os
 import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -27,8 +28,20 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Delete the file
-  project.delete_sample_file(args.sample_id, args.file_id)
+  # Get all of the samples in the project
+  samples = {}
+  for sample in project.get_samples():
+    samples[sample['id']] = sample['name']
+
+  # Get all of the files for each sample
+  for sample_id in samples:
+    for sample_file in project.get_sample_files(sample_id):
+
+      # Delete the file
+      try:
+        project.delete_sample_file(sample_id, sample_file['id'])
+      except Exception as e:
+        fail('Could not delete file. Error: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -45,10 +58,6 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to remove the sample file from')
-
-  # Arguments related to the file to add
-  project_arguments.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The sample id the file is attached to')
-  project_arguments.add_argument('--file_id', '-f', required = True, metavar = 'integer', help = 'The file id to be deleted')
 
   return parser.parse_args()
 
