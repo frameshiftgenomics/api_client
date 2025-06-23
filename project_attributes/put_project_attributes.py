@@ -39,16 +39,18 @@ def main():
     display_type = None
 
   # Check that the severity is a json
-  try:
-    json.loads(args.severity)
-  except Exception as e:
-    fail('Severity string is not in json format. Error: ' + str(e))
+  if args.severity:
+    try:
+      json.loads(args.severity)
+    except Exception as e:
+      fail('Severity string is not in json format. Error: ' + str(e))
 
   # Get the project settings
   is_editable = 'false' if args.is_editable else 'true'
   values = args.predefined_values.split(',') if args.predefined_values else None
   original_project_id = args.original_project_id if args.original_project_id else None
-  data = project.put_project_attributes(args.attribute_id, \
+  try:
+    project.put_project_attributes(args.attribute_id, \
                                         description=args.description, 
                                         name=args.name, \
                                         original_project_id=original_project_id, \
@@ -57,6 +59,8 @@ def main():
                                         display_type=display_type, \
                                         value=args.value, \
                                         severity = args.severity)
+  except Exception as e:
+    fail('Failed to update the attribute. Error: ' + str(e))
 
 # Input options
 def parse_command_line():
