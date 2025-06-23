@@ -28,22 +28,9 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Check if the attribute is already in the project. This will determine if a POST or a PUT is required
-  attribute_in_project = False
-  for attribute in project.get_project_attributes():
-    if str(attribute['id']) == str(args.attribute_id):
-      attribute_in_project = True
-      break
-
-  # If the attribute is in the project, use a PUT
-  if attribute_in_project:
-    try:
-      project.put_project_attributes(args.attribute_id, value = args.value)
-    except Exception as e:
-      fail('Could not update attribute. Error: ' + str(e))
-
-  # Otherwise use a POST
-  else:
+  try:
+    project.put_project_attributes(args.attribute_id, value = args.value)
+  except:
     try:
       project.post_project_attribute(value = args.value)
     except Exception as e:
