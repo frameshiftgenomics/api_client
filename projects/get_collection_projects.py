@@ -30,12 +30,19 @@ def main():
   if not collection.get_project()['is_collection']:
     fail('Collection id is for a project, not a collection')
 
+  # Make sure conflicting display options aren't selected
+  if args.ids_only and args.display_all:
+    fail('Conflicting display options selected')
+
   # Get all projects in the collection
   for project in collection.get_collection_projects():
-    print(project['name'], ': ', project['id'], sep = '')
-    if args.display_all:
-      print('  nickname: ', project['nickname'], sep = '')
-      print('  description: ', project['description'], sep = '')
+    if args.ids_only:
+      print(project['id'])
+    else:
+      print(project['name'], ': ', project['id'], sep = '')
+      if args.display_all:
+        print('  nickname: ', project['nickname'], sep = '')
+        print('  description: ', project['description'], sep = '')
 
 # Input options
 def parse_command_line():
@@ -53,7 +60,8 @@ def parse_command_line():
   # The collection id
   project_arguments.add_argument('--collection_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic collection id to get projects for')
 
-  # Concise output
+  # Display options
+  display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only return project ids')
   display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Display all project information')
 
   return parser.parse_args()
