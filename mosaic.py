@@ -578,14 +578,13 @@ class Mosaic(object):
     GLOBAL PROJECT ATTRIBUTES
     """
 
-    def get_public_project_attributes(self):#, attribute_ids=None):
-        #params = { }
+    def get_public_project_attributes(self, *, attribute_ids=None):
+        params = { }
 
-        #if attribute_ids:
-        #  params['attribute_ids'] = attribute_ids
-        #  return self.get(f'projects/attributes', params=params)
+        if attribute_ids:
+            params['attribute_ids'] = attribute_ids
 
-        yield from self.get_paged_route_iter(f'projects/attributes')
+        yield from self.get_paged_route_iter(f'projects/attributes', params=params)
 
 
 
