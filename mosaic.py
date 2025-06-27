@@ -1580,6 +1580,18 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/samples/{sample_id}/files/{file_id}')
 
 
+    def get_all_sample_files(self, *, file_types=None, sample_names=None, combine_duplicates=None):
+        params = {}
+        if combine_duplicates:
+            params['combine_duplicates'] = combine_duplicates
+        if file_types:
+            params['file_types'] = file_types
+        if sample_names:
+            params['sample_names'] = sample_names
+
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/files', params=params)
+
+
     def get_sample_files(self, sample_id):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
 
