@@ -83,13 +83,13 @@ def parse_command_line():
 
   # The project and attribute ids
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'string', help = 'An ordered, comma separated list of longitudinal attribute ids to add to the data group')
+  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The id of the data group')
 
   # Required parameters
   required_arguments.add_argument('--attributes', '-t', required = True, metavar = 'string', help = 'A comma separated list of attributes to add in the format ID:value. Example: 1:value1,2:value2')
 
   # Optional arguments
-  required_arguments.add_argument('--record_date', '-r', required = False, metavar = 'string', help = 'The record date to add in the format YYYY-MM-DD')
+  optional_arguments.add_argument('--record_date', '-r', required = False, metavar = 'string', help = 'The record date to add in the format YYYY-MM-DD')
 
   return parser.parse_args()
 

@@ -1,6 +1,7 @@
 import os
 import argparse
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -24,18 +25,9 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
+  # Delete the attribute form
   project = api_mosaic.get_project(args.project_id)
-
-  # Get the list of variant filter ids
-  for variant_filter in project.get_variant_filters():
-    if args.display_all:
-      print(variant_filter['name'])
-      for field in variant_filter:
-        if field != 'name':
-          print('  ', field, ': ', variant_filter[field], sep = '')
-    else:
-      print(variant_filter['id'])
+  pprint(project.get_project())
 
 # Input options
 def parse_command_line():
@@ -50,11 +42,8 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
-
-  # Verbose output
-  display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Output all variant filter information')
+  # The id of the project
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The id of the project')
 
   return parser.parse_args()
 
