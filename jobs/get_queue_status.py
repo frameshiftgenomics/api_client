@@ -30,6 +30,21 @@ def main():
   job_statuses = args.status if args.status else None
   per_status_start = args.per_status_start if args.per_status_start else None
   per_status_end = args.per_status_end if args.per_status_end else None
+
+  # If the number of jobs requested is greater than per_status_end, update per_status_end to the number of jobs to return.
+  # If per_status_end is not set, it will default to 49, so if the requested number of jobs is larger than this also
+  # update per_status_end
+  if not per_status_end:
+    if args.show_top_n:
+      per_status_end = args.show_top_n
+  else:
+    if args.show_top_n:
+      if int(args.show_top_n) > int(per_status_end):
+        per_status_end = args.show_top_n
+
+  if args.show_top_n:
+    per_status_end = args.show_top_n
+
   i = 1
   for job in api_mosaic.get_queue_status(per_status_start = per_status_start, per_status_end = per_status_end)['jobs']:
 
