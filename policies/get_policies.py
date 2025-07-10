@@ -28,7 +28,6 @@ def main():
   # Get the policies
   for policy in api_mosaic.get_policies():
     print(policy['name'], ', id:', policy['id'], ', uid:', policy['uid'], ', description: ', policy['description'], sep = '')
-    print(policy)
 
 # Input options
 def parse_command_line():

@@ -33,7 +33,7 @@ def main():
 
     # If only output samples is set, provide the limited output
     if args.ids_only:
-      print(sample['name'], ': ', sample['id'], sep = '')
+      print(sample['id'], sep = '')
 
     # Output all information
     else:

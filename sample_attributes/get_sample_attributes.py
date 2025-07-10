@@ -38,7 +38,11 @@ def main():
 
   # Get the attributes for the sample
   for attribute in project.get_sample_attributes(attribute_ids = attribute_ids, include_values = include_values):
-    print(attribute)
+    if args.only_show_values and include_values:
+      for value in attribute['values']:
+        print(value['value'])
+    else:
+      print(attribute)
 
 # Input options
 def parse_command_line():
@@ -58,6 +62,7 @@ def parse_command_line():
   # The sample id to get attributes for
   optional_arguments.add_argument('--attribute_ids', '-t', required = False, metavar = 'integer', help = 'A comma separated list of attribute ids')
   optional_arguments.add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Set to output values for all samples')
+  optional_arguments.add_argument('--only_show_values', '-ov', required = False, action = 'store_true', help = 'Only show the values for the selected attributes')
 
   return parser.parse_args()
 

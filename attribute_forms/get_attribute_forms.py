@@ -34,20 +34,25 @@ def main():
   data = api_mosaic.get_attribute_forms()
   for form in data['data']:
     print(form['name'], ': ', form['id'], ' (', form['origin_type'], ')', sep = '')
-    if args.verbose:
+    if args.display_all:
       for attribute in form['attribute_form_attributes']:
         print('  ', attribute['attribute_id'], ': ', attributes[attribute['attribute_id']]['name'], ', ', attribute['type'], sep = '')
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Verbose output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'Verbose output')
+  display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Verbose output')
 
   return parser.parse_args()
 

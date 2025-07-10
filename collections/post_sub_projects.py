@@ -34,7 +34,10 @@ def main():
 
   # Add the projects to the collection
   projects_to_add = args.projects_to_add.split(',') if ',' in args.projects_to_add else [args.projects_to_add]
-  data = collection.post_sub_projects(collection_projects = projects_to_add, same_role = 'true')
+  try:
+    collection.post_sub_projects(collection_projects = projects_to_add, same_role = 'true')
+  except Exception as e:
+    fail('Failed to post sub-project with error: ' + str(e))
 
 # Input options
 def parse_command_line():
