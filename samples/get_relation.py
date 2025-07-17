@@ -44,10 +44,16 @@ def main():
   for sample in samples:
     if args.relation:
       if relation_values[sample['id']] == args.relation:
-        print(sample['name'], sample['id'], relation_values[sample['id']], sep = '\t')
-
+        if args.ids_only:
+          print(sample['id'])
+        else:
+          print(sample['name'], sample['id'], relation_values[sample['id']], sep = '\t')
     else:
-      print(sample['name'], sample['id'], relation_values[sample['id']], sep = '\t')
+
+      if args.ids_only:
+        print(sample['id'])
+      else:
+        print(sample['name'], sample['id'], relation_values[sample['id']], sep = '\t')
 
 # Input options
 def parse_command_line():
@@ -69,7 +75,7 @@ def parse_command_line():
   optional_arguments.add_argument('--relation', '-r', required = False, metavar = 'string', help = 'The name of the relation to find, e.g. proband, or mother. If not set, all samples will be returned')
 
   # Output ids only
-  display_arguments.add_argument('--ids_only', '-d', required = False, action = 'store_true', help = 'Only output sample ids')
+  display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only output sample ids')
 
   return parser.parse_args()
 
