@@ -27,6 +27,10 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
+  # The -io and -no options are mutually exclusive
+  if args.ids_only and args.names_only:
+    fail('Only one of --ids_only or --names_only can be specified at a time')
+
   # Delete the file
   samples = project.get_samples()
   for sample in samples:
@@ -34,6 +38,10 @@ def main():
     # If only output samples is set, provide the limited output
     if args.ids_only:
       print(sample['id'], sep = '')
+
+    # Of if only names are requested
+    elif args.names_only:
+      print(sample['name'], sep = '')
 
     # Output all information
     else:
@@ -58,7 +66,8 @@ def parse_command_line():
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # Output ids only
-  display_arguments.add_argument('--ids_only', '-d', required = False, action = 'store_true', help = 'Only output sample ids')
+  display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only output sample ids')
+  display_arguments.add_argument('--names_only', '-no', required = False, action = 'store_true', help = 'Only output sample names')
 
   return parser.parse_args()
 

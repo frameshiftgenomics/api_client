@@ -60,16 +60,20 @@ def main():
       if args.name == annotation['name']:
         if args.show_detailed:
           print_verbose(annotation)
-        else:
+        elif args.ids_only:
           print(annotation['id'])
+        else:
+          print_simple(annotation)
 
     # If we only want a specific annotation
     elif args.uid:
       if args.uid == annotation['uid']:
         if args.show_detailed:
           print_verbose(annotation)
-        else:
+        elif args.ids_only:
           print(annotation['id'])
+        else:
+          print_simple(annotation)
 
     # If a category is specified, check the value
     elif args.category:
@@ -77,6 +81,8 @@ def main():
       if args.category == category:
         if args.show_detailed:
           print_verbose(annotation)
+        elif args.ids_only:
+          print(annotation['id'])
         else:
           print_simple(annotation)
 
@@ -86,6 +92,8 @@ def main():
       # If all information, except values were requested
       if args.show_detailed:
         print_verbose(annotation)
+      elif args.ids_only:
+        print(annotation['id'])
       else:
         print_simple(annotation)
 
@@ -137,6 +145,7 @@ def parse_command_line():
   optional_arguments.add_argument('--category', '-ca', required = False, metavar = 'string', help = 'Only view annotations from this category')
 
   # Determine what to display
+  display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'If set, only the annotation ids will be output')
   display_arguments.add_argument('--show_detailed', '-sd', required = False, action = 'store_true', help = 'If set, will display all information except the annotation values')
   display_arguments.add_argument('--show_values', '-sv', required = False, action = 'store_true', help = 'If set, will display all information including the annotation values. Annotation ids must be provided to get values')
 
