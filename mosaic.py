@@ -1049,6 +1049,17 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/import', data=data)
 
 
+    def post_create_attribute_value(self, attribute_id, *, value=None, record_date=None):
+        data = { }
+
+        if record_date:
+            data['record_date'] = record_date
+        if value:
+            data['value'] = value
+
+        return self._mosaic.post(f'{self._path}/attributes/{attribute_id}/values', data=data)
+
+
     def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_public=False):
         data = { }
 
