@@ -1096,6 +1096,17 @@ class Project(object):
         return self._mosaic.put(f'{self._path}/attributes/{attribute_id}', data=data)
 
 
+    def put_update_attribute_value(self, attribute_id, value_id, *, value=None, record_date=None):
+        data = { }
+
+        if value:
+            data['value'] = value
+        if record_date:
+            data['record_date'] = record_date
+
+        return self._mosaic.put(f'{self._path}/attributes/{attribute_id}/values/{value_id}', data=data)
+
+
     """
     PROJECT CONVERSATIONS
     """
@@ -1154,7 +1165,7 @@ class Project(object):
 
 
     def get_data_group_instances(self, attribute_id):
-        return self._mosaic.get(f'{self._path}/attributes/data-groups/{attribute_id}/instances')
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/attributes/data-groups/{attribute_id}/instances')
 
 
     def get_project_data_group_attributes(self, *, filter_restricted_project_id=None):
