@@ -43,6 +43,12 @@ def main():
       fail('A list of project ids to add to the collection is provided. To create a collection, the --is_collection (-co) must be set')
     collection_projects = args.collection_projects.split(',') if ',' in args.collection_projects else [args.collection_projects]
 
+  # If attribute forms are listed
+  attribute_forms = []
+  if args.attribute_forms:
+    for attribute_form_id in args.attribute_forms.split(','):
+      attribute_forms.append({"form_id": attribute_form_id, "attribute_form_attributes": []})
+
   # Create a project
   project = api_mosaic.post_project(args.name, \
                                     args.reference, \
@@ -51,7 +57,8 @@ def main():
                                     is_collection = args.is_collection, \
                                     collection_projects = collection_projects, \
                                     privacy_level = args.privacy_level, \
-                                    template_project_id = args.template_project_id)
+                                    template_project_id = args.template_project_id, \
+                                    attribute_forms = attriubte_forms)
 
 # Input options
 def parse_command_line():
@@ -79,6 +86,9 @@ def parse_command_line():
 
   # Set the project template
   optional_arguments.add_argument('--template_project_id', '-t', required = False, metavar = 'integer', help = 'Supply the id of a template project to apply this template on creation')
+
+  # Set the attribute forms
+  optional_arguments.add_argument('--attribute_forms', '-af', required = False, metavar = 'string', help = 'Comma separated list of attribute forms to associate with the project')
 
   return parser.parse_args()
 

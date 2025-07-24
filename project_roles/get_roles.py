@@ -29,14 +29,14 @@ def main():
   project = api_mosaic.get_project(args.project_id)
 
   # If using a verbose output, get the role types
-  if args.verbose:
+  if args.display_all:
     role_type_ids = {}
     for role_type in api_mosaic.get_role_types():
       role_type_ids[role_type['id']] = role_type['display_name']
 
   # Get the roles
-  for user in project.get_roles()['data']:
-    if args.verbose:
+  for user in project.get_roles():
+    if args.display_all:
       print('Role id: ', user['id'], sep = '')
       print('  user_id: ', user['user_id'], sep = '')
       print('  can_download: ', user['can_download'], sep = '')
@@ -48,19 +48,21 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-
-  # Include sub_project roles for a collection
-  parser.add_argument('--include_subproject_roles', '-i', required = False, metavar = 'string', help = 'Should subproject roles be included')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # Verbose output
-  parser.add_argument('--verbose', '-v', required = False, action = 'store_true', help = 'If set, details of the role will be provided')
+  display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'If set, details of the role will be provided')
 
   return parser.parse_args()
 

@@ -551,11 +551,13 @@ class Mosaic(object):
         yield from self.get_paged_route_iter(f'projects', params=params)
 
 
-    def post_project(self, name, reference, *, nickname=None, description=None, is_collection=None, collection_projects=None, privacy_level='private', template_project_id=None):
+    def post_project(self, name, reference, *, nickname=None, description=None, is_collection=None, collection_projects=None, privacy_level='private', template_project_id=None, attribute_forms=None):
 
         data = { 'name': name,
                  'reference': reference }
 
+        if attribute_forms:
+            data['attribute_forms'] = attribute_forms
         if nickname:
             data['nickname'] = nickname
         if description:
@@ -1365,22 +1367,26 @@ class Project(object):
         if include_sub_project_roles:
             params['include_sub_project_roles'] = 'true'
 
-        return self._mosaic.get(f'{self._path}/roles', params=params)
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/roles', params=params)
 
 
-    def post_project_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None, policy_ids=None):
-        data = { 'role_type_id': role_type_id}
+    def post_project_role(self, user_id, role_type_id, *, can_download=None, can_launch_app=None, policy_ids=None, disable_notification=None):
+        data = { 'user_id': user_id, \
+                 'role_type_id': role_type_id}
+
+        params = {}
 
         if can_download:
             data['can_download'] = can_download
-
         if can_launch_app:
             data['can_launch_app'] = can_launch_app
-
         if policy_ids:
             data['policy_ids'] = policy_ids
 
-        return self._mosaic.post(f'{self._path}/roles/{role_id}', data=data)
+        if disable_notification:
+          params['disable_notification'] = 'true'
+
+        return self._mosaic.post(f'{self._path}/roles', data=data, params=params)
 
 
     def put_project_role(self, role_id, role_type_id, *, user_id=None, can_download=None, can_launch_app=None, policy_ids=None):
