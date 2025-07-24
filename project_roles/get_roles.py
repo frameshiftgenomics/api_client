@@ -28,6 +28,10 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
+  # The -dn and -dr options are mutually exclusive
+  if args.display_all and args.display_user_id_and_type_id:
+    fail('The -dn and -dr options are mutually exclusive')
+
   # If using a verbose output, get the role types
   if args.display_all:
     role_type_ids = {}
@@ -42,6 +46,8 @@ def main():
       print('  can_download: ', user['can_download'], sep = '')
       print('  can_launch_app: ', user['can_launch_app'], sep = '')
       print('  role_type: ', role_type_ids[user['role_type_id']], ' (id: ', user['role_type_id'], ')', sep = '')
+    elif args.display_user_id_and_type_id:
+      print(user['user_id'], user['role_type_id'], sep = '\t')
     else:
       print(user['user_id'])
 
@@ -63,6 +69,7 @@ def parse_command_line():
 
   # Verbose output
   display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'If set, details of the role will be provided')
+  display_arguments.add_argument('--display_user_id_and_type_id', '-dr', required = False, action = 'store_true', help = 'If set, details of the role will be provided')
 
   return parser.parse_args()
 
