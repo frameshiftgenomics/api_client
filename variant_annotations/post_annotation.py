@@ -26,7 +26,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project with the given id. Error was: ' + str(e))
 
   # Check the inputted information
   allowed_types = ['float', 'string']
@@ -35,25 +38,53 @@ def main():
   if args.privacy_level != 'public' and args.privacy_level != 'private':
     fail('ERROR: unknown privacy_level. Must be public or private')
 
+  # Check if an annotation of the same name exists in the project
+  for annotation in project.get_variant_annotations():
+    if str(annotation['name']) == str(args.name):
+      if args.force_creation:
+        print('Forced annotation creation. Annotation with the name "' + str(args.name) + '" already exists, but a new annotation was created with the same name')
+      else:
+        print('No annotation created. Annotation with the name "' + str(args.name) + '" already exists')
+        exit(0)
+
   # Create the new annotation
-  data = project.post_variant_annotation(name=args.name, value_type=args.value_type, privacy_level=args.privacy_level, display_type=None, severity=None, category=args.category, value_truncate_type=None, value_max_length=None)
+  try:
+    project.post_variant_annotation(name = args.name, \
+                                    value_type = args.value_type, \
+                                    privacy_level = args.privacy_level, \
+                                    display_type = None, \
+                                    severity = None, \
+                                    category = args.category, \
+                                    value_truncate_type = None, \
+                                    value_max_length = None)
+  except Exception as e:
+    fail('Failed to create annotation. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # Information about the annotation being created
-  parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The annotation name')
-  parser.add_argument('--category', '-t', required = True, metavar = 'string', help = 'The category to assign the annotation to')
-  parser.add_argument('--value_type', '-v', required = True, metavar = 'string', help = 'The annotation type: string or float')
-  parser.add_argument('--privacy_level', '-y', required = True, metavar = 'string', help = 'The annotation privacy: public or private')
+  required_arguments.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The annotation name')
+  required_arguments.add_argument('--category', '-t', required = True, metavar = 'string', help = 'The category to assign the annotation to')
+  required_arguments.add_argument('--value_type', '-v', required = True, metavar = 'string', help = 'The annotation type: string or float')
+  required_arguments.add_argument('--privacy_level', '-y', required = True, metavar = 'string', help = 'The annotation privacy: public or private')
+
+  # Annotations will not be created if an annotation of the given name already exists. This
+  # flag will force the annotation to be created even if an annotation of the same name exists
+  optional_arguments.add_argument('--force_creation', '-f', required = False, action = 'store_true', help = 'Force annotation creation, even if an annotation of the same name exists')
 
   return parser.parse_args()
 
