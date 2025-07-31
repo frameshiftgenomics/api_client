@@ -41,10 +41,6 @@ def main():
   # Set the version name
   version_name = args.version_name if args.version_name else None
 
-  # If --set_as_latest is set, the version name must also be set
-  if args.set_as_latest and not version_name:
-    fail('The --set_as_latest flag can only be set if --version_name is also set')
-
   # Check if an annotation of the same name exists in the project
   for annotation in project.get_variant_annotations():
     if str(annotation['name']) == str(args.name):
@@ -56,14 +52,22 @@ def main():
 
   # Create the new annotation
   try:
-    annotation_id = project.post_variant_annotation(name = args.name, \
+    data = project.post_variant_annotation(name = args.name, \
                                            value_type = args.value_type, \
                                            privacy_level = args.privacy_level, \
                                            display_type = None, \
                                            severity = None, \
                                            category = args.category, \
                                            value_truncate_type = None, \
-                                           value_max_length = None)['id']
+                                           value_max_length = None)
+    annotation_id = data['id']
+
+    # Get the id of the default version
+    default_id = None
+    for annotation_version in data['annotation_versions']:
+      if annotation_version['version'] == 'default':
+        default_id = annotation_version['id']
+        break
   except Exception as e:
     fail('Failed to create annotation. Error was: ' + str(e))
 
@@ -73,6 +77,8 @@ def main():
       version_id = project.post_create_annotation_version(annotation_id, version_name)['id']
     except Exception as e:
       fail('Failed to create annotation version. Error was: ' + str(e))
+  else:
+    version_id = default_id
 
   # If the new annotation version is to be set as the latest, set it
   if args.set_as_latest:
@@ -107,7 +113,7 @@ def parse_command_line():
   # flag will force the annotation to be created even if an annotation of the same name exists
   optional_arguments.add_argument('--force_creation', '-f', required = False, action = 'store_true', help = 'Force annotation creation, even if an annotation of the same name exists')
   optional_arguments.add_argument('--version_name', '-vn', required = False, metavar = 'string', help = 'Optionally create an annotation version with this name')
-  optional_arguments.add_argument('--set_as_latest', '-s', required = False, action = 'store_true', help = 'If --version_name is set, this flag will set this version as the latest')
+  optional_arguments.add_argument('--set_as_latest', '-s', required = False, action = 'store_true', help = 'If --version_name is set, this flag will set the named version (or the default version if no name is given) as the latest')
 
   return parser.parse_args()
 
