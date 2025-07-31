@@ -38,6 +38,13 @@ def main():
   if args.privacy_level != 'public' and args.privacy_level != 'private':
     fail('ERROR: unknown privacy_level. Must be public or private')
 
+  # Set the version name
+  version_name = args.version_name if args.version_name else None
+
+  # If --set_as_latest is set, the version name must also be set
+  if args.set_as_latest and not version_name:
+    fail('The --set_as_latest flag can only be set if --version_name is also set')
+
   # Check if an annotation of the same name exists in the project
   for annotation in project.get_variant_annotations():
     if str(annotation['name']) == str(args.name):
@@ -49,16 +56,30 @@ def main():
 
   # Create the new annotation
   try:
-    project.post_variant_annotation(name = args.name, \
-                                    value_type = args.value_type, \
-                                    privacy_level = args.privacy_level, \
-                                    display_type = None, \
-                                    severity = None, \
-                                    category = args.category, \
-                                    value_truncate_type = None, \
-                                    value_max_length = None)
+    annotation_id = project.post_variant_annotation(name = args.name, \
+                                           value_type = args.value_type, \
+                                           privacy_level = args.privacy_level, \
+                                           display_type = None, \
+                                           severity = None, \
+                                           category = args.category, \
+                                           value_truncate_type = None, \
+                                           value_max_length = None)['id']
   except Exception as e:
     fail('Failed to create annotation. Error was: ' + str(e))
+
+  # If there is a version_name, create a new version
+  if version_name:
+    try:
+      version_id = project.post_create_annotation_version(annotation_id, version_name)['id']
+    except Exception as e:
+      fail('Failed to create annotation version. Error was: ' + str(e))
+
+  # If the new annotation version is to be set as the latest, set it
+  if args.set_as_latest:
+    try:
+      project.put_variant_annotation(annotation_id, latest_version_id = version_id)
+    except Exception as e:
+      fail('Failed to set new version as Latest. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -85,6 +106,8 @@ def parse_command_line():
   # Annotations will not be created if an annotation of the given name already exists. This
   # flag will force the annotation to be created even if an annotation of the same name exists
   optional_arguments.add_argument('--force_creation', '-f', required = False, action = 'store_true', help = 'Force annotation creation, even if an annotation of the same name exists')
+  optional_arguments.add_argument('--version_name', '-vn', required = False, metavar = 'string', help = 'Optionally create an annotation version with this name')
+  optional_arguments.add_argument('--set_as_latest', '-s', required = False, action = 'store_true', help = 'If --version_name is set, this flag will set this version as the latest')
 
   return parser.parse_args()
 

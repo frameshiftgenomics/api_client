@@ -1747,7 +1747,7 @@ class Project(object):
     def get_variant_annotation_versions(self, annotation_id):
         return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
 
-    def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, version=None):
+    def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
         data = { }
 
         if allow_deletion:
@@ -1782,8 +1782,6 @@ class Project(object):
             data['value_truncate_type'] = value_truncate_type
         if value_max_length:
             data['value_max_length'] = value_max_length
-        if version:
-            data['version'] = version
 
         return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
 
