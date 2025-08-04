@@ -544,7 +544,8 @@ class Mosaic(object):
         params = { }
 
         if only_collections:
-            params['only_collections'] = 'true'
+            params['show_collections'] = 'true'
+            params['show_projects'] = 'false'
         if search:
             params['search'] = search
 
