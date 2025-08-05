@@ -126,8 +126,8 @@ def main():
           if str(version) == str(version_info['version']):
             has_version = True
             break
-      if not has_version:
-        fail('Annotation with uid ' + str(uid) + ' does not have a version with the name ' + str(version))
+        if not has_version:
+          fail('Annotation with uid ' + str(uid) + ' does not have a version with the name ' + str(version))
 
   # Upload the variant annotations
   allow_deletion = 'true' if args.allow_deletion else 'false'
