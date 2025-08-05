@@ -1390,11 +1390,9 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/roles', data=data, params=params)
 
 
-    def put_project_role(self, role_id, role_type_id, *, user_id=None, can_download=None, can_launch_app=None, policy_ids=None):
-        data = { 'role_type_id': role_type_id}
-
-        if user_id:
-            data['user_id'] = user_id
+    def put_project_role(self, role_id, role_type_id, *, can_download=None, can_launch_app=None, policy_ids=None):
+        data = { 'role_id': user_id, \
+                 'role_type_id': role_type_id}
 
         if can_download:
             data['can_download'] = can_download

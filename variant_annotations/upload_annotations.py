@@ -99,16 +99,32 @@ def main():
 
   # If the annotations are being uploaded to a user defined project, ensure the annotations exist
   if user_defined_project:
-    existing_uids = []
+    existing_uids = {}
 
     # Get all the annotations in the project
     for annotation in project.get_variant_annotations():
-      existing_uids.append(annotation['uid'])
+      existing_uids[annotation['uid']] = {'id': annotation['id'], 'versions': annotation['annotation_versions']}
 
-    # Check all the required annotations exist
-    for uid in user_project_uids:
+    # Check all the required annotations exist. Note that the annotation uid may contain the version id. If
+    # this is the case, also check that the version exists
+    for file_uid in user_project_uids:
+      uid = file_uid
+      version = None
+      if '@' in file_uid:
+        uid = uid.split('@')[0]
+        version = file_uid.split('@')[1]
       if uid not in existing_uids:
         fail('Annotation with uid ' + str(uid) + ' does not exist in the project specified with -p')
+
+      # If there is a defined version, check that the version exists
+      has_version = False
+      if version:
+        for version_info in existing_uids[uid]['versions']:
+          if str(version) == str(version_info['version']):
+            has_version = True
+            break
+      if not has_version:
+        fail('Annotation with uid ' + str(uid) + ' does not have a version with the name ' + str(version))
 
   # Upload the variant annotations
   allow_deletion = 'true' if args.allow_deletion else 'false'
