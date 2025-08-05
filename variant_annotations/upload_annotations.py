@@ -108,6 +108,9 @@ def main():
     # Check all the required annotations exist. Note that the annotation uid may contain the version id. If
     # this is the case, also check that the version exists
     for file_uid in user_project_uids:
+
+      # Trim leading or traling spaces
+      file_uid = file_uid.lstrip().rstrip()
       uid = file_uid
       version = None
       if '@' in file_uid:
