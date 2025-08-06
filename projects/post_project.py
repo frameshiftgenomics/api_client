@@ -58,7 +58,7 @@ def main():
                                     collection_projects = collection_projects, \
                                     privacy_level = args.privacy_level, \
                                     template_project_id = args.template_project_id, \
-                                    attribute_forms = attriubte_forms)
+                                    attribute_forms = attribute_forms)
 
 # Input options
 def parse_command_line():
