@@ -34,28 +34,36 @@ def main():
     if int(attribute['id']) == int(args.attribute_id):
       has_attribute = True
       break
+  if not has_attribute:
+    fail('The attribute with id ' + str(args.attribute_id) + ' is not in this project, so a record for it cannot be edited')
 
-  # Check the optional attributes
-  name = args.name if args.name else None
-  description = args.description if args.description else None
+  # Check that a record with the given id exists for this data group
+  has_instance = False
+  for instance in project.get_data_group_instances(args.attribute_id):
+    if int(instance['id']) == int(args.instance_id):
+      has_instance = True
+      break
+  if not has_instance:
+    fail('No instance with the given id exists for the requested data group attribute')
 
-  # If the is_editable, or not editable options are set
-  if args.is_editable and args.is_not_editable:
-    fail('The is_editable and is_not_editable flags cannot be set simultaneously')
-  elif args.is_editable:
-    is_editable = 'true'
-  elif args.is_not_editable:
-    is_editable = 'false'
+  # Update the variants in the project
+  if args.variant_ids:
+    variant_ids = [int(variant_id) for variant_id in args.variant_ids.split(',')]
   else:
-    is_editable = None
-
-  # If this a private attribute and the is_public flag is set, make the data group public
-  is_public = None
-  if not attribute['is_public'] and args.is_public:
-    is_public = 'true'
+    variant_ids = None
+  for variant_id in variant_ids:
+    try:
+      variant_info = project.get_variant(variant_id)
+      if not variant_info:
+        fail('Failed to get variant with id ' + str(variant_id) + '. Check that this variant exists in this project')
+    except Exception as e:
+      fail('Failed to get variant with id ' + str(variant_id) + '. Check that this variant exists in this project')
 
   # Edit the data group attribute
-  project.put_project_data_group_attribute(args.attribute_id, name = name, description = description, is_public = is_public, is_editable = is_editable)
+  try:
+    project.put_project_data_group_instance(args.attribute_id, args.instance_id, record_date=None, data_group_attribute_variant_ids = variant_ids)
+  except Exception as e:
+    fail('Failed to update instance. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -72,14 +80,12 @@ def parse_command_line():
 
   # The project and attribute ids
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic project data attribute id to edit')
+  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The id of the Mosaic project data group attribute to edit')
+  project_arguments.add_argument('--instance_id', '-n', required = True, metavar = 'integer', help = 'The id of the Mosaic project data group instance to edit')
 
   # Optional parameters
-  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the data group attribute')
-  optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The description of the data group attribute')
-  optional_arguments.add_argument('--is_public', '-u', required = False, action = 'store_true', help = 'Set to make the data group attribute public')
-  optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'Set to make the data group attribute editable')
-  optional_arguments.add_argument('--is_not_editable', '-ne', required = False, action = 'store_true', help = 'Set to make the data group attribute NOT editable')
+  #optional_arguments.add_argument('--record_date', '-r', required = False, metavar = 'string', help = 'The date / time to set for this data group instance')
+  optional_arguments.add_argument('--variant_ids', '-v', required = False, metavar = 'string', help = 'A comma separated list of variant ids to add to the instance')
 
   return parser.parse_args()
 

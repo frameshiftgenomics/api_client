@@ -91,7 +91,10 @@ def main():
     annotation_array.append({"annotation_version_id": int(annotation_version_id)})
 
   # Edit the data group attribute
-  project.put_project_data_group_attribute(args.attribute_id, name = name, description = description, is_public = is_public, is_editable = is_editable, data_group_attributes = attribute_array, data_group_annotation_versions = annotation_array)
+  try:
+    project.put_project_data_group_attribute(args.attribute_id, name = name, description = description, is_public = is_public, is_editable = is_editable, data_group_attributes = attribute_array, data_group_annotation_versions = annotation_array)
+  except Exception as e:
+    fail('Failed to update data group. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():

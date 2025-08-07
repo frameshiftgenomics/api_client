@@ -1220,10 +1220,15 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/data-groups/import', data=data)
 
 
-    def put_project_data_group_instance(self, attribute_id, instance_id):
+    def put_project_data_group_instance(self, attribute_id, instance_id, *, record_date=None, data_group_attribute_variant_ids=None):
         data = { }
 
-        return self._mosaic.put(f'{self._path}/attributes/data-groups/{attribute_id}/instances/{instance_id}')#, data=data)
+        if record_date:
+            data['record_date'] = record_date
+        if data_group_attribute_variant_ids:
+            data['data_group_attribute_variant_ids'] = data_group_attribute_variant_ids
+
+        return self._mosaic.put(f'{self._path}/attributes/data-groups/{attribute_id}/instances/{instance_id}', data=data)
 
 
     def put_project_data_group_attribute(self, attribute_id, *, name=None, description=None, is_public=None, is_editable=None, data_group_attributes=None, data_group_annotation_versions=None):
