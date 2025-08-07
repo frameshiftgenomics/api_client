@@ -1226,23 +1226,21 @@ class Project(object):
         return self._mosaic.put(f'{self._path}/attributes/data-groups/{attribute_id}/instances/{instance_id}')#, data=data)
 
 
-    def put_project_data_group_attribute(self, attribute_id, *, name=None, description=None, is_public=None, is_editable=None, data_group_attributes=None):
+    def put_project_data_group_attribute(self, attribute_id, *, name=None, description=None, is_public=None, is_editable=None, data_group_attributes=None, data_group_annotation_versions=None):
         data = { }
 
         if name:
             data['name'] = name
-
         if description:
             data['description'] = description
-
         if is_public:
             data['is_public'] = is_public
-
         if is_editable:
             data['is_editable'] = is_editable
-
         if data_group_attributes:
             data['data_group_attributes'] = data_group_attributes
+        if data_group_annotation_versions:
+            data['data_group_annotation_versions'] = data_group_annotation_versions
 
         return self._mosaic.put(f'{self._path}/attributes/data-groups/{attribute_id}', data=data)
 

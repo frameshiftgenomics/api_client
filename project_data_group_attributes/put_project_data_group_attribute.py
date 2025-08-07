@@ -54,8 +54,44 @@ def main():
   if not attribute['is_public'] and args.is_public:
     is_public = 'true'
 
+  # If the attributes in the data group are to be updated
+  # Generate a list of attribute ids
+  if args.attribute_ids:
+    attribute_ids = [int(attribute_id) for attribute_id in args.attribute_ids.split(',')] if ',' in args.attribute_ids else [int(args.attribute_ids)]
+  else:
+    attribute_ids = []
+
+  # Check that all the attributes are in the project and are longitudinal
+  project_attributes = {}
+  attribute_array = []
+  for project_attribute in project.get_project_attributes():
+    project_attributes[str(project_attribute['id'])] = project_attribute['is_longitudinal']
+  for attribute_id in attribute_ids:
+    if str(attribute_id) not in project_attributes:
+      fail('Attribute id ' + str(attribute_id) + ' is not in the project and so cannot be added to the data group')
+    if not project_attributes[str(attribute_id)]:
+      fail('Attribute id ' + str(attribute_id) + ' is not a longitudinal attribute and so cannot be added to the data group')
+    attribute_array.append({"attribute_id": int(attribute_id)})
+
+  # If the annotations in the data group are to be updated
+  # Generate a list of annotation ids
+  if args.annotation_version_ids:
+    annotation_version_ids = [int(annotation_id) for annotation_id in args.annotation_version_ids.split(',')] if ',' in args.annotation_version_ids else [int(args.annotation_version_ids)]
+  else:
+    annotation_version_ids = []
+
+  # Check that all the annotation version ids exist in the project
+  project_annotations = []
+  annotation_array = []
+  for project_annotation in project.get_variant_annotations():
+    project_annotations.extend([int(version['id']) for version in project_annotation['annotation_versions']])
+  for annotation_version_id in annotation_version_ids:
+    if annotation_version_id not in project_annotations:
+      fail('Annotation version id ' + str(annotation_version_id) + ' is not in the project and so cannot be added to the data group')
+    annotation_array.append({"annotation_version_id": int(annotation_version_id)})
+
   # Edit the data group attribute
-  project.put_project_data_group_attribute(args.attribute_id, name = name, description = description, is_public = is_public, is_editable = is_editable)
+  project.put_project_data_group_attribute(args.attribute_id, name = name, description = description, is_public = is_public, is_editable = is_editable, data_group_attributes = attribute_array, data_group_annotation_versions = annotation_array)
 
 # Input options
 def parse_command_line():
@@ -73,6 +109,10 @@ def parse_command_line():
   # The project and attribute ids
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
   project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic project data attribute id to edit')
+
+  # Add attributes and / or annotations
+  optional_arguments.add_argument('--attribute_ids', '-ai', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to include in the data group. This must be a complete list. Any exsiting attributes in the data group will be removed if they are not included in this list')
+  optional_arguments.add_argument('--annotation_version_ids', '-ni', required = False, metavar = 'string', help = 'A comma separated list of annotation ids to include in the data group. This must be a complete list. Any exsiting annotations in the data group will be removed if they are not included in this list')
 
   # Optional parameters
   optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the data group attribute')
