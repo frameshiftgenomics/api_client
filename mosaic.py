@@ -706,6 +706,10 @@ class Mosaic(object):
         yield from self.get_paged_route_iter(f'tasks', params=params)
 
 
+    def get_task_types(self):
+        return self.get(f'tasks/types')
+
+
     """
     GLOBAL USERS
     """
@@ -1699,6 +1703,9 @@ class Project(object):
     def get_project_tasks(self):
         return self._mosaic.get(f'{self._path}/tasks')
 
+
+    def get_task_type_attributes(self):
+        return self._mosaic.get(f'{self._path}/tasks/types/attributes')
 
 
     """

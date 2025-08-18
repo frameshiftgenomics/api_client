@@ -85,22 +85,27 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Filter tasks by category
-  parser.add_argument('--categories', '-g', required = False, metavar = 'string', help = 'A comma separated list of types to return. The values "all", "project_setup", or "review_variants" can be used. Default: all')
+  optional_arguments.add_argument('--categories', '-g', required = False, metavar = 'string', help = 'A comma separated list of types to return. The values "all", "project_setup", or "review_variants" can be used. Default: all')
 
   # Filter tasks by type
-  parser.add_argument('--types', '-t', required = False, metavar = 'string', help = 'A comma separated list of types to return. The values "all", "set_project_attribute_value", "add_files_for_samples", "primary_clinvar_review", and "submit_for_processing" can be used. Default: all')
+  optional_arguments.add_argument('--types', '-t', required = False, metavar = 'string', help = 'A comma separated list of types to return. The values "all", "set_project_attribute_value", "add_files_for_samples", "primary_clinvar_review", and "submit_for_processing" can be used. Default: all')
 
   # Only return completed tasks
-  parser.add_argument('--completed', '-m', required = False, metavar = 'string', help = 'Return "completed", "pending", or "all" tasks. Default: all')
+  optional_arguments.add_argument('--completed', '-m', required = False, metavar = 'string', help = 'Return "completed", "pending", or "all" tasks. Default: all')
 
   # Project ids to check
-  parser.add_argument('--project_ids', '-p', required = False, metavar = 'string', help = 'A comma separated list of project ids to check')
+  optional_arguments.add_argument('--project_ids', '-p', required = False, metavar = 'string', help = 'A comma separated list of project ids to check')
 
   return parser.parse_args()
 

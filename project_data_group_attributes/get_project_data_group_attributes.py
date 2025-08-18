@@ -62,7 +62,7 @@ def main():
         updated_at = str(datetime.strptime(data_group['updated_at'], format_string)).split('.')[0]
   
         print('  created_at: ', created_at, ', updated_at: ', updated_at, sep = '')
-        print('  prdefined values: ', data_group['predefined_values'], sep = '')
+        print('  predefined values: ', data_group['predefined_values'], sep = '')
       if args.include_attributes:
         for attribute in data_group['data_group_attributes']:
           print('  ', attribute['id'], ': ', project_attributes[attribute['attribute_id']], ': ', attribute['attribute_id'], sep = '')
