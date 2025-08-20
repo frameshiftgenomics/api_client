@@ -1,5 +1,5 @@
-import os
 import argparse
+import os
 
 from pprint import pprint
 from sys import path
@@ -25,14 +25,14 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Get the task_type_attributes
-  for task_type in api_mosaic.get_task_types():
-    print(task_type['display_name'])
-    print('  Task type id: ', task_type['id'], sep = '')
-    print('  Type: ', task_type['type'], sep = '')
-    print('  Category: ', task_type['category'], sep = '')
-    print('  Display Category: ', task_type['display_category'], sep = '')
-    print()
+  # Open an api client project object for the defined project
+  project = api_mosaic.get_project(args.project_id)
+
+  # Import the data group attribute
+  try:
+    project.post_import_project_data_group_attribute(args.attribute_id)
+  except Exception as e:
+    fail('Failed to import data group')
 
 # Input options
 def parse_command_line():
@@ -46,6 +46,10 @@ def parse_command_line():
   # Define the location of the api_client and the ini config file
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+
+  # The project and attribute ids
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The id of the data group to import')
 
   return parser.parse_args()
 

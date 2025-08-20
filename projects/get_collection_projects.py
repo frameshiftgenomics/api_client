@@ -35,14 +35,21 @@ def main():
     fail('Conflicting display options selected')
 
   # Get all projects in the collection
+  output_list = ''
   for project in collection.get_collection_projects():
-    if args.ids_only:
+    if args.comma_separated_list:
+      output_list += str(project['id']) + ','
+    elif args.ids_only:
       print(project['id'])
     else:
       print(project['name'], ': ', project['id'], sep = '')
       if args.display_all:
         print('  nickname: ', project['nickname'], sep = '')
         print('  description: ', project['description'], sep = '')
+
+  # If a comma separated list is being output, trim the final comma and print
+  if args.comma_separated_list:
+    print(output_list.rstrip(','))
 
 # Input options
 def parse_command_line():
@@ -63,6 +70,7 @@ def parse_command_line():
   # Display options
   display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only return project ids')
   display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Display all project information')
+  display_arguments.add_argument('--comma_separated_list', '-ol', required = False, action = 'store_true', help = 'Output the project ids as a comma separated list')
 
   return parser.parse_args()
 

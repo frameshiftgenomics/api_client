@@ -1708,6 +1708,19 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/tasks/types/attributes')
 
 
+    def put_task_type_attributes(self, task_type_attribute_id, *, attribute_ids=None, cascade_update=None):
+        data = {}
+
+        if attribute_ids:
+            data['attribute_ids'] = attribute_ids
+        if cascade_update:
+            if cascade_update == True or cascade_update == 'true':
+                data['cascade_update'] = 'true'
+            elif cascade_update == False or cascade_update == 'false':
+                data['cascade_update'] = 'false'
+
+        return self._mosaic.put(f'{self._path}/tasks/types/{task_type_attribute_id}/attributes', data=data)
+
     """
     USER PROJECT SETTINGS
     """
