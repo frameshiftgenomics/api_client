@@ -1422,7 +1422,7 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/settings')
 
 
-    def put_project_settings(self, *, external_url=None, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None):
+    def put_project_settings(self, *, external_url=None, privacy_level=None, reference=None, selected_sample_attribute_chart_data=None, selected_sample_attribute_column_ids=None, selected_variant_annotation_version_ids=None, default_variant_set_annotation_ids=None, sorted_annotations=None, is_template=None, sub_project_template_ids=None):
         data = { }
 
         if external_url:
@@ -1450,6 +1450,8 @@ class Project(object):
             data['sorted_annotations'] = sorted_annotations
         if is_template:
             data['is_template'] = is_template
+        if sub_project_template_ids:
+            data['sub_project_template_ids'] = sub_project_template_ids
 
         return self._mosaic.put(f'{self._path}/settings', data=data)
 

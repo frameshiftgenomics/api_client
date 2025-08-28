@@ -61,6 +61,8 @@ def main():
           print('    predefined_values:')
           for value in attribute['predefined_values']:
             print('      ', value, sep = '')
+        else:
+          print('    predefined values: none set')
         if attribute['source']:
           print('    source: ', attribute['source'], sep = '')
         if attribute['start_attribute_id']:

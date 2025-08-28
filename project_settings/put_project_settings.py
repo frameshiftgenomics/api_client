@@ -33,6 +33,12 @@ def main():
   is_template = args.is_template if args.is_template else None
   external_url = args.external_url if args.external_url else None
 
+  # Set the sub-project template ids
+  if args.sub_project_template_ids:
+    sub_project_template_ids = args.sub_project_template_ids.split(',') if ',' in args.sub_project_template_ids else [args.sub_project_template_ids]
+  else:
+    sub_project_template_ids = None
+
   # Update the project settings
   project.put_project_settings(external_url = external_url, \
                                privacy_level = privacy_level, \
@@ -42,7 +48,8 @@ def main():
                                selected_variant_annotation_version_ids = None, \
                                default_variant_set_annotation_ids = None, \
                                sorted_annotations = None, \
-                               is_template = is_template)
+                               is_template = is_template, \
+                               sub_project_template_ids = sub_project_template_ids)
 
 # Input options
 def parse_command_line():
@@ -63,8 +70,9 @@ def parse_command_line():
   # Optional arguments
   optional_arguments.add_argument('--external_url', '-e', required = False, metavar = 'string', help = 'The project\'s external url')
   optional_arguments.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The privacy level to assign to the project')
-  optional_arguments.add_argument('--is_template', '-t', required = False, action='store_true', help = 'Select if the project should be a template project')
   optional_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'The genome reference to assign to the project')
+  optional_arguments.add_argument('--is_template', '-t', required = False, action='store_true', help = 'Select if the project should be a template project')
+  optional_arguments.add_argument('--sub_project_template_ids', '-s', required = False, metavar='string', help = 'A comma separated list of project ids to add to a collection')
 
   return parser.parse_args()
 
