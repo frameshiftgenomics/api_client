@@ -473,13 +473,15 @@ class Mosaic(object):
     """
 
     def get_hpo_term(self, hpo_id):
-        return self.get(f'hpo-terms/{hpo_id}')
+        return self.get(f'hpo-terms/{hpo_id}', params=params)
 
 
-    def get_hpo_terms(self, hpo_ids):
+    def get_hpo_terms(self, hpo_ids, *, search=None):
         params = { }
         if hpo_ids:
             params['hpo_ids'] = hpo_ids
+        if search:
+            params['search'] = search
 
         yield from self.get_paged_route_iter(f'hpo-terms', params=params)
 
@@ -1541,7 +1543,8 @@ class Project(object):
     def post_sample_hpo_term(self, sample_id, hpo_id):
         data = { }
 
-        if hpo_id: data['hpo_id'] = hpo_id
+        if hpo_id:
+            data['hpo_id'] = hpo_id
 
         return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
 
