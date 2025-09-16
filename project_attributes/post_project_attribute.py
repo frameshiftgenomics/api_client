@@ -37,11 +37,29 @@ def main():
   else: 
     fail('is_public must be "public" or "private"')
 
+  # Check the attribute type
   if args.value_type != 'float' and args.value_type != 'string' and args.value_type != 'timestamp':
     fail('value_type must be "float" or "string", or "timestamp"')
 
-  values = args.predefined_values.split(',') if args.predefined_values else None
-  data = project.post_project_attribute(description = args.description, name=args.name, predefined_values=values, value=args.value, value_type=args.value_type, is_editable=is_editable, is_public=is_public)
+  # Set the predefined values
+  predefined_values = args.predefined_values.split(',') if args.predefined_values else None
+
+  # Deal with whether the attribute is editable or longitudinal
+  is_editable = 'false' if args.is_editable else 'true'
+  is_longitudinal = 'true' if args.is_longitudinal else 'false'
+
+  # Create the attribute
+  try:
+    project.post_project_attribute(description = args.description, \
+                                   name = args.name, \
+                                   predefined_values = predefined_values, \
+                                   value = args.value, \
+                                   value_type = args.value_type, \
+                                   is_editable = is_editable, \
+                                   is_longitudinal = is_longitudinal, \
+                                   is_public = is_public)
+  except Exception as e:
+    fail('Failed to create attribute. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -56,12 +74,13 @@ def parse_command_line():
 
   # Required arguments for creating a new attribute
   parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the attribute')
-  parser.add_argument('--is_public', '-u', required = True, metavar = 'string', help = 'Is the project public or private')
-  parser.add_argument('--value_type', '-l', required = True, metavar = 'string', help = 'The value type must be "float", "string", or "timestamp"')
+  parser.add_argument('--is_public', '-u', required = True, metavar = 'string', help = 'Is the project "public" or "private"')
+  parser.add_argument('--value_type', '-t', required = True, metavar = 'string', help = 'The value type must be "float", "string", or "timestamp"')
 
   # Optional arguments to update
   parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
   parser.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
+  parser.add_argument('--is_longitudinal', '-l', required = False, action = 'store_true', help = 'If set, the attribute will not longitudinal')
   parser.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
   parser.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
 

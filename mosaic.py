@@ -1069,13 +1069,15 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/{attribute_id}/values', data=data)
 
 
-    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_public=False):
+    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_longitudinal=None, is_public=False):
         data = { }
 
         if description:
             data['description'] = description
         if is_editable:
             data['is_editable'] = is_editable
+        if is_longitudinal:
+            data['is_longitudinal'] = is_longitudinal
         if is_public:
             data['is_public'] = is_public
         if name:
