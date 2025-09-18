@@ -96,6 +96,11 @@ def main():
   projects_table_columns = []
   projects_table_attribute_ids = []
   if 'projects_table' in json_info:
+    # Get all the project attributes in the project
+    project_attributes = {}
+    for project_attribute in project.get_project_attributes():
+      project_attributes[project_attribute['uid']] = {'id': project_attribute['id'], 'name': project_attribute['name']}
+
     allowed_columns = ['NICKNAME', 'PHI_NAME', 'DESCRIPTION', 'ROLE', 'CREATED', 'UPDATED', 'COLLABORATORS', 'REFERENCE', 'VARIANT_COUNT', 'SAMPLE_COUNT', 'ID']
     for attribute in json_info['projects_table']:
 
@@ -142,7 +147,7 @@ def main():
          selected_collections_table_columns = projects_table_columns, \
          selected_collection_attributes = projects_table_attribute_ids, \
          selected_variant_annotation_version_ids = annotation_version_ids)
-  
+
 # Input options
 def parse_command_line():
   global version
@@ -183,7 +188,7 @@ def get_json_filename(project, args):
     json_filename = args.json_path + 'project_defaults_' + str(args.instance) + '_' + str(reference) + '.json'
 
   return json_filename
-  
+
 # Check that the json containing the required defaults exists and read in the information
 def read_json_file(json_filename):
   try:
@@ -195,7 +200,7 @@ def read_json_file(json_filename):
   except:
     fail('Could not read contents of json file ' + str(json_filename) + '. Check that this is a valid json')
   json_file.close()
- 
+
   return json_info
 
 # Get the annotation version ids
@@ -246,25 +251,25 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
       annotation_id = annotation_uids[annotation_uid]
 
     # If an annotation_id has been found
-    if annotation_id: 
+    if annotation_id:
 
       # Get the annotation versions
       annotation_versions = {}
       for version_info in project.get_variant_annotation_versions(annotation_id):
         annotation_versions[version_info['version']] = version_info['id']
-  
+
       # Find the id for the required version, if the default version was specified...
       if annotation_version == 'default':
         if 'default' not in annotation_versions:
           fail('annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
         annotation_version_ids.append(annotation_versions['default'])
-  
+
       # ... if the latest version was specified...
       elif annotation_version == 'latest':
         if 'Latest' not in annotation_versions:
           fail('annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
         annotation_version_ids.append(annotation_versions['Latest'])
-  
+
       # ... or if the version id was specified
       else:
         has_version_id = False
