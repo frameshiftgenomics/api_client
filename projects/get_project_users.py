@@ -28,6 +28,10 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
+  # Display options are mutually exclusive
+  if args.output_list and args.output_ids:
+    fail('Display arguments are mutually exclusive')
+
   # Get all the users in the project
   output_list = ''
   for user in project.get_project_users():
@@ -35,6 +39,10 @@ def main():
     # Build the output list if requested
     if args.output_list:
       output_list += str(user['id']) + ','
+
+    # Output the id only
+    elif args.output_ids:
+      print(user['id'])
 
     # Output all information
     else:
@@ -63,6 +71,7 @@ def parse_command_line():
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # Optional viewing options
+  display_arguments.add_argument('--output_ids', '-oi', required = False, action = 'store_true', help = 'Only output user ids')
   display_arguments.add_argument('--output_list', '-ol', required = False, action = 'store_true', help = 'Output a comma separated list of all user ids')
 
   return parser.parse_args()
