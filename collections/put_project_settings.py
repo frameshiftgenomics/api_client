@@ -53,8 +53,23 @@ def main():
         except:
           fail('Column ids must be one of the following allowed values, or a project attribute id (failed value: ' + str(column_id) + '):\n  ' + '\n  '.join(allowed_columns))
 
+  # Deal with annotation version ids
+  if args.annotation_version_ids:
+
+    # Get the annotation version ids present in the project
+    available_version_ids = []
+    for annotation in project.get_variant_annotations():
+      for version in annotation['annotation_versions']:
+        available_version_ids.append(int(version['id']))
+
+    # Loop over the annotation version ids and ensure that they are valid
+    annotation_version_ids = args.annotation_version_ids.split(',') if ',' in args.annotation_version_ids else [args.annotation_version_ids]
+    for annotation_version_id in annotation_version_ids:
+      if int(annotation_version_id) not in available_version_ids:
+        fail('Annotation version id ' + str(annotation_version_id) + ' does not exist in the project')
+
   # Update the project settings
-  project.put_collection_project_settings(privacy_level = privacy_level, selected_collections_table_columns = column_ids, selected_collection_attributes = attribute_ids)
+  project.put_collection_project_settings(privacy_level = privacy_level, selected_collections_table_columns = column_ids, selected_collection_attributes = attribute_ids, selected_variant_annotation_version_ids = annotation_version_ids)
 
 # Input options
 def parse_command_line():
@@ -76,6 +91,7 @@ def parse_command_line():
   optional_arguments.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The privacy level to assign to the project')
   optional_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'The genome reference to assign to the project')
   optional_arguments.add_argument('--project_table_columns', '-t', required = False, metavar = 'string', help = 'A comma separated list of project attribute ids or uids')
+  optional_arguments.add_argument('--annotation_version_ids', '-ai', required = False, metavar = 'string', help = 'A comma separated list of annotation version ids')
 
   return parser.parse_args()
 

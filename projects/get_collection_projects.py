@@ -25,6 +25,15 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
+  # If a reference is provided, check that it's valid
+  if args.reference:
+    if args.reference == 'GRCh37':
+      pass
+    elif args.reference == 'GRCh38':
+      pass
+    else:
+      fail('Unknown reference genome')
+
   # Open an api client project object for the defined project
   collection = api_mosaic.get_project(args.collection_id)
   if not collection.get_project()['is_collection']:
@@ -36,16 +45,28 @@ def main():
 
   # Get all projects in the collection
   output_list = ''
-  for project in collection.get_collection_projects():
-    if args.comma_separated_list:
-      output_list += str(project['id']) + ','
-    elif args.ids_only:
-      print(project['id'])
-    else:
-      print(project['name'], ': ', project['id'], sep = '')
-      if args.display_all:
-        print('  nickname: ', project['nickname'], sep = '')
-        print('  description: ', project['description'], sep = '')
+  for project_info in collection.get_collection_projects():
+
+    # If only projects from a specific reference are required, get the reference the project is
+    # associated with
+    output_project = True
+    if args.reference:
+      project = api_mosaic.get_project(project_info['id'])
+      settings = project.get_project_settings()
+      reference = settings['reference']
+      output_project = True if str(args.reference) == str(reference) else False
+
+    # Only output projects that pass requirements
+    if output_project:
+      if args.comma_separated_list:
+        output_list += str(project_info['id']) + ','
+      elif args.ids_only:
+        print(project_info['id'])
+      else:
+        print(project_info['name'], ': ', project_info['id'], sep = '')
+        if args.display_all:
+          print('  nickname: ', project_info['nickname'], sep = '')
+          print('  description: ', project_info['description'], sep = '')
 
   # If a comma separated list is being output, trim the final comma and print
   if args.comma_separated_list:
@@ -71,6 +92,7 @@ def parse_command_line():
   display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only return project ids')
   display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Display all project information')
   display_arguments.add_argument('--comma_separated_list', '-ol', required = False, action = 'store_true', help = 'Output the project ids as a comma separated list')
+  display_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Output projects associated with this reference genome')
 
   return parser.parse_args()
 
