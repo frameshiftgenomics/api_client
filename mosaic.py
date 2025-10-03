@@ -1472,6 +1472,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/')
 
 
+    def get_project_users(self):
+        return self._mosaic.get(f'{self._path}/users')
+
+
     def patch_project(self, template_project_id):
         return self._mosaic.patch(f'{self._path}/template/{template_project_id}')
 
