@@ -27,6 +27,15 @@ def main():
 
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
+
+  # Check if the project is in any collections and if so, if variants are turned on
+  for collection_info in project.get_project()['member_of_collections']:
+    collection = api_mosaic.get_project(collection_info['id'])
+    info = collection.get_project_settings()
+    if info['enable_variant_view']:
+      fail('Collection "', collection.name, '" has variants turned on. Please turn off prior to upload', sep = '')
+
+  # Check the vcf files
   has_vcfs = False
   for sample in project.get_samples():
     for sample_file in project.get_sample_files(sample['id']):

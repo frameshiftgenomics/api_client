@@ -665,6 +665,10 @@ class Mosaic(object):
         return self.get(f'settings')
 
 
+    def get_logs(self):
+        return self.get(f'jobs/scheduled/logs')
+
+
     def get_user_by_email(self, email):
         return self.get(f'user/email/{email}')
 

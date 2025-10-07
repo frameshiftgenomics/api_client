@@ -26,8 +26,8 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Get the user info
-  data = api_mosaic.get_global_settings()
-  pprint(data)
+  for entry in api_mosaic.get_logs()['data']:
+    print('id: ', entry['id'], ', type: ', entry['job_type'], ', at time ', entry['created_at'], sep = '')
 
 # Input options
 def parse_command_line():
