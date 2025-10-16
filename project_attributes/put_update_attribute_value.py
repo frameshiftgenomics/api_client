@@ -53,12 +53,16 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic attribute id to update')
-  project_arguments.add_argument('--value_id', '-v', required = True, metavar = 'integer', help = 'The Mosaic value id to update')
+
+  # Information about the attribute
+  required_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic attribute id to update')
+  required_arguments.add_argument('--value_id', '-v', required = True, metavar = 'integer', help = 'The Mosaic value id to update')
+
+  # If the value is left blank, it will be set to null
+  optional_arguments.add_argument('--value', '-va', required = False, metavar = 'string', help = 'The value of the attribute')
 
   # Optional arguments to update
   optional_arguments.add_argument('--record_date', '-r', required = False, metavar = 'string', help = 'The date to update the value record date to')
-  optional_arguments.add_argument('--value', '-va', required = False, metavar = 'string', help = 'The value of the attribute')
 
   return parser.parse_args()
 

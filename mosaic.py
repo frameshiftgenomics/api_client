@@ -1123,7 +1123,7 @@ class Project(object):
 
 
     def put_update_attribute_value(self, attribute_id, value_id, *, value=None, record_date=None):
-        data = {'value': None }
+        data = {'value': None}
 
         if value:
             data['value'] = value

@@ -71,7 +71,7 @@ def main():
         if args.include_values:
           print('    Values:')
           for value in attribute['values']:
-            print('      ', value['value'], ': ', value['project_id'])
+            print('      ', value['value'], ': ', value['id'])
         print('    policies: ', attribute['policies'], sep = '')
 
 # Input options
