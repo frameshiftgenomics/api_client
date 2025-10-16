@@ -1123,7 +1123,7 @@ class Project(object):
 
 
     def put_update_attribute_value(self, attribute_id, value_id, *, value=None, record_date=None):
-        data = { }
+        data = {'value': None }
 
         if value:
             data['value'] = value
@@ -1946,20 +1946,20 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/position/{variant_position}')
 
 
-    def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
-        params = { }
-        params['include_variant_data'] = 'true' if include_variant_data else 'false'
-        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
-
-        return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}')
-
-
     def get_variant_watchlist(self, *, include_variant_data=None):
         params = { }
 
         params['include_variant_data'] = 'true' if include_variant_data else 'false'
 
         return self._mosaic.get(f'{self._path}/variants/sets/watchlist', params=params)
+
+
+    def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
+        params = { }
+        params['include_variant_data'] = 'true' if include_variant_data else 'false'
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+
+        return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}', params = params)
 
 
     def get_variant_sets(self):

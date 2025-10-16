@@ -1,10 +1,7 @@
-import argparse
-import datetime
 import os
-import time
-
-from datetime import datetime
+import argparse
 from pprint import pprint
+
 from sys import path
 
 def main():
@@ -28,38 +25,22 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Get the user info
+  # Open an api client project object for the defined project
   try:
-    user_data = api_mosaic.get_user_info(args.user_id)
+    project = api_mosaic.get_project(args.project_id)
   except Exception as e:
-    fail('User ' + str(args.user_id) + ' does not exist')
+    fail('Failed to open project. Error was: ' + str(e))
 
-  # Format the time stringd
-  format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
+  # Set the display requirements
+  include_variant_data = True if args.show_variant_data else False
+  include_genotype_data = True if args.show_genotype_information else False
+
+  # Get the variant set information
   try:
-    created_at = str(datetime.strptime(user_data['created_at'], format_string)).split('.')[0]
-  except:
-    created_at = None
-  try:
-    last_login_at = str(datetime.strptime(user_data['last_login_at'], format_string)).split('.')[0]
-  except:
-    last_login_at = None
-
-  # Write out the information
-  if args.last_login:
-    print(user_data['first_name'], ' ', user_data['last_name'], ': ', last_login_at, sep = '')
-
-  # Write all data
-  else:
-    print(user_data['id'], ': ', sep = '')
-    print('  email: ', user_data['email'], sep = '')
-    print('  first name: ', user_data['first_name'], sep = '')
-    print('  last name: ', user_data['last_name'], sep = '')
-    print('  username: ', user_data['username'], sep = '')
-    print('  CAS username: ', user_data['cas_username'], sep = '')
-    print('  created: ', created_at, sep = '')
-    print('  confirmation status: ', user_data['confirmation_status'], sep = '')
-    print('  last login: ', last_login_at, sep = '')
+    print(include_variant_data, include_genotype_data)
+    print(project.get_variant_set(args.variant_set_id, include_variant_data = include_variant_data, include_genotype_data = include_genotype_data))
+  except Exception as e:
+    fail('Failed to get variant set information. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -74,11 +55,15 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The user id
-  required_arguments.add_argument('--user_id', '-i', required = True, metavar = 'integer', help = 'The user id')
+  # The project id to which the filter is to be added is required
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get variants sets for')
 
-  # Optional display arguments
-  display_arguments.add_argument('--last_login', '-l', required = False, action = 'store_true', help = 'If set, only the last login date will be output for the user')
+  # Variant set information
+  required_arguments.add_argument('--variant_set_id', '-v', required = True, metavar = 'integer', help = 'The Mosaic variant set id')
+
+  # Optional arguments
+  display_arguments.add_argument('--show_variant_data', '-si', required = False, action = 'store_true', help = 'Show the variant annotation information')
+  display_arguments.add_argument('--show_genotype_information', '-sg', required = False, action = 'store_true', help = 'Show the genotype information')
 
   return parser.parse_args()
 

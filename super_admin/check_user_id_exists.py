@@ -32,7 +32,7 @@ def main():
   try:
     user_data = api_mosaic.get_user_info(args.user_id)
   except Exception as e:
-    fail('User ' + str(args.user_id) + ' does not exist')
+    fail('Unable to get user info. Error was: ' + str(e))
 
   # Format the time stringd
   format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -76,9 +76,6 @@ def parse_command_line():
 
   # The user id
   required_arguments.add_argument('--user_id', '-i', required = True, metavar = 'integer', help = 'The user id')
-
-  # Optional display arguments
-  display_arguments.add_argument('--last_login', '-l', required = False, action = 'store_true', help = 'If set, only the last login date will be output for the user')
 
   return parser.parse_args()
 
