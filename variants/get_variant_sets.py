@@ -34,25 +34,36 @@ def main():
   # Get the variant sets in the project
   try:
     for variant_set in project.get_variant_sets():
+      set_name = variant_set['name']
+      set_id = variant_set['id']
 
       # If only Primary ClinVar sets are required, check that ClinVar and Primary appear in the set name
       if args.clinvar_primary:
         display = False
-        name = variant_set['name']
-        if 'ClinVar' in name and 'Primary' in name:
+        if 'ClinVar' in set_name and 'Primary' in set_name:
           display = True
           if args.clinvar_start_date:
-            if clinvar_date_format(args.clinvar_start_date, 'start') not in name:
+            if clinvar_date_format(args.clinvar_start_date, 'start') not in set_name:
               display = False
           if args.clinvar_end_date:
-            if clinvar_date_format(args.clinvar_end_date, 'end') not in name:
+            if clinvar_date_format(args.clinvar_end_date, 'end') not in set_name:
               display = False
           if display:
-            print(variant_set['id'])
+            if args.set_ids_only:
+              print(set_id)
+            elif args.set_names_ids_only:
+              print(set_id, ': ', set_name, sep = '')
+            else:
+              pprint(variant_set)
 
       # If all variants sets are to be output
       else:
-        pprint(variant_set)
+        if args.set_ids_only:
+          print(set_id)
+        elif args.set_names_ids_only:
+          print(set_id, ': ', set_name, sep = '')
+        else:
+          pprint(variant_set)
   except Exception as e:
     fail('Failed to get variants sets. Error was: ' + str(e))
 
@@ -77,6 +88,10 @@ def parse_command_line():
   clinvar_arguments.add_argument('--clinvar_primary', '-cp', required = False, action = 'store_true', help = 'If set, only return Primary ClinVar review variant sets')
   clinvar_arguments.add_argument('--clinvar_start_date', '-cs', required = False, metavar = 'string', help = 'If set, only return Primary ClinVar review variant sets with this start date (format: YYYYMMDD)')
   clinvar_arguments.add_argument('--clinvar_end_date', '-ce', required = False, metavar = 'string', help = 'If set, only return Primary ClinVar review variant sets with this end date (format: YYYYMMDD)')
+
+  # Display arguments
+  display_arguments.add_argument('--set_ids_only', '-so', required = False, action = 'store_true', help = 'If set, only display the ids of the variants sets')
+  display_arguments.add_argument('--set_names_ids_only', '-no', required = False, action = 'store_true', help = 'If set, only display the names and ids of the variants sets')
 
   return parser.parse_args()
 

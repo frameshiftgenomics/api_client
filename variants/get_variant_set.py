@@ -35,12 +35,24 @@ def main():
   include_variant_data = True if args.show_variant_data else False
   include_genotype_data = True if args.show_genotype_information else False
 
+  # If only_show_variant_ids is set, no other display options can be set
+  if args.only_show_variant_ids and (args.show_variant_data or args.show_genotype_information):
+    fail('If --only_show_variant_ids (-vi) is set, no other optional display arguments can be set')
+
   # Get the variant set information
   try:
-    print(include_variant_data, include_genotype_data)
-    print(project.get_variant_set(args.variant_set_id, include_variant_data = include_variant_data, include_genotype_data = include_genotype_data))
+    variant_set_info = project.get_variant_set(args.variant_set_id, include_variant_data = include_variant_data, include_genotype_data = include_genotype_data)
   except Exception as e:
     fail('Failed to get variant set information. Error was: ' + str(e))
+
+  # Only output variant ids
+  if args.only_show_variant_ids:
+    for variant_id in variant_set_info['variant_ids']:
+      print(variant_id)
+
+  # Output all information
+  else:
+    pprint(variant_set_info)
 
 # Input options
 def parse_command_line():
@@ -64,6 +76,7 @@ def parse_command_line():
   # Optional arguments
   display_arguments.add_argument('--show_variant_data', '-si', required = False, action = 'store_true', help = 'Show the variant annotation information')
   display_arguments.add_argument('--show_genotype_information', '-sg', required = False, action = 'store_true', help = 'Show the genotype information')
+  display_arguments.add_argument('--only_show_variant_ids', '-vi', required = False, action = 'store_true', help = 'Only output the ids of the variants in the set')
 
   return parser.parse_args()
 
