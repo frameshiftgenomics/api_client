@@ -1,7 +1,7 @@
 import os
 import argparse
-
 from pprint import pprint
+
 from sys import path
 
 def main():
@@ -26,27 +26,23 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
-  # Determine whether to show values
-  include_values = 'true' if args.include_values else 'false'
+  # Set the display requirements
+  #include_variant_data = True if args.show_variant_data else False
+  #include_genotype_data = True if args.show_genotype_information else False
 
-  # Make sure the attribute ids are a list
-  attribute_ids = None
-  if args.attribute_ids:
-    attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
+  # Get the variant info
+  try:
+    variant_info = project.get_variant(args.variant_id, include_annotation_data=None, include_genotype_data=None)
+  except Exception as e:
+    fail('Failed to get variant. Error was: ' + str(e))
 
-  # Get the attributes for the sample
-  for attribute in project.get_sample_attributes(attribute_ids = attribute_ids, include_values = include_values):
-    if args.only_show_values and include_values:
-      for value in attribute['values']:
-        print(value['value'])
-    elif include_values:
-      print(attribute['id'], ': ', attribute['name'], sep = '')
-      for value in attribute['values']:
-        print('  sample: ', value['sample_id'], ', value: ', value['value'], sep = '')
-    else:
-      pprint(attribute)
+  # Output all information
+  pprint(variant_info)
 
 # Input options
 def parse_command_line():
@@ -55,18 +51,22 @@ def parse_command_line():
   project_arguments = parser.add_argument_group('Project Arguments')
   required_arguments = parser.add_argument_group('Required Arguments')
   optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to get variants sets for')
 
-  # The sample id to get attributes for
-  optional_arguments.add_argument('--attribute_ids', '-t', required = False, metavar = 'integer', help = 'A comma separated list of attribute ids')
-  optional_arguments.add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Set to output values for all samples')
-  optional_arguments.add_argument('--only_show_values', '-ov', required = False, action = 'store_true', help = 'Only show the values for the selected attributes')
+  # Variant set information
+  required_arguments.add_argument('--variant_id', '-v', required = True, metavar = 'integer', help = 'The Mosaic variant id')
+
+  # Optional arguments
+  #display_arguments.add_argument('--show_variant_data', '-si', required = False, action = 'store_true', help = 'Show the variant annotation information')
+  #display_arguments.add_argument('--show_genotype_information', '-sg', required = False, action = 'store_true', help = 'Show the genotype information')
+  #display_arguments.add_argument('--only_show_variant_ids', '-vi', required = False, action = 'store_true', help = 'Only output the ids of the variants in the set')
 
   return parser.parse_args()
 

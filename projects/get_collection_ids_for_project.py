@@ -25,28 +25,20 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
-
-  # Determine whether to show values
-  include_values = 'true' if args.include_values else 'false'
-
-  # Make sure the attribute ids are a list
-  attribute_ids = None
-  if args.attribute_ids:
-    attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
-
-  # Get the attributes for the sample
-  for attribute in project.get_sample_attributes(attribute_ids = attribute_ids, include_values = include_values):
-    if args.only_show_values and include_values:
-      for value in attribute['values']:
-        print(value['value'])
-    elif include_values:
-      print(attribute['id'], ': ', attribute['name'], sep = '')
-      for value in attribute['values']:
-        print('  sample: ', value['sample_id'], ', value: ', value['value'], sep = '')
-    else:
-      pprint(attribute)
+  # Delete the attribute form
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
+  
+  try:
+    for collection in  project.get_project()['member_of_collections']:
+      if args.ids_only:
+        print(collection['id'])
+      else:
+        print(collection['id'], ': ', collection['name'], sep = '')
+  except Exception as e:
+    fail('Failed to get information on project collections. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -55,18 +47,17 @@ def parse_command_line():
   project_arguments = parser.add_argument_group('Project Arguments')
   required_arguments = parser.add_argument_group('Required Arguments')
   optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  # The id of the project
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The id of the project')
 
-  # The sample id to get attributes for
-  optional_arguments.add_argument('--attribute_ids', '-t', required = False, metavar = 'integer', help = 'A comma separated list of attribute ids')
-  optional_arguments.add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Set to output values for all samples')
-  optional_arguments.add_argument('--only_show_values', '-ov', required = False, action = 'store_true', help = 'Only show the values for the selected attributes')
+  # Only write out the collection ids
+  display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only return project ids for the collections')
 
   return parser.parse_args()
 
