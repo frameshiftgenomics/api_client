@@ -54,6 +54,7 @@ def main():
           fail('Column ids must be one of the following allowed values, or a project attribute id (failed value: ' + str(column_id) + '):\n  ' + '\n  '.join(allowed_columns))
 
   # Deal with annotation version ids
+  annotation_version_ids = None
   if args.annotation_version_ids:
 
     # Get the annotation version ids present in the project
