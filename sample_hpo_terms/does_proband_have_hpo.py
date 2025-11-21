@@ -31,17 +31,28 @@ def main():
   except Exception as e:
     fail('Failed to open project. Error was: ' + str(e))
 
-  # If the terms should be output for Exomiser, collect them in a list first
-  if args.exomiser_format:
-    hpo_terms = []
-    for hpo_term in project.get_sample_hpo_terms(args.sample_id):
-      hpo_terms.append(hpo_term['hpo_id'])
-    print(hpo_terms)
+  # Ensure that this is not a collection:
+  if project.get_project()['is_collection']:
+    fail('This script is only valid for projects and not collections')
 
-  # Get the HPO terms for the sample
+  # Get all the project samples and find the proband
+  proband_id = False
+  for attribute in project.get_sample_attributes(include_values = 'true'):
+    if attribute['uid'] == 'relation':
+      for value_info in attribute['values']:
+        if value_info['value'] == 'Proband':
+          proband_id = value_info['sample_id']
+          break
+
+  # Fail if there is no proband
+  if not proband_id:
+    fail('Project has no sample identified as the proband')
+
+  # Check if the proband has any HPO terms
+  if len(project.get_sample_hpo_terms(proband_id)) > 0:
+    print('true')
   else:
-    for hpo_term in project.get_sample_hpo_terms(args.sample_id):
-      print(hpo_term['hpo_id'], ': ', hpo_term['label'], ' (id: ', hpo_term['id'], ')', sep = '')
+    print('false')
 
 # Input options
 def parse_command_line():
@@ -58,10 +69,6 @@ def parse_command_line():
 
   # Get the id of the project and the sample whose HPO terms are required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The project id')
-  project_arguments.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The id of the sample whose HPO terms are required')
-
-  # Output in a format for exomiser
-  project_arguments.add_argument('--exomiser_format', '-e', required = False, action = 'store_true', help = 'Output the HPO terms in a format useful for Exomiser')
 
   return parser.parse_args()
 
