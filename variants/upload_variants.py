@@ -33,7 +33,7 @@ def main():
     collection = api_mosaic.get_project(collection_info['id'])
     info = collection.get_project_settings()
     if info['enable_variant_view']:
-      fail('Collection "', collection.name, '" has variants turned on. Please turn off prior to upload', sep = '')
+      fail('Collection "' + collection.name + '" has variants turned on. Please turn off prior to upload')
 
   # Check the vcf files
   has_vcfs = False

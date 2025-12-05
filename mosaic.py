@@ -2012,6 +2012,29 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/sets/{variant_set_id}/annotations', data=data)
 
 
+    """
+    VIEWS
+    """
+
+
+    def get_view_tabs(self, object_type):
+        return self._mosaic.get(f'{self._path}/{object_type}/views/tabs')
+
+
+    def post_create_data_groups_view(self, name, *, description=None, data_group_attribute_id=None, selected_attribute_ids=None):
+        data = { }
+
+        if description:
+            data['descriptoin'] = description
+        if data_group_attribute_id:
+            data['data_group_attribute_id'] = data_group_attribute_id
+        if selected_attribute_ids:
+            data['selected_attribute_ids'] = selected_attribute_ids
+
+        return self._mosaic.post(f'{self._path}/data_groups/views', data=data)
+
+
+
 if __name__ == '__main__':
     import fire
     fire.Fire({
