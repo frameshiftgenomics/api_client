@@ -25,7 +25,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
   # Get the project settings
   pprint(project.get_project_settings())
