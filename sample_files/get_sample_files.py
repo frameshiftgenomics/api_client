@@ -24,6 +24,10 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
+  # Some display options are mutually exclusive
+  if args.display_all_information and args.ids_only:
+    fail('The --display_all_information (-da) and --ids_only (-io) arguments are mututally exclusive')
+
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
@@ -39,7 +43,9 @@ def main():
       display = False
 
     if display:
-      if not args.display_all_information:
+      if args.ids_only:
+        print(sample['id'])
+      elif not args.display_all_information:
         print(sample['name'], ': ', sample['id'], ', ', sample['type'], sep = '')
       else:
         print(sample['name'])
@@ -72,6 +78,7 @@ def parse_command_line():
 
   # Determine what information to print to screen
   display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display all information about the attributes')
+  display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Output the file ids only')
 
   return parser.parse_args()
 
