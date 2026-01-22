@@ -35,7 +35,10 @@ def main():
       fail('Unknown reference genome')
 
   # Open an api client project object for the defined project
-  collection = api_mosaic.get_project(args.collection_id)
+  try:
+    collection = api_mosaic.get_project(args.collection_id)
+  except Exception as e:
+    fail('Unable to open project with the given id. The project id must be a valid integer')
   if not collection.get_project()['is_collection']:
     fail('Collection id is for a project, not a collection')
 
