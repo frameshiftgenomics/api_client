@@ -57,7 +57,7 @@ def main():
 
       # Check for duplicate sample attributes
       if sample_attribute['name'] in sample_attribute_names:
-        fail('ERROR: there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(project_id))
+        fail('there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(project_id))
       sample_attribute_names[sample_attribute['name']] = sample_attribute['id']
       sample_attribute_uids[sample_attribute['uid']] = sample_attribute['id']
       sample_attribute_ids.append(sample_attribute['id'])
@@ -82,19 +82,19 @@ def main():
         # If the attribute name was specified
         if attribute_type == 'name':
           if attribute_specifier not in sample_attribute_names:
-            fail('ERROR: sample table defaults includes a sample attribute specified by name that is not available: ' + attribute_specifier)
+            fail('sample table defaults includes a sample attribute specified by name that is not available: ' + attribute_specifier)
           samples_table_columns.append(sample_attribute_names[attribute_specifier])
 
         # If the attribute uid was specified
         elif attribute_type == 'uid':
           if attribute_specifier not in sample_attribute_uids:
-            fail('ERROR: sample table defaults includes a sample attribute specified by uid that is not available: ' + attribute_specifier)
+            fail('sample table defaults includes a sample attribute specified by uid that is not available: ' + attribute_specifier)
           samples_table_columns.append(sample_attribute_uids[attribute_specifier])
 
         # If the attribute id was specified
         elif attribute_type == 'id':
           if attribute_specifier not in sample_attribute_ids:
-            fail('ERROR: sample table defaults includes a sample attribute specified by id that is not available: ' + attribute_specifier)
+            fail('sample table defaults includes a sample attribute specified by id that is not available: ' + attribute_specifier)
           samples_table_columns.append(attribute_specifier)
 
     #######
@@ -206,6 +206,7 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
   annotation_version_ids = []
   annotations_to_import = False
   for annotation in data:
+    annotation_id = False
     annotation_uid = data[annotation]['uid']
     annotation_version = data[annotation]['version']
     skip_missing = False
@@ -217,10 +218,9 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
     if not annotation_uid:
       if annotation not in annotation_names:
         if not skip_missing:
-          fail('ERROR: annotation "' + str(annotation) + '" has no uid provided (assumed to be a private annotation), but no annotation of this name exists in project ' + str(project_id))
+          warning('annotation "' + str(annotation) + '" has no uid provided (assumed to be a private annotation), but no annotation of this name exists in project ' + str(project_id))
         else:
-          print('WARNING: Skipping "' + str(annotation) + '" as it is not present in the project and has no uid so cannot be imported - private annotation')
-          annotation_id = False
+          warning('skipping "' + str(annotation) + '" as it is not present in the project and has no uid so cannot be imported - private annotation')
       else:
         annotation_id = annotation_names[annotation]
 
@@ -237,8 +237,9 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
 
       # Get the id of the annotation to import and import it
       if annotation_uid not in annotations_to_import:
-        fail('ERROR: annotation "' + str(annotation) + '" with uid "' + str(annotation_uid) + '" is not available for import')
-      annotation_id = annotations_to_import[annotation_uid]
+        warning('annotation "' + str(annotation) + '" with uid "' + str(annotation_uid) + '" is not available for import')
+      else:
+        annotation_id = annotations_to_import[annotation_uid]
       try:
         project.post_import_annotation(annotation_id)
       except:
@@ -259,14 +260,16 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
       # Find the id for the required version, if the default version was specified...
       if annotation_version == 'default':
         if 'default' not in annotation_versions:
-          fail('ERROR: annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
-        annotation_version_ids.append(annotation_versions['default'])
+          warning('annotation "' + str(annotation) + '" is set to use the "default" version, but this does not exist for this annotation')
+        else:
+          annotation_version_ids.append(annotation_versions['default'])
   
       # ... if the latest version was specified...
       elif annotation_version == 'latest':
         if 'Latest' not in annotation_versions:
-          fail('ERROR: annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
-        annotation_version_ids.append(annotation_versions['Latest'])
+          warning('annotation "' + str(annotation) + '" is set to use the "latest" version, but this does not exist for this annotation')
+        else:
+          annotation_version_ids.append(annotation_versions['Latest'])
   
       # ... or if the version id was specified
       else:
@@ -277,7 +280,7 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
             has_version_id = True
             break
         if not has_version_id:
-          fail('ERROR: annotation "' + str(annotation) + '" lists "' + str(annotation_version) + '" as the annotation version. This must be "default", "latest", or a valid annotation_version_id')
+          fail('annotation "' + str(annotation) + '" lists "' + str(annotation_version) + '" as the annotation version. This must be "default", "latest", or a valid annotation_version_id')
 
   # Return the list of version ids
   return annotation_version_ids
