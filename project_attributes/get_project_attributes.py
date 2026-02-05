@@ -63,7 +63,7 @@ def main():
             else:
               print('   predefined values: none set')
           elif attribute_info == 'start_attribute_id':
-            print('   Start attribute id: ', attribute['start_attribute_id'], ', End attribute id: ', attribute['end_attribute_id'], sep = '')
+            print('   start attribute id: ', attribute['start_attribute_id'], ', end attribute id: ', attribute['end_attribute_id'], sep = '')
           elif attribute_info == 'end_attribute_id':
             continue
           elif attribute_info == 'values':
