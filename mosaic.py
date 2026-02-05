@@ -1086,7 +1086,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/{attribute_id}/values', data=data)
 
 
-    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_longitudinal=None, is_public=False):
+    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_longitudinal=None, is_public=False, only_suggest_predefined_values=None):
         data = { }
 
         if description:
@@ -1099,6 +1099,8 @@ class Project(object):
             data['is_public'] = is_public
         if name:
             data['name'] = name
+        if only_suggest_predefined_values:
+            data['only_suggest_predefined_values'] = only_suggest_predefined_values
         if predefined_values:
             data['predefined_values'] = predefined_values
         if value:
@@ -1112,7 +1114,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/', data=data)
 
 
-    def put_project_attributes(self, attribute_id, *, description=None, name=None, original_project_id=None, predefined_values=None, value=None, is_editable=None, display_type=None, severity=None):
+    def put_project_attributes(self, attribute_id, *, description=None, name=None, original_project_id=None, predefined_values=None, value=None, is_editable=None, display_type=None, severity=None, only_suggest_predefined_values=None):
         data = { }
 
         if description:
@@ -1125,6 +1127,8 @@ class Project(object):
             data['name'] = name
         if predefined_values:
             data['predefined_values'] = predefined_values
+        if only_suggest_predefined_values:
+            data['only_suggest_predefined_values'] = only_suggest_predefined_values
         if original_project_id:
             data['original_project_id'] = original_project_id
         if severity:

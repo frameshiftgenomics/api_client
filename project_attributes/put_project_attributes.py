@@ -47,6 +47,7 @@ def main():
 
   # Get the project settings
   is_editable = 'false' if args.is_editable else 'true'
+  only_suggest_predefined = 'true' if args.only_suggest_predefined else 'false'
   values = args.predefined_values.split(',') if args.predefined_values else None
   original_project_id = args.original_project_id if args.original_project_id else None
   try:
@@ -54,6 +55,7 @@ def main():
                                         description=args.description, 
                                         name=args.name, \
                                         original_project_id=original_project_id, \
+                                        only_suggest_predefined_values = only_suggest_predefined, \
                                         predefined_values=values, \
                                         is_editable=is_editable, \
                                         display_type=display_type, \
@@ -68,6 +70,11 @@ def parse_command_line():
 
   # Define the location of the api_client and the ini config file
   api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
+
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
@@ -83,6 +90,7 @@ def parse_command_line():
   optional_arguments.add_argument('--original_project_id', '-o', required = False, metavar = 'string', help = 'The id of the project that the attribute should live in')
   optional_arguments.add_argument('--display_type', '-s', required = False, metavar = 'string', help = 'The display type for the attribute: time, date, duration, custom')
   optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
+  optional_arguments.add_argument('--only_suggest_predefined', '-os', required = False, action = 'store_true', help = 'If set, when editing the attribute, only predefined values will be suggested')
   optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
   optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
   optional_arguments.add_argument('--severity', '-se', required = False, metavar = 'string', help = 'A json object of severity levels')

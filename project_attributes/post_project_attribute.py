@@ -47,6 +47,7 @@ def main():
   # Deal with whether the attribute is editable or longitudinal
   is_editable = 'false' if args.is_editable else 'true'
   is_longitudinal = 'true' if args.is_longitudinal else 'false'
+  only_suggest_predefined = 'true' if args.only_suggest_predefined else 'false'
 
   # Create the attribute
   try:
@@ -57,32 +58,39 @@ def main():
                                    value_type = args.value_type, \
                                    is_editable = is_editable, \
                                    is_longitudinal = is_longitudinal, \
-                                   is_public = is_public)
+                                   is_public = is_public, \
+                                   only_suggest_predefined_values = only_suggest_predefined)
   except Exception as e:
     fail('Failed to create attribute. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # Required arguments for creating a new attribute
-  parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the attribute')
-  parser.add_argument('--is_public', '-u', required = True, metavar = 'string', help = 'Is the project "public" or "private"')
-  parser.add_argument('--value_type', '-t', required = True, metavar = 'string', help = 'The value type must be "float", "string", or "timestamp"')
+  required_arguments.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the attribute')
+  required_arguments.add_argument('--is_public', '-u', required = True, metavar = 'string', help = 'Is the project "public" or "private"')
+  required_arguments.add_argument('--value_type', '-t', required = True, metavar = 'string', help = 'The value type must be "float", "string", or "timestamp"')
 
   # Optional arguments to update
-  parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
-  parser.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
-  parser.add_argument('--is_longitudinal', '-l', required = False, action = 'store_true', help = 'If set, the attribute will not longitudinal')
-  parser.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
-  parser.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
+  optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
+  optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
+  optional_arguments.add_argument('--is_longitudinal', '-l', required = False, action = 'store_true', help = 'If set, the attribute will not longitudinal')
+  optional_arguments.add_argument('--only_suggest_predefined', '-o', required = False, action = 'store_true', help = 'If set, when editing the attribute, only predefined values will be suggested')
+  optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
+  optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
 
   return parser.parse_args()
 
