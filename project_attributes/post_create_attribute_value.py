@@ -30,10 +30,31 @@ def main():
   args.record_date = str(datetime.now()).split(' ')[0] if not args.record_date else args.record_date 
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
   # Check that the attribute is longitudinal
   has_attribute = False
+  for attribute in project.get_project_attribute_definitions(attribute_ids = [args.attribute_id]):
+    if not attribute['is_longitudinal']:
+      fail('Attribute is not longitudinal. This route is only for longitudinal attributes')
+    has_attribute = True
+
+    # Get the last value associated with the attribute. If there is only one value and this is None, there
+    # are no values (just a null value) and so the null can be replaced, rather than creating a new value
+    print(args.attribute_id)
+    values = project.get_unique_project_attribute_values(args.attribute_id)
+    last_value = values[-1]
+    print(last_value, len(values))
+    #if not last_value and len(values) == 1:
+    #  value_id = attribute['values'][0]['id']
+    #  replace_null_value(project, args.attribute_id, value_id, args.value, args.record_date)
+    #else:
+    #  add_new_value(project, args.attribute_id, args.value, args.record_date)
+  exit(0)
+
   for attribute in project.get_project_attributes():
     if int(attribute['id']) == int(args.attribute_id):
       if not attribute['is_longitudinal']:

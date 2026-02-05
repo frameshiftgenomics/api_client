@@ -1053,6 +1053,19 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/attributes')
 
 
+    def get_project_attribute_definitions(self, *, attribute_ids = []):
+        params = {}
+
+        if attribute_ids:
+            params['attribute_ids'] = attribute_ids
+
+        return self._mosaic.get(f'{self._path}/attributes/definitions', params=params)
+
+
+    def get_unique_project_attribute_values(self, attribute_id):
+        return self._mosaic.get(f'{self._path}/attributes/{attribute_id}/unique-values')
+
+
     def post_import_project_attribute(self, attribute_id, *, value=None):
         data = { 'attribute_id': attribute_id}
 
@@ -1377,7 +1390,7 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/roles/{role_id}', params=params)
 
 
-    def get_roles(self, include_sub_project_roles=None):
+    def get_roles(self, *, include_sub_project_roles=None):
         params = { }
 
         if include_sub_project_roles:
@@ -1405,8 +1418,9 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/roles', data=data, params=params)
 
 
-    def put_project_role(self, role_id, role_type_id, *, can_download=None, can_launch_app=None, policy_ids=None):
-        data = { 'role_id': user_id, \
+    def put_project_role(self, user_id, role_id, role_type_id, *, can_download=None, can_launch_app=None, policy_ids=None):
+        data = { 'user_id': user_id, \
+                 'role_id': role_id, \
                  'role_type_id': role_type_id}
 
         if can_download:

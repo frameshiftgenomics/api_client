@@ -1,6 +1,5 @@
-import argparse
 import os
-import sys
+import argparse
 
 from pprint import pprint
 from sys import path
@@ -11,15 +10,13 @@ def main():
   args = parse_command_line()
 
   # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+  try:
+    args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+  except:
+    fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
   # Import the api client
   path.append(args.api_client)
-  import general_modules
   try:
     from mosaic import Mosaic, Project, Store
   except:
@@ -33,23 +30,14 @@ def main():
   except Exception as e:
     fail('Failed to open project. Error was: ' + str(e))
 
-  # Loop over the required attributes and get the required information about them
-  for attribute in project.get_project_attribute_definitions(attribute_ids = [args.attribute_id]):
-    values = []
-    predefined_values = attribute['predefined_values']
+  # Turn the provided attribute ids into an array
+  sample_attribute_ids = args.sample_attribute_ids.split(',') if ',' in args.sample_attribute_ids else [args.sample_attribute_ids]
 
-    # Loop over all of the values and find all unique values
-    for value in project.get_unique_project_attribute_values(args.attribute_id):
-      if value not in values and value:
-
-          # If the display_non_predefined flag is set, only store the value if it is not
-          # a predefined value
-          if value not in predefined_values or not args.display_non_predefined:
-            values.append(value) 
-
-  # Print out the values
-  for value in sorted(values):
-    print('\'', value, '\'', sep = '')
+  # Update the project settings
+  try:
+    project.put_project_settings(selected_sample_attribute_column_ids = sample_attribute_ids)
+  except Exception as e:
+    fail('Unable to update the samples attribute table defaults. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -66,10 +54,7 @@ def parse_command_line():
 
   # The project id to which the filter is to be added is required
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
-  project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The id of the attribute to view')
-
-  # Verbose output
-  display_arguments.add_argument('--display_non_predefined', '-dn', required = False, action = 'store_true', help = 'Only display values that are not in the predefined values list')
+  project_arguments.add_argument('--sample_attribute_ids', '-s', required = True, metavar = 'string', help = 'An ordered, comma separated list of the sample attribute ids to set as the defaults for the sample attribute table')
 
   return parser.parse_args()
 

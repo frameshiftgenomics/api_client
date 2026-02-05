@@ -26,7 +26,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
   # Get the array of ids to look at
   attribute_ids = False
@@ -46,33 +49,30 @@ def main():
         print(attribute['name'], ': ', attribute['id'], sep = '')
       else:
         print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
-        if attribute['description']:
-          print('  description: ', attribute['description'], sep = '')
-        print('    uid: ', attribute['uid'], sep = '')
-        print('    value_type: ', attribute['value_type'], sep = '')
-        print('    original_project_id: ', attribute['original_project_id'], sep = '')
-        print('    is_custom: ', attribute['is_custom'], sep = '')
-        print('    is_editable: ', attribute['is_editable'], sep = '')
-        print('    is_longitudinal: ', attribute['is_longitudinal'], sep = '')
-        print('    is_public: ', attribute['is_public'], sep = '')
-        print('    custom_display_format: ', attribute['custom_display_format'], sep = '')
-        print('    display_type: ', attribute['display_type'], sep = '')
-        if attribute['predefined_values']:
-          print('    predefined_values:')
-          for value in attribute['predefined_values']:
-            print('      ', value, sep = '')
-        else:
-          print('    predefined values: none set')
-        if attribute['source']:
-          print('    source: ', attribute['source'], sep = '')
-        if attribute['start_attribute_id']:
-          print('    Start id: ', attribute['start_attribute_id'], ', End id: ', attribute['end_attribute_id'], sep = '')
-        print('    created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')
-        if args.include_values:
-          print('    Values:')
-          for value in attribute['values']:
-            print('      ', value['value'], ': ', value['id'])
-        print('    policies: ', attribute['policies'], sep = '')
+        print('   created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')
+        for attribute_info in sorted(attribute.keys()):
+          if attribute_info == 'name' or attribute_info == 'id':
+            continue
+          elif attribute_info == 'created_at' or attribute_info == 'updated_at':
+            continue
+          elif attribute_info == 'predefined_values':
+            if len(attribute['predefined_values']) > 0:
+              print('   predefined_values:')
+              for value in attribute['predefined_values']:
+                print('      ', value, sep = '')
+            else:
+              print('   predefined values: none set')
+          elif attribute_info == 'start_attribute_id':
+            print('   Start attribute id: ', attribute['start_attribute_id'], ', End attribute id: ', attribute['end_attribute_id'], sep = '')
+          elif attribute_info == 'end_attribute_id':
+            continue
+          elif attribute_info == 'values':
+            if args.include_values:
+              print('   values:')
+              for value in attribute['values']:
+                print('      ', value['value'], ': ', value['id'])
+          else:
+            print('   ', attribute_info, ': ', attribute[attribute_info], sep = '')
 
 # Input options
 def parse_command_line():
