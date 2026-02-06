@@ -1114,6 +1114,12 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/', data=data)
 
 
+    def put_convert_project_attribute_type(self, attribute_id, value_type):
+        data = {'value_type': value_type}
+
+        return self._mosaic.put(f'{self._path}/attributes/{attribute_id}/convert-type', data=data)
+
+
     def put_project_attributes(self, attribute_id, *, description=None, name=None, original_project_id=None, predefined_values=None, value=None, is_editable=None, display_type=None, severity=None, only_suggest_predefined_values=None):
         data = { }
 
