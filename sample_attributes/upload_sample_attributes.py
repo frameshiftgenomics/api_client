@@ -27,7 +27,7 @@ def main():
 
   # Otherwise open this project ready for annotation upload
   try:
-    project = api_mosaic.get_project(upload_project_id)
+    project = api_mosaic.get_project(args.project_id)
   except Exception as e:
     fail('failed to open project. Error was: ' + str(e))
 
@@ -51,7 +51,7 @@ def parse_command_line():
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id
-  parser.add_argument('--project_id', '-p', required = False, metavar = 'integer', help = 'The Mosaic project id to upload annotations to. Only necessary for private or custom annotations')
+  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload annotations to. Only necessary for private or custom annotations')
 
   # Additional arguments
   required_arguments.add_argument('--tsv', '-t', required = True, metavar = 'string', help = 'The annotation tsv file to upload')
