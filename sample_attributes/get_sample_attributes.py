@@ -43,8 +43,9 @@ def main():
         print(value['value'])
     elif include_values:
       print(attribute['id'], ': ', attribute['name'], sep = '')
-      for value in attribute['values']:
-        print('  sample: ', value['sample_id'], ', value: ', value['value'], sep = '')
+      if 'values' in attribute:
+        for value in attribute['values']:
+          print('  sample: ', value['sample_id'], ', value: ', value['value'], sep = '')
     else:
       pprint(attribute)
 
