@@ -38,11 +38,18 @@ def main():
   if args.view_type not in allowed_view_types:
     fail('type is unknown. Allowed types are: ' + ', '.join(allowed_view_types))
 
+  # Get all of the views in the project
+  views = {}
+  for view in project.get_views(args.view_type):
+    views[str(view['id'])] = view['name']
+
   # Get the available view tabs
   try:
-    #for tab in project.get_view_tabs(args.view_type):
-    print(project.get_views_tabs(args.view_type))
-    #  print(tab)
+    for view_id in project.get_views_tabs(args.view_type)['view_ids']:
+      name = views[str(view_id)] if str(view_id) in views else view_id
+      if name == 'DEFAULT':
+        name = 'All'
+      print('name: ', name, ', id: ', view_id, sep = '')
   except Exception as e:
     fail('failed to get view tabs. Error was: ' + str(e))
 

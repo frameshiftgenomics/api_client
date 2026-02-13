@@ -22,8 +22,8 @@ def main():
   path.append(args.api_client)
   try:
     from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
+  except Exception as e:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument. Error was: ' + str(e))
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
@@ -38,36 +38,22 @@ def main():
   if args.view_type not in allowed_view_types:
     fail('type is unknown. Allowed types are: ' + ', '.join(allowed_view_types))
 
-  # Get a list of all attribute ids in the project. This can be regular project attributes,
-  # data groups, or intervals
-  project_attribute_ids = []
-  for attribute_info in project.get_project_attribute_definitions():
-    if attribute_info['id'] not in project_attribute_ids:
-      project_attribute_ids.append(attribute_info['id'])
+  # Get all of the views in the project
+  existing_view_ids = ['DEFAULT']
+  for view in project.get_views(args.view_type):
+    existing_view_ids.append(str(view['id']))
 
-  # Loop over the list of attribute ids and ensure they exist in the project
-  attribute_ids = None
-  if args.attribute_ids:
-    attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
-    missing_ids = ''
-    for attribute_id in attribute_ids:
-      if int(attribute_id) not in project_attribute_ids:
-        missing_ids += attribute_id + ','
-    missing_ids = missing_ids.rstrip(',')
-    if len(missing_ids) > 0:
-      print('The following attribute ids are not in the selected project and so cannot be part of a view:')
-      print('  ', missing_ids)
-      exit(0)
+  # Put the view ids into a list, checking they are all present in the project
+  view_ids = args.view_ids.split(',') if ',' in args.view_ids else [args.view_ids]
+  for view_id in view_ids:
+    if str(view_id) not in existing_view_ids:
+      fail('view id ' + str(view_id) + ' is not present in the project')
 
-  # Set the name and description
-  name = args.name if args.name else None
-  description = args.description if args.description else None
-
-  # POST the new view
+  # Update the views tabs
   try:
-    project.put_update_view(args.view_type, args.view_id, name = name, description = description, selected_attribute_ids = attribute_ids)
+    project.put_upsert_views_tabs(args.view_type, view_ids)
   except Exception as e:
-    fail('failed to PUT data group view. Error wes: ' + str(e))
+    fail('failed to PUT data group views tabs. Error wes: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -87,14 +73,7 @@ def parse_command_line():
 
   # View information
   required_arguments.add_argument('--view_type', '-t', required = True, metavar = 'string', help = 'The type of view to delete. Available options: data-group')
-  required_arguments.add_argument('--view_id', '-i', required = True, metavar = 'string', help = 'The id of the view to update')
-
-  # Optional arguments
-  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the new data group view')
-  optional_arguments.add_argument('--attribute_ids', '-ai', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to appear in the view')
-
-  # Optional arguments
-  project_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'A description of the new data group view')
+  required_arguments.add_argument('--view_ids', '-i', required = True, metavar = 'string', help = 'A comma separate list of view ids')
 
   return parser.parse_args()
 

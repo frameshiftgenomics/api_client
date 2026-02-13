@@ -2092,6 +2092,12 @@ class Project(object):
         return self._mosaic.put(f'{self._path}/{view_type}/views/{view_id}', data=data)
 
 
+    def put_upsert_views_tabs(self, view_type, view_ids):
+        data = { 'view_ids': view_ids }
+
+        return self._mosaic.put(f'{self._path}/{view_type}/views/tabs', data=data)
+
+
 if __name__ == '__main__':
     import fire
     fire.Fire({
