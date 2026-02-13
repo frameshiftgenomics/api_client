@@ -1513,540 +1513,540 @@ class Project(object):
 
 
     """
-        SAMPLE ATTRIBUTES
+    SAMPLE ATTRIBUTES
+    """
+
+    def delete_sample_attribute(self, attribute_id):
+        return self._mosaic.delete(f'{self._path}/samples/attributes/{attribute_id}')
+
+
+    def get_sample_attributes(self, *, is_custom=None, include_values=None, attribute_ids=None):
+        params = { }
+        if is_custom:
+              params['is_custom'] = is_custom
+        if include_values:
+              params['include_values'] = include_values
+        if attribute_ids:
+              params['attribute_ids'] = attribute_ids
+
+        return self._mosaic.get(f'{self._path}/samples/attributes', params=params)
+
+
+    def get_attributes_for_sample(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
+
+
+    def post_import_sample_attribute(self, attribute_id):
+        data = { 'attribute_id': attribute_id}
+
+        return self._mosaic.post(f'{self._path}/samples/attributes/import', data=data)
+
+
+    def post_sample_attribute_value(self, sample_id, attribute_id, value):
+        data = { }
+
+        if value:
+            data['value'] = value
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
+
+
+    def post_upload_sample_attributes(self, file_path):
+        return self._mosaic.post(f'{self._path}/samples/attributes/upload', file_path=file_path)
+
+
+    def put_sample_attribute_value(self, sample_id, attribute_id, value):
+        data = { }
+
+        if value:
+            data['value'] = value
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
+
+
+    def update_sample_attribute(self, data):
+        pass
+
+
+    """
+    SAMPLE HPO TERMS
+    """
+
+    def delete_sample_hpo_term(self, sample_id, hpo_term_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/hpo-terms/{hpo_term_id}')
+
+
+    def get_sample_hpo_terms(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/hpo-terms')
+
+
+    def get_samples_hpo_terms(self):
+        return self._mosaic.get(f'{self._path}/samples/hpo-terms')
+
+
+    def post_sample_hpo_term(self, sample_id, hpo_id):
+        data = { }
+
+        if hpo_id:
+            data['hpo_id'] = hpo_id
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
+
+
+    """
+    SAMPLES
+    """
+
+    def delete_sample(self, sample_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}')
+
+
+    def get_samples(self):
+        return self._mosaic.get(f'{self._path}/samples')
+
+
+    def get_sample(self, sample_id, only_keys=None):
+        sample_data = self._mosaic.get(f'{self._path}/samples/{sample_id}')
+    
+        if only_keys:
+            return { key: sample_data[key] for key in only_keys }
+
+        return sample_data
+
+
+    def update_sample(self, sample_id, *, name=None, description=None):
         """
-
-        def delete_sample_attribute(self, attribute_id):
-            return self._mosaic.delete(f'{self._path}/samples/attributes/{attribute_id}')
-
-
-        def get_sample_attributes(self, *, is_custom=None, include_values=None, attribute_ids=None):
-            params = { }
-            if is_custom:
-                  params['is_custom'] = is_custom
-            if include_values:
-                  params['include_values'] = include_values
-            if attribute_ids:
-                  params['attribute_ids'] = attribute_ids
-
-            return self._mosaic.get(f'{self._path}/samples/attributes', params=params)
-
-
-        def get_attributes_for_sample(self, sample_id):
-            return self._mosaic.get(f'{self._path}/samples/{sample_id}/attributes')
-
-
-        def post_import_sample_attribute(self, attribute_id):
-            data = { 'attribute_id': attribute_id}
-
-            return self._mosaic.post(f'{self._path}/samples/attributes/import', data=data)
-
-
-        def post_sample_attribute_value(self, sample_id, attribute_id, value):
-            data = { }
-
-            if value:
-                data['value'] = value
-
-            return self._mosaic.post(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
-
-
-        def post_upload_sample_attributes(self, file_path):
-            return self._mosaic.post(f'{self._path}/samples/attributes/upload', file_path=file_path)
-
-
-        def put_sample_attribute_value(self, sample_id, attribute_id, value):
-            data = { }
-
-            if value:
-                data['value'] = value
-
-            return self._mosaic.put(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
-
-
-        def update_sample_attribute(self, data):
-            pass
-
-
+        The API for this is a little strange.
         """
-        SAMPLE HPO TERMS
-        """
+        data = {}
 
-        def delete_sample_hpo_term(self, sample_id, hpo_term_id):
-            return self._mosaic.delete(f'{self._path}/samples/{sample_id}/hpo-terms/{hpo_term_id}')
+        if name:
+            data['name'] = name
 
+        if description:
+            data['description'] = description
 
-        def get_sample_hpo_terms(self, sample_id):
-            return self._mosaic.get(f'{self._path}/samples/{sample_id}/hpo-terms')
+        if not name and not description:
+            raise Exception('Provide either name or description')
 
-
-        def get_samples_hpo_terms(self):
-            return self._mosaic.get(f'{self._path}/samples/hpo-terms')
-
-
-        def post_sample_hpo_term(self, sample_id, hpo_id):
-            data = { }
-
-            if hpo_id:
-                data['hpo_id'] = hpo_id
-
-            return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
+        self._mosaic.put(f'{self._path}/samples/{sample_id}', data=data)
 
 
-        """
-        SAMPLES
-        """
+    def create_sample(self, name, description=None):
+        data = { 'name': name }
 
-        def delete_sample(self, sample_id):
-            return self._mosaic.delete(f'{self._path}/samples/{sample_id}')
+        if description:
+            data['description'] = description
 
-
-        def get_samples(self):
-            return self._mosaic.get(f'{self._path}/samples')
+        return self._mosaic.post(f'{self._path}/samples', data=data)
 
 
-        def get_sample(self, sample_id, only_keys=None):
-            sample_data = self._mosaic.get(f'{self._path}/samples/{sample_id}')
-        
-            if only_keys:
-                return { key: sample_data[key] for key in only_keys }
-
-            return sample_data
+    def delete_sample(self, sample_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}')
 
 
-        def update_sample(self, sample_id, *, name=None, description=None):
-            """
-            The API for this is a little strange.
-            """
-            data = {}
+    def merge_samples(self, from_sample_id, into_sample_id):
+        data = {
+            'from_sample_id': from_sample_id,
+            'into_sample_id': into_sample_id,
+        }
 
-            if name:
-                data['name'] = name
-
-            if description:
-                data['description'] = description
-
-            if not name and not description:
-                raise Exception('Provide either name or description')
-
-            self._mosaic.put(f'{self._path}/samples/{sample_id}', data=data)
+        return self._mosaic.post(f'{self._path}/samples/merge', data=data)
 
 
-        def create_sample(self, name, description=None):
-            data = { 'name': name }
+    """
+    SAMPLE FILES
+    """
 
-            if description:
-                data['description'] = description
-
-            return self._mosaic.post(f'{self._path}/samples', data=data)
-
-
-        def delete_sample(self, sample_id):
-            return self._mosaic.delete(f'{self._path}/samples/{sample_id}')
+    def delete_sample_file(self, sample_id, file_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/files/{file_id}')
 
 
-        def merge_samples(self, from_sample_id, into_sample_id):
-            data = {
-                'from_sample_id': from_sample_id,
-                'into_sample_id': into_sample_id,
-            }
+    def get_all_sample_files(self, *, file_types=None, sample_names=None, combine_duplicates=None):
+        params = {}
+        if combine_duplicates:
+            params['combine_duplicates'] = combine_duplicates
+        if file_types:
+            params['file_types'] = file_types
+        if sample_names:
+            params['sample_names'] = sample_names
 
-            return self._mosaic.post(f'{self._path}/samples/merge', data=data)
-
-
-        """
-        SAMPLE FILES
-        """
-
-        def delete_sample_file(self, sample_id, file_id):
-            return self._mosaic.delete(f'{self._path}/samples/{sample_id}/files/{file_id}')
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/files', params=params)
 
 
-        def get_all_sample_files(self, *, file_types=None, sample_names=None, combine_duplicates=None):
-            params = {}
-            if combine_duplicates:
-                params['combine_duplicates'] = combine_duplicates
-            if file_types:
-                params['file_types'] = file_types
-            if sample_names:
-                params['sample_names'] = sample_names
-
-            yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/files', params=params)
+    def get_sample_files(self, sample_id):
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
 
 
-        def get_sample_files(self, sample_id):
-            yield from self._mosaic.get_paged_route_iter(f'{self._path}/samples/{sample_id}/files')
+    def get_sample_file_url(self, file_id):
+        return self._mosaic.get(f'{self._path}/files/{file_id}/url')
 
 
-        def get_sample_file_url(self, file_id):
-            return self._mosaic.get(f'{self._path}/files/{file_id}/url')
+    def post_sample_file(self, sample_id, *, url=None, experiment_id=None, library_type=None, name, nickname=None, qc=None, reference, file_type, size=None, uri, vcf_sample_name=None):
+        data = {
+            'name': name,
+            'reference': reference,
+            'type': file_type,
+            'uri': uri
+        }
+
+        if url:
+            data['endpoint_url'] = url
+        if experiment_id:
+            data['experiment_id'] = experiment_id
+        if library_type:
+            data['library_type'] = library_type
+        if nickname:
+            data['nickname'] = nickname
+        if qc:
+            data['qc'] = qc
+        if size:
+            data['size'] = size
+        if vcf_sample_name:
+            data['vcf_sample_name'] = vcf_sample_name
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/files', data=data)
 
 
-        def post_sample_file(self, sample_id, *, url=None, experiment_id=None, library_type=None, name, nickname=None, qc=None, reference, file_type, size=None, uri, vcf_sample_name=None):
-            data = {
-                'name': name,
-                'reference': reference,
-                'type': file_type,
-                'uri': uri
-            }
+    def put_sample_file(self, sample_id, file_id, *, url=None, experiment_id=None, library_type=None, name=None, nickname=None, qc=None, reference=None, file_type=None, size=None, uri=None, vcf_sample_name=None):
+        data = {}
 
-            if url:
-                data['endpoint_url'] = url
-            if experiment_id:
-                data['experiment_id'] = experiment_id
-            if library_type:
-                data['library_type'] = library_type
-            if nickname:
-                data['nickname'] = nickname
-            if qc:
-                data['qc'] = qc
-            if size:
-                data['size'] = size
-            if vcf_sample_name:
-                data['vcf_sample_name'] = vcf_sample_name
+        if name:
+            data['name'] = name
+        if reference:
+            data['reference'] = reference
+        if file_type:
+            data['type'] = file_type
+        if uri:
+            data['uri'] = uri
+        if url:
+            data['endpoint_url'] = url
+        if experiment_id:
+            data['experiment_id'] = experiment_id
+        if library_type:
+            data['library_type'] = library_type
+        if nickname:
+            data['nickname'] = nickname
+        if qc:
+            data['qc'] = qc
+        if size:
+            data['size'] = size
+        if vcf_sample_name:
+            data['vcf_sample_name'] = vcf_sample_name
+        if not data:
+          print('No fields to update were provided. Please include at least one field to update')
+          exit(1)
 
-            return self._mosaic.post(f'{self._path}/samples/{sample_id}/files', data=data)
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/files/{file_id}', data=data)
 
 
-        def put_sample_file(self, sample_id, file_id, *, url=None, experiment_id=None, library_type=None, name=None, nickname=None, qc=None, reference=None, file_type=None, size=None, uri=None, vcf_sample_name=None):
-            data = {}
 
-            if name:
-                data['name'] = name
-            if reference:
-                data['reference'] = reference
-            if file_type:
-                data['type'] = file_type
-            if uri:
-                data['uri'] = uri
-            if url:
-                data['endpoint_url'] = url
-            if experiment_id:
-                data['experiment_id'] = experiment_id
-            if library_type:
-                data['library_type'] = library_type
-            if nickname:
-                data['nickname'] = nickname
-            if qc:
-                data['qc'] = qc
-            if size:
-                data['size'] = size
-            if vcf_sample_name:
-                data['vcf_sample_name'] = vcf_sample_name
-            if not data:
-              print('No fields to update were provided. Please include at least one field to update')
+    """
+    TASKS
+    """
+
+    def delete_task(self, task_id):
+        return self._mosaic.delete(f'{self._path}/tasks/{task_id}')
+
+
+    def get_project_tasks(self):
+        return self._mosaic.get(f'{self._path}/tasks')
+
+
+    def get_task_type_attributes(self):
+        return self._mosaic.get(f'{self._path}/tasks/types/attributes')
+
+
+    def put_task_type_attributes(self, task_type_attribute_id, *, attribute_ids=None, cascade_update=None):
+        data = {}
+
+        if attribute_ids:
+            data['attribute_ids'] = attribute_ids
+        if cascade_update:
+            if cascade_update == True or cascade_update == 'true':
+                data['cascade_update'] = 'true'
+            elif cascade_update == False or cascade_update == 'false':
+                data['cascade_update'] = 'false'
+
+        return self._mosaic.put(f'{self._path}/tasks/types/{task_type_attribute_id}/attributes', data=data)
+
+    """
+    USER PROJECT SETTINGS
+    """
+
+    def delete_user_project_settings(self):
+        return self._mosaic.delete(f'{self._path}/settings')
+
+
+    def get_user_project_settings(self):
+        return self._mosaic.get(f'{self._path}/settings')
+
+
+
+    """
+    VARIANT ANNOTATIONS
+    """
+
+    def delete_variant_annotation(self, annotation_id):
+        return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}')
+
+
+    def delete_variant_annotation_version(self, annotation_id, annotation_version_id):
+        return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}')
+
+
+    def delete_variant_annotation_version_values(self, annotation_id, annotation_version_id):
+        return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}/values')
+
+
+    def get_variant_annotations(self, *, annotation_ids=None, annotation_version_ids=None, include_values=None):
+        params = { }
+        if annotation_ids:
+            params['annotation_ids'] = annotation_ids
+        if annotation_version_ids:
+            params['annotation_version_ids'] = annotation_version_ids
+        if include_values:
+            params['include_values'] = include_values
+
+        return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
+
+
+    def get_variant_annotations_to_import(self): 
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
+
+
+    def get_variant_annotation_versions(self, annotation_id):
+        return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
+
+    def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+        data = { }
+
+        if allow_deletion:
+            if allow_deletion == 'true':
+                data['allow_deletion'] = 'true'
+            elif allow_deletion == 'True':
+                data['allow_deletion'] = 'true'
+            elif allow_deletion == True:
+                data['allow_deletion'] = 'true'
+            elif allow_deletion == 'false':
+                data['allow_deletion'] = 'false'
+            elif allow_deletion == 'false':
+                data['allow_deletion'] = 'false'
+            elif allow_deletion == True:
+                data['allow_deletion'] = 'false'
+            else:
+                print('ERROR: Upload annotations has "allow_deletion" set to ', allow_deletion, '. The value must be "true" or "false"', sep = '')
+                exit(1)
+        if name:
+            data['name'] = name
+        if value_type:
+            data['value_type'] = value_type
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if display_type:
+            data['display_type'] = display_type
+        if severity:
+            data['severity'] = severity
+        if category:
+            data['category'] = category
+        if value_truncate_type:
+            data['value_truncate_type'] = value_truncate_type
+        if value_max_length:
+            data['value_max_length'] = value_max_length
+
+        return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
+
+    def post_import_annotation(self, annotation_id):
+        data = {'annotation_id': annotation_id}
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/import', data=data)
+
+    def post_annotation_file(self, file_path, allow_deletion=None, disable_successful_notification=None):
+        data = { }
+
+        if allow_deletion:
+            if allow_deletion == 'true':
+                data['allow_deletion'] = 'true'
+            else:
+                data['allow_deletion'] = 'false'
+
+        if disable_successful_notification:
+            if disable_successful_notification == 'true':
+                data['disable_successful_notification'] = 'true'
+            else:
+                data['disable_successful_notification'] = 'false'
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/upload', file_path=file_path, data=data)
+
+
+    def post_create_annotation_version(self, annotation_id, version_name):
+        data = { 'version': version_name }
+
+        return self._mosaic.post(f'{self._path}/variants/annotations/{annotation_id}/versions', data=data)
+
+
+    def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, latest_version_id=None):
+        data = { }
+
+        if name:
+            data['name'] = name
+        if value_type:
+            data['value_type'] = value_type
+        if privacy_level:
+            data['privacy_level'] = privacy_level
+        if display_type:
+            data['display_type'] = display_type
+        if severity:
+            data['severity'] = severity
+        if category:
+            data['category'] = category
+        if value_truncate_type:
+            data['value_truncate_type'] = value_truncate_type
+        if value_max_length:
+            data['value_max_length'] = value_max_length
+        if latest_version_id:
+            data['latest_annotation_version_id'] = latest_version_id
+
+        return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
+
+    """
+    VARIANT FILTERS
+    """
+
+    def delete_variant_filter(self, filter_id):
+        self._mosaic.delete(f'{self._path}/variants/filters/{filter_id}')
+
+
+    def get_variant_filters(self):
+        return self._mosaic.get(f'{self._path}/variants/filters')
+
+
+    def post_variant_filter(self, *, name=None, description=None, category=None, column_ids=None, sort_column_id=None, sort_direction=None, filter_data=None):
+        data = { 'name': name, 'filter': filter_data }
+
+        if name:
+            data['name'] = name
+        if description:
+            data['description'] = description
+        if category:
+            data['category'] = category
+        if column_ids:
+            data['selected_view_columns_annotation_versions'] = column_ids
+        if sort_column_id:
+            data['sort_by_column_id'] = sort_column_id
+        if sort_direction:
+            if sort_direction == 'asc':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'ASC':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'ascending':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'Ascending':
+                data['sort_dir'] = 'ASC'
+            elif sort_direction == 'desc':
+                data['sort_dir'] = 'DESC'
+            elif sort_direction == 'DESC':
+                data['sort_dir'] = 'DESC'
+            elif sort_direction == 'descending':
+                data['sort_dir'] = 'DESC'
+            elif sort_direction == 'Descending':
+                data['sort_dir'] = 'DESC'
+            else:
+                print('Unknown sort direction: ', sort_direction, sep = '')
+                exit(1)
+        if filter_data:
+            data['filter'] = filter_data
+
+        return self._mosaic.post(f'{self._path}/variants/filters', data=data)
+
+    
+    def update_variant_filter(self, filter_id, data):
+        return self._mosaic.put(f'{self._path}/variants/filters/{filter_id}', data=data)
+
+
+    """
+    VARIANTS
+    """
+
+    def delete_variant_set(self, variant_set_id):
+        return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
+
+
+    def get_variant_by_position(self, variant_position, *, include_annotation_data=None, include_genotype_data=None):
+        params = { }
+        params['include_annotation_data'] = 'true' if include_annotation_data else 'false'
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+
+        return self._mosaic.get(f'{self._path}/variants/position/{variant_position}')
+
+
+    def get_variant_watchlist(self, *, include_variant_data=None):
+        params = { }
+
+        params['include_variant_data'] = 'true' if include_variant_data else 'false'
+
+        return self._mosaic.get(f'{self._path}/variants/sets/watchlist', params=params)
+
+
+    def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
+        params = { }
+        params['include_variant_data'] = 'true' if include_variant_data else 'false'
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+
+        return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}', params = params)
+
+
+    def get_variant_sets(self):
+        return self._mosaic.get(f'{self._path}/variants/sets')
+
+
+    def get_variant(self, variant_id, *, include_annotation_data=None, include_genotype_data=None):
+        params = { }
+        if include_annotation_data:
+          if include_annotation_data == 'true':
+              params['include_annotation_data'] = 'true'
+          elif include_annotation_data == 'false':
+              params['include_annotation_data'] = 'false'
+          else:
+              print('get_variant: include_annotation_data must be "true" or "false"')
               exit(1)
 
-            return self._mosaic.put(f'{self._path}/samples/{sample_id}/files/{file_id}', data=data)
+        if include_genotype_data:
+          if include_genotype_data == 'true':
+              params['include_genotype_data'] = 'true'
+          elif include_genotype_data == 'false':
+              params['include_genotype_data'] = 'false'
+          else:
+              print('get_variant: include_genotype_data must be "true" or "false"')
+              exit(1)
 
+        return self._mosaic.get(f'{self._path}/variants/{variant_id}', params=params)
 
 
-        """
-        TASKS
-        """
+    def post_variant_file(self, file_path, *, sample_map=None, upload_type=None, disable_successful_notification=None):
+        data = { }
 
-        def delete_task(self, task_id):
-            return self._mosaic.delete(f'{self._path}/tasks/{task_id}')
+        if upload_type:
+            data['type'] = upload_type
+        if disable_successful_notification:
+            if disable_successful_notification == 'true':
+              data['disable_successful_notification'] = 'true'
+            else:
+              data['disable_successful_notification'] = 'false'
 
+        return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data, sample_map=sample_map)
 
-        def get_project_tasks(self):
-            return self._mosaic.get(f'{self._path}/tasks')
 
+    def post_variant_set_annotations(self, variant_set_id, annotation_version_ids):
+        data = { }
 
-        def get_task_type_attributes(self):
-            return self._mosaic.get(f'{self._path}/tasks/types/attributes')
+        if annotation_version_ids:
+            data['selected_variant_annotation_version_ids'] = annotation_version_ids
 
+        return self._mosaic.post(f'{self._path}/variants/sets/{variant_set_id}/annotations', data=data)
 
-        def put_task_type_attributes(self, task_type_attribute_id, *, attribute_ids=None, cascade_update=None):
-            data = {}
 
-            if attribute_ids:
-                data['attribute_ids'] = attribute_ids
-            if cascade_update:
-                if cascade_update == True or cascade_update == 'true':
-                    data['cascade_update'] = 'true'
-                elif cascade_update == False or cascade_update == 'false':
-                    data['cascade_update'] = 'false'
-
-            return self._mosaic.put(f'{self._path}/tasks/types/{task_type_attribute_id}/attributes', data=data)
-
-        """
-        USER PROJECT SETTINGS
-        """
-
-        def delete_user_project_settings(self):
-            return self._mosaic.delete(f'{self._path}/settings')
-
-
-        def get_user_project_settings(self):
-            return self._mosaic.get(f'{self._path}/settings')
-
-
-
-        """
-        VARIANT ANNOTATIONS
-        """
-
-        def delete_variant_annotation(self, annotation_id):
-            return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}')
-
-
-        def delete_variant_annotation_version(self, annotation_id, annotation_version_id):
-            return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}')
-
-
-        def delete_variant_annotation_version_values(self, annotation_id, annotation_version_id):
-            return self._mosaic.delete(f'{self._path}/variants/annotations/{annotation_id}/versions/{annotation_version_id}/values')
-
-
-        def get_variant_annotations(self, *, annotation_ids=None, annotation_version_ids=None, include_values=None):
-            params = { }
-            if annotation_ids:
-                params['annotation_ids'] = annotation_ids
-            if annotation_version_ids:
-                params['annotation_version_ids'] = annotation_version_ids
-            if include_values:
-                params['include_values'] = include_values
-
-            return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
-
-
-        def get_variant_annotations_to_import(self): 
-            yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
-
-
-        def get_variant_annotation_versions(self, annotation_id):
-            return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
-
-        def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
-            data = { }
-
-            if allow_deletion:
-                if allow_deletion == 'true':
-                    data['allow_deletion'] = 'true'
-                elif allow_deletion == 'True':
-                    data['allow_deletion'] = 'true'
-                elif allow_deletion == True:
-                    data['allow_deletion'] = 'true'
-                elif allow_deletion == 'false':
-                    data['allow_deletion'] = 'false'
-                elif allow_deletion == 'false':
-                    data['allow_deletion'] = 'false'
-                elif allow_deletion == True:
-                    data['allow_deletion'] = 'false'
-                else:
-                    print('ERROR: Upload annotations has "allow_deletion" set to ', allow_deletion, '. The value must be "true" or "false"', sep = '')
-                    exit(1)
-            if name:
-                data['name'] = name
-            if value_type:
-                data['value_type'] = value_type
-            if privacy_level:
-                data['privacy_level'] = privacy_level
-            if display_type:
-                data['display_type'] = display_type
-            if severity:
-                data['severity'] = severity
-            if category:
-                data['category'] = category
-            if value_truncate_type:
-                data['value_truncate_type'] = value_truncate_type
-            if value_max_length:
-                data['value_max_length'] = value_max_length
-
-            return self._mosaic.post(f'{self._path}/variants/annotations', data=data)
-
-        def post_import_annotation(self, annotation_id):
-            data = {'annotation_id': annotation_id}
-
-            return self._mosaic.post(f'{self._path}/variants/annotations/import', data=data)
-
-        def post_annotation_file(self, file_path, allow_deletion=None, disable_successful_notification=None):
-            data = { }
-
-            if allow_deletion:
-                if allow_deletion == 'true':
-                    data['allow_deletion'] = 'true'
-                else:
-                    data['allow_deletion'] = 'false'
-
-            if disable_successful_notification:
-                if disable_successful_notification == 'true':
-                    data['disable_successful_notification'] = 'true'
-                else:
-                    data['disable_successful_notification'] = 'false'
-
-            return self._mosaic.post(f'{self._path}/variants/annotations/upload', file_path=file_path, data=data)
-
-
-        def post_create_annotation_version(self, annotation_id, version_name):
-            data = { 'version': version_name }
-
-            return self._mosaic.post(f'{self._path}/variants/annotations/{annotation_id}/versions', data=data)
-
-
-        def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, latest_version_id=None):
-            data = { }
-
-            if name:
-                data['name'] = name
-            if value_type:
-                data['value_type'] = value_type
-            if privacy_level:
-                data['privacy_level'] = privacy_level
-            if display_type:
-                data['display_type'] = display_type
-            if severity:
-                data['severity'] = severity
-            if category:
-                data['category'] = category
-            if value_truncate_type:
-                data['value_truncate_type'] = value_truncate_type
-            if value_max_length:
-                data['value_max_length'] = value_max_length
-            if latest_version_id:
-                data['latest_annotation_version_id'] = latest_version_id
-
-            return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
-
-        """
-        VARIANT FILTERS
-        """
-
-        def delete_variant_filter(self, filter_id):
-            self._mosaic.delete(f'{self._path}/variants/filters/{filter_id}')
-
-
-        def get_variant_filters(self):
-            return self._mosaic.get(f'{self._path}/variants/filters')
-
-
-        def post_variant_filter(self, *, name=None, description=None, category=None, column_ids=None, sort_column_id=None, sort_direction=None, filter_data=None):
-            data = { 'name': name, 'filter': filter_data }
-
-            if name:
-                data['name'] = name
-            if description:
-                data['description'] = description
-            if category:
-                data['category'] = category
-            if column_ids:
-                data['selected_view_columns_annotation_versions'] = column_ids
-            if sort_column_id:
-                data['sort_by_column_id'] = sort_column_id
-            if sort_direction:
-                if sort_direction == 'asc':
-                    data['sort_dir'] = 'ASC'
-                elif sort_direction == 'ASC':
-                    data['sort_dir'] = 'ASC'
-                elif sort_direction == 'ascending':
-                    data['sort_dir'] = 'ASC'
-                elif sort_direction == 'Ascending':
-                    data['sort_dir'] = 'ASC'
-                elif sort_direction == 'desc':
-                    data['sort_dir'] = 'DESC'
-                elif sort_direction == 'DESC':
-                    data['sort_dir'] = 'DESC'
-                elif sort_direction == 'descending':
-                    data['sort_dir'] = 'DESC'
-                elif sort_direction == 'Descending':
-                    data['sort_dir'] = 'DESC'
-                else:
-                    print('Unknown sort direction: ', sort_direction, sep = '')
-                    exit(1)
-            if filter_data:
-                data['filter'] = filter_data
-
-            return self._mosaic.post(f'{self._path}/variants/filters', data=data)
-
-        
-        def update_variant_filter(self, filter_id, data):
-            return self._mosaic.put(f'{self._path}/variants/filters/{filter_id}', data=data)
-
-
-        """
-        VARIANTS
-        """
-
-        def delete_variant_set(self, variant_set_id):
-            return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
-
-
-        def get_variant_by_position(self, variant_position, *, include_annotation_data=None, include_genotype_data=None):
-            params = { }
-            params['include_annotation_data'] = 'true' if include_annotation_data else 'false'
-            params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
-
-            return self._mosaic.get(f'{self._path}/variants/position/{variant_position}')
-
-
-        def get_variant_watchlist(self, *, include_variant_data=None):
-            params = { }
-
-            params['include_variant_data'] = 'true' if include_variant_data else 'false'
-
-            return self._mosaic.get(f'{self._path}/variants/sets/watchlist', params=params)
-
-
-        def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
-            params = { }
-            params['include_variant_data'] = 'true' if include_variant_data else 'false'
-            params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
-
-            return self._mosaic.get(f'{self._path}/variants/sets/{variant_set_id}', params = params)
-
-
-        def get_variant_sets(self):
-            return self._mosaic.get(f'{self._path}/variants/sets')
-
-
-        def get_variant(self, variant_id, *, include_annotation_data=None, include_genotype_data=None):
-            params = { }
-            if include_annotation_data:
-              if include_annotation_data == 'true':
-                  params['include_annotation_data'] = 'true'
-              elif include_annotation_data == 'false':
-                  params['include_annotation_data'] = 'false'
-              else:
-                  print('get_variant: include_annotation_data must be "true" or "false"')
-                  exit(1)
-
-            if include_genotype_data:
-              if include_genotype_data == 'true':
-                  params['include_genotype_data'] = 'true'
-              elif include_genotype_data == 'false':
-                  params['include_genotype_data'] = 'false'
-              else:
-                  print('get_variant: include_genotype_data must be "true" or "false"')
-                  exit(1)
-
-            return self._mosaic.get(f'{self._path}/variants/{variant_id}', params=params)
-
-
-        def post_variant_file(self, file_path, *, sample_map=None, upload_type=None, disable_successful_notification=None):
-            data = { }
-
-            if upload_type:
-                data['type'] = upload_type
-            if disable_successful_notification:
-                if disable_successful_notification == 'true':
-                  data['disable_successful_notification'] = 'true'
-                else:
-                  data['disable_successful_notification'] = 'false'
-
-            return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data, sample_map=sample_map)
-
-
-        def post_variant_set_annotations(self, variant_set_id, annotation_version_ids):
-            data = { }
-
-            if annotation_version_ids:
-                data['selected_variant_annotation_version_ids'] = annotation_version_ids
-
-            return self._mosaic.post(f'{self._path}/variants/sets/{variant_set_id}/annotations', data=data)
-
-
-        """
+    """
     VIEWS
     """
 
