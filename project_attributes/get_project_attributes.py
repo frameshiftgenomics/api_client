@@ -70,7 +70,7 @@ def main():
             if args.include_values:
               print('   values:')
               for value in attribute['values']:
-                print('      ', value['value'], ': ', value['id'])
+                print('      project_id: ', value['project_id'], ', value_id: ', value['id'], ', value: ', value['value'], sep = '')
           else:
             print('   ', attribute_info, ': ', attribute[attribute_info], sep = '')
 

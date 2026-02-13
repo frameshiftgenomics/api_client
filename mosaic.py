@@ -1045,6 +1045,10 @@ class Project(object):
     PROJECT ATTRIBUTES
     """
 
+    def delete_project_attribute_value(self, attribute_id, value_id):
+        return self._mosaic.delete(f'{self._path}/attributes/{attribute_id}/values/{value_id}')
+
+
     def delete_project_attribute(self, attribute_id):
         return self._mosaic.delete(f'{self._path}/attributes/{attribute_id}')
 
@@ -1950,8 +1954,8 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/filters', data=data)
 
     
-    def update_variant_filter(self, filter_id, new_data):
-        self._mosaic.put(f'{self._path}/variants/filters/{filter_id}', data=new_data)
+    def update_variant_filter(self, filter_id, data):
+        return self._mosaic.put(f'{self._path}/variants/filters/{filter_id}', data=data)
 
 
     """
@@ -2040,23 +2044,46 @@ class Project(object):
     VIEWS
     """
 
+    def delete_view(self, view_type, view_id):
+        return self._mosaic.delete(f'{self._path}/{view_type}/views/{view_id}')
 
-    def get_view_tabs(self, object_type):
-        return self._mosaic.get(f'{self._path}/{object_type}/views/tabs')
+
+    def get_views(self, view_type):
+        return self._mosaic.get(f'{self._path}/{view_type}/views')
 
 
-    def post_create_data_groups_view(self, name, *, description=None, data_group_attribute_id=None, selected_attribute_ids=None):
-        data = { }
+    def get_view_tabs(self, view_type):
+        return self._mosaic.get(f'{self._path}/{view_type}/views/tabs')
+
+
+    def post_create_view(self, view_type, name, *, description=None, icon=None, data_group_attribute_id=None, selected_attribute_ids=None):
+        data = { 'name': name }
 
         if description:
-            data['descriptoin'] = description
+            data['description'] = description
+        if icon:
+            data['icon'] = icon
         if data_group_attribute_id:
             data['data_group_attribute_id'] = data_group_attribute_id
         if selected_attribute_ids:
             data['selected_attribute_ids'] = selected_attribute_ids
 
-        return self._mosaic.post(f'{self._path}/data_groups/views', data=data)
+        return self._mosaic.post(f'{self._path}/{view_type}/views', data=data)
 
+
+    def update_view(self, view_type, view_id, *, name=None, description=None, icon=None, selected_attribute_ids=None):
+        data = { }
+
+        if name:
+            data['name'] = name
+        if description:
+            data['description'] = description
+        if icon:
+            data['icon'] = icon
+        if selected_attribute_ids:
+            data['selected_attribute_ids'] = selected_attribute_ids
+
+        return self._mosaic.put(f'{self._path}/{view_type}/views/{view_id}', data=data)
 
 
 if __name__ == '__main__':
