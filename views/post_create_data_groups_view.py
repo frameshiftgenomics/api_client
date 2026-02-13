@@ -22,8 +22,8 @@ def main():
   path.append(args.api_client)
   try:
     from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
+  except Exception as e:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument. Error was: ' + str(e))
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
@@ -41,13 +41,7 @@ def main():
   # Get a list of all attribute ids in the project. This can be regular project attributes,
   # data groups, or intervals
   project_attribute_ids = []
-  for attribute_info in project.get_project_data_group_attributes():
-    if attribute_info['id'] not in project_attribute_ids:
-      project_attribute_ids.append(attribute_info['id'])
-  for attribute_info in project.get_project_attributes():
-    if attribute_info['id'] not in project_attribute_ids:
-      project_attribute_ids.append(attribute_info['id'])
-  for attribute_info in project.get_project_interval_attributes():
+  for attribute_info in project.get_project_attribute_definitions():
     if attribute_info['id'] not in project_attribute_ids:
       project_attribute_ids.append(attribute_info['id'])
 

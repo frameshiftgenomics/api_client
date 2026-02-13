@@ -2058,7 +2058,7 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/{view_type}/views')
 
 
-    def get_view_tabs(self, view_type):
+    def get_views_tabs(self, view_type):
         return self._mosaic.get(f'{self._path}/{view_type}/views/tabs')
 
 
@@ -2077,7 +2077,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/{view_type}/views', data=data)
 
 
-    def update_view(self, view_type, view_id, *, name=None, description=None, icon=None, selected_attribute_ids=None):
+    def put_update_view(self, view_type, view_id, *, name=None, description=None, icon=None, selected_attribute_ids=None):
         data = { }
 
         if name:

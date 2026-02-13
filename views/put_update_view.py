@@ -34,38 +34,34 @@ def main():
     fail('Failed to open project. Error was: ' + str(e))
 
   # Define the allowed object types
-  allowed_view_types = {'data-group'}
+  allowed_view_types = {'data-groups'}
   if args.view_type not in allowed_view_types:
     fail('type is unknown. Allowed types are: ' + ', '.join(allowed_view_types))
 
   # Get a list of all attribute ids in the project. This can be regular project attributes,
   # data groups, or intervals
   project_attribute_ids = []
-  for attribute_info in project.get_project_data_group_attributes():
-    if attribute_info['id'] not in project_attribute_ids:
-      project_attribute_ids.append(attribute_info['id'])
-  for attribute_info in project.get_project_attributes():
-    if attribute_info['id'] not in project_attribute_ids:
-      project_attribute_ids.append(attribute_info['id'])
-  for attribute_info in project.get_project_interval_attributes():
+  for attribute_info in project.get_project_attribute_definitions():
     if attribute_info['id'] not in project_attribute_ids:
       project_attribute_ids.append(attribute_info['id'])
 
   # Check that the data group exists in the given project
-  if int(args.data_group_id) not in project_attribute_ids:
-    fail('data group does not exist in the project')
+  #if int(args.data_group_id) not in project_attribute_ids:
+  #  fail('data group does not exist in the project')
 
   # Loop over the list of attribute ids and ensure they exist in the project
-  attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
-  missing_ids = ''
-  for attribute_id in attribute_ids:
-    if int(attribute_id) not in project_attribute_ids:
-      missing_ids += attribute_id + ','
-  missing_ids = missing_ids.rstrip(',')
-  if len(missing_ids) > 0:
-    print('The following attribute ids are not in the selected project and so cannot be part of a view:')
-    print('  ', missing_ids)
-    exit(0)
+  attribute_ids = None
+  if args.attribute_ids:
+    attribute_ids = args.attribute_ids.split(',') if ',' in args.attribute_ids else [args.attribute_ids]
+    missing_ids = ''
+    for attribute_id in attribute_ids:
+      if int(attribute_id) not in project_attribute_ids:
+        missing_ids += attribute_id + ','
+    missing_ids = missing_ids.rstrip(',')
+    if len(missing_ids) > 0:
+      print('The following attribute ids are not in the selected project and so cannot be part of a view:')
+      print('  ', missing_ids)
+      exit(0)
 
   # Set the name and description
   name = args.name if args.name else None
@@ -73,9 +69,9 @@ def main():
 
   # POST the new view
   try:
-    project.put_create_view(args.view_type, args.view_id, name = name, description = description, data_group_attribute_id = args.data_group_id, selected_attribute_ids = attribute_ids)
+    project.put_update_view(args.view_type, args.view_id, name = name, description = description, selected_attribute_ids = attribute_ids)
   except Exception as e:
-    fail('failed to POST new data group view. Error wes: ' + str(e))
+    fail('failed to PUT data group view. Error wes: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -99,7 +95,7 @@ def parse_command_line():
 
   # Optional arguments
   optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the new data group view')
-  optional_arguments.add_argument('--data_group_id', '-di', required = False, metavar = 'integer', help = 'The id of the data group that this view is used for')
+  #optional_arguments.add_argument('--data_group_id', '-di', required = False, metavar = 'integer', help = 'The id of the data group that this view is used for')
   optional_arguments.add_argument('--attribute_ids', '-ai', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to appear in the view')
 
   # Optional arguments

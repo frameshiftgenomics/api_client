@@ -41,7 +41,7 @@ def main():
   # Get the available view tabs
   try:
     #for tab in project.get_view_tabs(args.view_type):
-    print(project.get_view_tabs(args.view_type))
+    print(project.get_views_tabs(args.view_type))
     #  print(tab)
   except Exception as e:
     fail('failed to get view tabs. Error was: ' + str(e))

@@ -41,23 +41,26 @@ def main():
   # Get the available view tabs
   try:
     for view in project.get_views(args.view_type):
-      pprint(view)
 
-#      # Format the time stringd
-#      format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
-#      created_at = str(datetime.strptime(view['created_at'], format_string)).split('.')[0]
-#      updated_at = str(datetime.strptime(view['updated_at'], format_string)).split('.')[0]
-#
-#      print('name: ', view['name'], ', id: ', view['id'], sep = '')
-#      print('  type: ', view['type'], sep = '')
-#      print('  description: ', view['description'], sep = '')
-#      print('  created at: ', created_at, sep = '')
-#      print('  updated at: ', updated_at, sep = '')
-#      print('  icon: ', view['icon'], sep = '')
-#
-#      # Write out information specific to data group views
-#      if args.view_type == 'data-groups':
-#        pprint(view['projectViewDataGroups'])
+      # Format the time stringd
+      format_string = "%Y-%m-%dT%H:%M:%S.%fZ"
+      created_at = str(datetime.strptime(view['created_at'], format_string)).split('.')[0]
+      updated_at = str(datetime.strptime(view['updated_at'], format_string)).split('.')[0]
+
+      print('name: ', view['name'], ', id: ', view['id'], sep = '')
+      print('  type: ', view['type'], sep = '')
+      print('  description: ', view['description'], sep = '')
+      print('  created at: ', created_at, sep = '')
+      print('  updated at: ', updated_at, sep = '')
+      print('  icon: ', view['icon'], sep = '')
+
+      # Write out information specific to data group views
+      if args.view_type == 'data-groups':
+        print('  data group id: ', view['project_view_data_group']['data_group_attribute_id'], sep = '')
+        attribute_string = ''
+        for attribute_id in view['project_view_data_group']['selected_attribute_ids']:
+          attribute_string += str(attribute_id) + ', '
+        print('  attribute ids: ', attribute_string.rstrip().rstrip(','), sep = '')
   except Exception as e:
     fail('failed to get view. Error was: ' + str(e))
 
