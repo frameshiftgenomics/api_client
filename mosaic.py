@@ -1512,6 +1512,21 @@ class Project(object):
         return self._mosaic.patch(f'{self._path}/template/{template_project_id}')
 
 
+    def put_project(self, *, name=None, nickname=None, description=None, primary_sample_id=None):
+        data = { }
+
+        if description:
+            data['description'] = description
+        elif name:
+            data['name'] = name
+        elif nickname:
+            data['nickname'] = nickname
+        elif primary_sample_id:
+            data['primary_sample_id'] = primary_sample_id
+
+        return self._mosaic.put(f'{self._path}/', data=data)
+
+
     """
     SAMPLE ATTRIBUTES
     """
