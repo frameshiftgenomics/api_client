@@ -47,6 +47,10 @@ def main():
     if display:
       if not args.display_all_information:
         print(attribute['name'], ': ', attribute['id'], sep = '')
+        if args.include_values:
+          print('   values:')
+          for value in attribute['values']:
+            print('      project_id: ', value['project_id'], ', value_id: ', value['id'], ', value: ', value['value'], sep = '')
       else:
         print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
         print('   created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')

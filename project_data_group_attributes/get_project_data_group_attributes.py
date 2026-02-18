@@ -67,6 +67,12 @@ def main():
         print('  included attributes: ')
         for attribute in data_group['data_group_attributes']:
           print('    ', attribute['id'], ': ', project_attributes[attribute['attribute_id']], ': ', attribute['attribute_id'], sep = '')
+      if args.output_attribute_id_list:
+        id_list = ''
+        for attribute in data_group['data_group_attributes']:
+          id_list += str(attribute['attribute_id']) + ','
+        id_list = id_list.rstrip(',')
+        print('  included attribute list: ', id_list, sep = '')
 
 # Input options
 def parse_command_line():
@@ -90,6 +96,7 @@ def parse_command_line():
   # Optional viewing options
   display_arguments.add_argument('--include_attributes', '-i', required = False, action = 'store_true', help = 'Include constituent attributes in output')
   display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Include all data group information')
+  display_arguments.add_argument('--output_attribute_id_list', '-il', required = False, action = 'store_true', help = 'For each data group, output a comma separated list of the constituent attribute ids')
 
   return parser.parse_args()
 
