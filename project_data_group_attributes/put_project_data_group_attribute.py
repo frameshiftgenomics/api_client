@@ -71,7 +71,18 @@ def main():
       fail('Attribute id ' + str(attribute_id) + ' is not in the project and so cannot be added to the data group')
     if not project_attributes[str(attribute_id)]:
       fail('Attribute id ' + str(attribute_id) + ' is not a longitudinal attribute and so cannot be added to the data group')
-    attribute_array.append({"attribute_id": int(attribute_id)})
+    attribute_array.append({'attribute_id': int(attribute_id)})
+
+  # Get all of the attributes that are already in the data group
+  if not args.delete_attributes:
+    missing_attributes = []
+    for data_group in project.get_project_data_group_attributes():
+      if int(data_group['id']) == int(args.attribute_id):
+        for attribute in data_group['data_group_attributes']:
+          if int(attribute['attribute_id']) not in attribute_ids:
+            missing_attributes.append(str(attribute['attribute_id']))
+    if missing_attributes:
+      fail('the input list of attribute ids does not include all ids that are currently in the data group. Set the -da flag to allow attributes to be removed, but note that any values associated with this attribute will be deleted and will not be recoverable. The following ids were set to be removed: ' + ','.join(missing_attributes))
 
   # If the annotations in the data group are to be updated
   # Generate a list of annotation ids
@@ -115,6 +126,7 @@ def parse_command_line():
 
   # Add attributes and / or annotations
   optional_arguments.add_argument('--attribute_ids', '-ai', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to include in the data group. This must be a complete list. Any exsiting attributes in the data group will be removed if they are not included in this list')
+  optional_arguments.add_argument('--delete_attributes', '-da', required = False, action = 'store_true', help = 'If the input list of attribute ids omits an id already in thed data group, that attribute will be removed from the data group and all values will be lost. If attributes are to be deleted, set this flag to allow it')
   optional_arguments.add_argument('--annotation_version_ids', '-ni', required = False, metavar = 'string', help = 'A comma separated list of annotation ids to include in the data group. This must be a complete list. Any exsiting annotations in the data group will be removed if they are not included in this list')
 
   # Optional parameters
