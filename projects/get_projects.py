@@ -5,6 +5,7 @@ from sys import path
 from pprint import pprint
 
 def main():
+  global api_mosaic
   global allowed_references
   global system_projects
 
@@ -35,8 +36,24 @@ def main():
   if args.only_collections:
     args.include_collections = True
 
+  # Get the list of project ids to return
+  all_project_ids = None
+  if args.project_ids:
+    all_project_ids = args.project_ids.split(',') if ',' in args.project_ids else [args.project_ids]
+
+  # Loop through the projects list 100 at at time
+  if all_project_ids:
+    for i in range(0, len(all_project_ids), 100):
+      project_ids = all_project_ids[i:i + 100]
+      process_projects(args, project_ids)
+  else:
+    process_projects(args, None)
+
+# Process the projects
+def process_projects(args, project_ids):
+
   # Get all the available projects
-  for project_info in api_mosaic.get_projects(search = args.search, only_collections = args.only_collections):
+  for project_info in api_mosaic.get_projects(search = args.search, only_collections = args.only_collections, project_ids = project_ids):
     display = True
     if args.reference:
       if project_info['reference'] != args.reference:
@@ -57,10 +74,23 @@ def main():
       if not args.include_system_projects:
         display = False
 
+    # Only output projects with variants
+    if args.output_projects_with_variants:
+      if project_info['variant_count'] == 0:
+        display = False
+
     # Write out information
     if display:
-      if args.output_ids_only:
+      if args.raw_output:
+        pprint(project_info)
+      elif args.output_projects_with_variants:
+        print(project_info['id'], ':', project_info['variant_count'], sep = '')
+      elif args.output_ids_only:
         print(project_info['id'], sep = '')
+      elif args.display_all:
+        print(project_info['name'], ': ', project_info['id'], sep = '')
+        print('  task count: ', project_info['task_count'], sep = '')
+        print('  variant count: ', project_info['variant_count'], sep = '')
       else:
         print(project_info['name'], ': ', project_info['id'], sep = '')
 
@@ -77,6 +107,9 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
+  # Limit search to specific projects
+  project_arguments.add_argument('--project_ids', '-p', required = False, metavar = 'string', help = 'A comma separate list of project ids to get information for')
+
   # Only output project ids, or exclude specific projects
   display_arguments.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')
   display_arguments.add_argument('--include_templates', '-t', required = False, action = 'store_true', help = 'By default, template projects will NOT be included in the output. This will include them')
@@ -89,6 +122,15 @@ def parse_command_line():
   # Only output collections
   display_arguments.add_argument('--only_collections', '-oc', required = False, action = 'store_true', help = 'If set, only return collections')
 
+  # Display the raw output
+  display_arguments.add_argument('--raw_output', '-ro', required = False, action = 'store_true', help = 'Output an unformatted dump of all information')
+
+  # Display the raw output
+  display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Output all information in a formatted output')
+
+  # Output projects with variants
+  display_arguments.add_argument('--output_projects_with_variants', '-v', required = False, action = 'store_true', help = 'Only output information on projects with variants')
+
   # Query params
   display_arguments.add_argument('--search', '-s', required = False, metavar = 'string', help = 'Term to search on')
 
@@ -98,6 +140,8 @@ def parse_command_line():
 def fail(message):
   print('ERROR: ', message, sep = '')
   exit(1)
+
+api_mosaic = None
 
 allowed_references = []
 allowed_references.append('GRCh37')
