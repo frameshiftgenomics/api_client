@@ -51,7 +51,6 @@ def main():
     for attribute in data_group_instance['data_group_attribute_values']:
       if args.display_all_information:
         print('  attribute id: ', attribute['attribute_id'], ', id: ', attribute['id'], sep = '')
-        format_string = '%Y-%m-%dT%H:%M:%S'
         record_date = str(attribute['record_date']).split('+')[0]
         record_date = str(datetime.strptime(record_date, format_string)).split('.')[0]
         print('    record_date: ', record_date, sep = '')
