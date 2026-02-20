@@ -28,7 +28,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
   # Delete watchers from the specified conversation
   for conversation in project.get_project_conversations()['data']:
@@ -52,7 +55,7 @@ def main():
         print('  created at: ', created_at, ', updated at: ', updated_at, sep = '')
         print('  comment count: ', conversation['comment_count'], sep = '')
       else:
-        print(conversation['id'], ':', conversation['title'], sep = '')
+        print(conversation['id'], ': ', conversation['title'], sep = '')
 
 # Input options
 def parse_command_line():
