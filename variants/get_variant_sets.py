@@ -54,7 +54,8 @@ def main():
             elif args.set_names_ids_only:
               print(set_id, ': ', set_name, sep = '')
             else:
-              pprint(variant_set)
+              print(variant_set['project_id'], variant_set['variant_count'])
+              #pprint(variant_set)
 
       # If all variants sets are to be output
       else:

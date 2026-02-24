@@ -88,7 +88,7 @@ def parse_command_line():
   optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the attribute')
   optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
   optional_arguments.add_argument('--original_project_id', '-o', required = False, metavar = 'string', help = 'The id of the project that the attribute should live in')
-  optional_arguments.add_argument('--display_type', '-s', required = False, metavar = 'string', help = 'The display type for the attribute: time, date, duration, custom')
+  optional_arguments.add_argument('--display_type', '-s', required = False, metavar = 'string', help = 'The display type for the attribute: badge, time, date, duration, custom')
   optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
   optional_arguments.add_argument('--only_suggest_predefined', '-os', required = False, action = 'store_true', help = 'If set, when editing the attribute, only predefined values will be suggested')
   optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')

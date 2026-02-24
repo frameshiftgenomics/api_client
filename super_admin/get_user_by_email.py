@@ -26,7 +26,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Get the user info
-  print(api_mosaic.get_user_by_email(args.email)['user_id'])
+  try:
+    print(api_mosaic.get_user_by_email(args.email)['user_id'])
+  except:
+    print(args.email, ' does not exist')
 
 # Input options
 def parse_command_line():

@@ -31,6 +31,31 @@ def main():
   except Exception as e:
     fail('failed to open project. Error was: ' + str(e))
 
+  # Get all the sample attributes in the project
+  uids = []
+  try:
+    for attribute in project.get_sample_attributes():
+      uids.append(attribute['uid'])
+  except:
+    fail('failed to get sample attributes for project')
+
+  # Get the header line of thr tsv
+  try:
+    with open(args.tsv, 'r') as file:
+      header = file.readline().rstrip().split('\t')
+
+      # The header must begin with 'SAMPLE_NAME'
+      if str(header[0]) != 'SAMPLE_NAME':
+        fail('the tsv header must begin with SAMPLE_NAME')
+
+      # The remaining fields must be sample attribute uids
+      for uid in header[1:]:
+        if uid not in uids:
+          fail('unknown uid (' + str(uid) + ') in tsv header')
+
+  except FileNotFoundError:
+    fail('failed to open tsv file')
+
   # Upload the sample attributes file
   try:
     project.post_upload_sample_attributes(args.tsv)

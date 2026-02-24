@@ -26,7 +26,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Post the email to the whitelist
-  api_mosaic.post_to_whitelist(args.email)
+  try:
+    api_mosaic.post_to_whitelist(args.email)
+  except Exception as e:
+    fail('failed to add user to whitelist. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
