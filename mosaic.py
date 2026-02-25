@@ -1990,6 +1990,10 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
 
 
+    def get_project_variants_list(self):
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/list')
+
+
     def get_variant_by_position(self, variant_position, *, include_annotation_data=None, include_genotype_data=None):
         params = { }
         params['include_annotation_data'] = 'true' if include_annotation_data else 'false'
