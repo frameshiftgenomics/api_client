@@ -99,6 +99,35 @@ def main():
 
     #######
     #######
+    # Set the analytics charts
+    #######
+    #######
+    chart_attribute_ids = []
+    if 'analytics' in json_info:
+      for attribute in json_info['analytics']:
+        attribute_type = json_info['analytics'][attribute]
+
+        # If the sample attribute name was specified
+        if attribute_type == 'name':
+          if attribute not in sample_attribute_names:
+            fail('the analytics section includes a sample attribute specified by name that is not available: ' + attribute)
+          chart_attribute_ids.append(sample_attribute_names[attribute])
+
+        # If the sample attribute uid was specified
+        elif attribute_type == 'uid':
+          if attribute not in sample_attribute_uids:
+            fail('the analytics section includes a sample attribute specified by uid that is not available: ' + attribute)
+          chart_attribute_ids.append(sample_attribute_uids[attribute])
+
+        # If the sample attribute id was specified
+        elif attribute_type == 'id':
+          if attribute not in sample_attribute_ids:
+            fail('the analytics section includes a sample attribute specified by id that is not available: ' + attribute)
+          chart_attribute_ids.append(attribute)
+    chart_json = {"chart_ids": chart_attribute_ids, "chart_data": 'null'}
+
+    #######
+    #######
     # Remove any specified annotations
     #######
     #######
@@ -140,7 +169,8 @@ def main():
 
     # Set the project settings
     data = project.put_project_settings(selected_sample_attribute_column_ids = samples_table_columns, \
-           selected_variant_annotation_version_ids = annotation_version_ids)
+           selected_variant_annotation_version_ids = annotation_version_ids, \
+           selected_sample_attribute_chart_data = chart_json)
 
     # Get the id of the variant watchlist and update the columns
     watchlist_id = project.get_variant_watchlist()['id']

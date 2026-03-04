@@ -288,7 +288,10 @@ class Mosaic(object):
     """
 
     def get_project(self, project_id):
-        project_data = self.get(f'projects/{project_id}')
+        try:
+          project_data = self.get(f'projects/{project_id}')
+        except Exception as e:
+          fail('failed to open project. Error was: ' + str(e))
 
         project = Project(mosaic=self, project_data=project_data)
 
@@ -2010,6 +2013,14 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/sets/watchlist', params=params)
 
 
+    def get_variant_set_watchlist(self, *, include_variant_data=None, include_genotype_data=None):
+        params = { }
+        params['include_variant_data'] = 'true' if include_variant_data else 'false'
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+
+        return self._mosaic.get(f'{self._path}/variants/sets/watchlist', params = params)
+
+
     def get_variant_set(self, variant_set_id, *, include_variant_data=None, include_genotype_data=None):
         params = { }
         params['include_variant_data'] = 'true' if include_variant_data else 'false'
@@ -2119,6 +2130,13 @@ class Project(object):
 
         return self._mosaic.put(f'{self._path}/{view_type}/views/tabs', data=data)
 
+# If the script fails, provide an error message and exit, alternatively provide a warning
+def warning(message):
+  print('WARNING: ', message, sep = '')
+
+def fail(message):
+  print('ERROR: ', message, sep = '')
+  exit(1)
 
 if __name__ == '__main__':
     import fire
