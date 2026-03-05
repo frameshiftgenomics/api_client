@@ -27,7 +27,12 @@ def main():
 
   # Delete the attribute form
   project = api_mosaic.get_project(args.project_id)
-  pprint(project.get_project())
+  data = project.get_project()
+
+  if args.output_name:
+    print(data['name'])
+  else:
+    pprint(data)
 
 # Input options
 def parse_command_line():
@@ -44,6 +49,9 @@ def parse_command_line():
 
   # The id of the project
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The id of the project')
+
+  # Display options
+  display_arguments.add_argument('--output_name', '-on', required = False, action = 'store_true', help = 'Only out the project name')
 
   return parser.parse_args()
 
