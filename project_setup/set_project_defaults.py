@@ -103,27 +103,75 @@ def main():
     #######
     #######
     chart_attribute_ids = []
+    charts = {}
     if 'analytics' in json_info:
+
+      # Get the ids of all of the charts
+      for chart in project.get_attribute_charts():
+        attribute_id = chart['attribute_id']
+        chart_id = chart['id']
+        chart_type_id = chart['chart_type_id'] # 1: histogram, 2: pie, 3: horizontal bar, 4: scatterplot, 5: stacked_bar
+        if attribute_id not in charts:
+          charts[attribute_id] = {}
+        charts[attribute_id][chart_type_id] = chart_id
+
+      # Loop over the attributes that need to be charted and select the correct chart ids
       for attribute in json_info['analytics']:
-        attribute_type = json_info['analytics'][attribute]
+        attribute_id = False
+        try:
+          attribute_type = json_info['analytics'][attribute]['attribute_type']
+        except:
+          fail('attribute_type not specified in analytics for attribute ' + attribute)
+        try:
+          chart_type = json_info['analytics'][attribute]['chart_type']
+        except:
+          fail('chart_type not specified in analytics for attribute ' + attribute)
+
+        # Convert the chart type to a chart_type_id
+        if chart_type == 'histogram':
+          chart_type_id = 1
+        elif chart_type == 'pie':
+          chart_type_id = 2
+        elif chart_type == 'horizontal_bar':
+          chart_type_id = 3
+        elif chart_type == 'scatterplot':
+          chart_type_id = 4
+        elif chart_type == 'stacked_bar':
+          chart_type_id = 5
+        else:
+          fail('chart_type for attribute "' + str(attribute) + '" in analytics is not recognised. Allowed values are histogram, pie, horizontal_bar, scatterplot, stacked_bar')
 
         # If the sample attribute name was specified
         if attribute_type == 'name':
-          if attribute not in sample_attribute_names:
+          try:
+            attribute_id = sample_attribute_names[attribute]
+          except:
             fail('the analytics section includes a sample attribute specified by name that is not available: ' + attribute)
-          chart_attribute_ids.append(sample_attribute_names[attribute])
 
         # If the sample attribute uid was specified
         elif attribute_type == 'uid':
-          if attribute not in sample_attribute_uids:
+          try:
+            attribute_id = sample_attribute_uids[attribute]
+          except:
             fail('the analytics section includes a sample attribute specified by uid that is not available: ' + attribute)
-          chart_attribute_ids.append(sample_attribute_uids[attribute])
 
         # If the sample attribute id was specified
         elif attribute_type == 'id':
           if attribute not in sample_attribute_ids:
             fail('the analytics section includes a sample attribute specified by id that is not available: ' + attribute)
-          chart_attribute_ids.append(attribute)
+          attribute_id = attribute
+
+        # If the attribute_type is unknown
+        else:
+          fail('unknown attribute type for attribute "' + str(attribute) + '" in analytics')
+
+        # Get the correct chart id
+        if not attribute_id or attribute_id not in charts:
+          fail('could not find charts for attribute "' + attribute + '"')
+        if chart_type_id not in charts[attribute_id]:
+          fail('requested a ' + str(chart_type) + ' for attribute "' + str(attribute) + '", but this is not valid')
+        chart_id = charts[attribute_id][chart_type_id]
+        chart_attribute_ids.append(chart_id)
     chart_json = {"chart_ids": chart_attribute_ids, "chart_data": 'null'}
 
     #######
