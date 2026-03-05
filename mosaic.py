@@ -782,6 +782,16 @@ class Project(object):
 
 
     """
+    CHARTS
+    """
+
+
+    def get_attribute_charts(self):
+        return self._mosaic.get(f'{self._path}/charts')
+
+
+
+    """
     CLINVAR
     """
 
