@@ -140,6 +140,7 @@ def main():
     # Set the variants table defaults. The json file can include annotation names, ids or version ids, but they must be
     # specified. If an annotation name, uid, or id is supplied, the "latest" annotation version id will be used, or, if this
     # doesn't exist, the "default" will be used
+    annotation_version_ids = []
     if 'annotations'in json_info:
       annotation_version_ids = get_variant_table_ids(project, project_id, json_info['annotations'], annotation_names, annotation_uids)
     if 'watchlist_annotations'in json_info:
