@@ -176,7 +176,8 @@ def main():
 
     # Get the id of the variant watchlist and update the columns
     watchlist_id = project.get_variant_watchlist()['id']
-    data = project.post_variant_set_annotations(watchlist_id, watchlist_version_ids)
+    if len(watchlist_version_ids) > 0:
+      data = project.post_variant_set_annotations(watchlist_id, watchlist_version_ids)
   
 # Input options
 def parse_command_line():
