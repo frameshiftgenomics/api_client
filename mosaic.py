@@ -1607,6 +1607,10 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/samples/{sample_id}/hpo-terms/{hpo_term_id}')
 
 
+    def get_has_hpo_terms(self):
+        return self._mosaic.get(f'{self._path}/has-hpo')
+
+
     def get_sample_hpo_terms(self, sample_id):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/hpo-terms')
 
@@ -1630,6 +1634,10 @@ class Project(object):
 
     def delete_sample(self, sample_id):
         return self._mosaic.delete(f'{self._path}/samples/{sample_id}')
+
+
+    def get_project_is_trio(self):
+        return self._mosaic.get(f'{self._path}/is-trio')
 
 
     def get_samples(self):
