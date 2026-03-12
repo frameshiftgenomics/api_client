@@ -1516,6 +1516,17 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/sub-projects')
 
 
+    def get_activities(self, *, from_date=None, to_date=None):
+        params = { }
+
+        if from_date:
+            params['fron_date'] = from_date
+        if to_date:
+            params['to_date'] = to_date
+
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/activities', params=params)
+
+
     def get_project(self):
         return self._mosaic.get(f'{self._path}/')
 
