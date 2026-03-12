@@ -2,7 +2,7 @@
 This Mosaic API client is designed to support two workflows:
 
     (1) Python interpreter/script (preferred).
-            
+
             from mosaic import Mosaic, Project
 
         create a mosaic instance:
@@ -13,22 +13,22 @@ This Mosaic API client is designed to support two workflows:
 
             project = mosaic.get_project(project_id)
 
-        and work with the CRUD methods defined on those interactively. 
+        and work with the CRUD methods defined on those interactively.
 
 
     (2) Command line (via Python Fire):
-        
+
             python mosaic.py mosaic --host-type=<type> <command>
 
         or
-            
+
             python mosaic.py project --mosaic-host-type=<type> --project-id=<id> <command>
 
 
-    
+
     API tokens must be supplied in <host-type>.ini files, in the same directory.
 
-    If there is an API call that is not supported, add it as a method to the Mosaic 
+    If there is an API call that is not supported, add it as a method to the Mosaic
     or Project class, whichever is appropriate. See the existing methods for examples
     of how to call the underlying HTTP methods.
 
@@ -107,7 +107,7 @@ class Mosaic(object):
 
     def _log_request(self, req):
         """
-        req is a PreparedRequest object that the 
+        req is a PreparedRequest object that the
         response object has in res.request.
         """
         req_str = f"curl -X {req.method} '{req.url}' "
@@ -155,8 +155,8 @@ class Mosaic(object):
                     formatted_params[key] = value
 
         kwargs = {
-                'headers': self._headers, 
-                'verify': self._verify, 
+                'headers': self._headers,
+                'verify': self._verify,
                 'params': formatted_params
                 }
 
@@ -179,7 +179,7 @@ class Mosaic(object):
             # be supplied if a file was also supplied
             if sample_map:
               kwargs['files']['sample_map'] = open(sample_map, "rb")
-          
+
         elif data:
             # json.dumps prevents form encoding
             kwargs['data'] = json.dumps(data)
@@ -224,17 +224,17 @@ class Mosaic(object):
 
     def put(self, resource, *, params=None, data=None):
         """
-        Makes an HTTP PUT request to Mosaic. 
+        Makes an HTTP PUT request to Mosaic.
 
-        PUT differs from POST in that it assumes 
-        idempotency: calling HTTP PUT twice should have 
-        the same behavior as calling it once. 
+        PUT differs from POST in that it assumes
+        idempotency: calling HTTP PUT twice should have
+        the same behavior as calling it once.
 
         POST is used to create when the resource
-        identifier is not known already. In Mosaic, 
+        identifier is not known already. In Mosaic,
         it usually isn't. For example,
         a POST to /samples will create a new sample, e.g.
-        /samples/35 -- the resource identifier. Thus, 
+        /samples/35 -- the resource identifier. Thus,
         for us, PUT oftens performs updates.
         """
         return self._http_request(requests.put, resource, params=params, data=data)
@@ -253,7 +253,7 @@ class Mosaic(object):
         If you want a specific page, don't use this method.
         """
         limit = None
-       
+
         if params:
             limit = params.get('limit')
             search = params.get('search')
@@ -274,7 +274,7 @@ class Mosaic(object):
             params['page'] = page
             res = self.get(resource, params=params)
             count, data = res['count'], res['data']
-           
+
             received_count += len(data)
             page += 1
 
@@ -326,10 +326,10 @@ class Mosaic(object):
         # TODO: support other optional fields.
         data = { 'name': name, 'reference': reference }
 
-        if family_members: 
+        if family_members:
             data['family_members'] = family_members
 
-        if privacy_level: 
+        if privacy_level:
             data['privacy_level'] = privacy_level
 
         if family_name:
@@ -363,7 +363,7 @@ class Mosaic(object):
 
     def request_history(self):
         """
-        Return a list of all the HTTP requests run so far 
+        Return a list of all the HTTP requests run so far
         in this session, as a list of curl commands.
         """
         return self._request_history
@@ -1201,21 +1201,21 @@ class Project(object):
         data = { }
 
         if dashboard_type:
-            data['type'] = dashboard_type 
+            data['type'] = dashboard_type
         if is_active:
-            data['is_active'] = is_active 
+            data['is_active'] = is_active
         if should_show_name_in_badge:
-            data['should_show_name_in_badge'] = should_show_name_in_badge 
+            data['should_show_name_in_badge'] = should_show_name_in_badge
         if chart_id:
-            data['chart_id'] = chart_id 
+            data['chart_id'] = chart_id
         if attribute_id:
-            data['attribute_id'] = attribute_id 
+            data['attribute_id'] = attribute_id
         if project_analysis_id:
-            data['project_analysis_id'] = project_analysis_id 
+            data['project_analysis_id'] = project_analysis_id
         if project_conversation_id:
-            data['project_conversation_id'] = project_conversation_id 
+            data['project_conversation_id'] = project_conversation_id
         if variant_set_id:
-            data['variant_set_id'] = variant_set_id 
+            data['variant_set_id'] = variant_set_id
 
         return self._mosaic.post(f'{self._path}/dashboard', data=data)
 
@@ -1355,7 +1355,7 @@ class Project(object):
             data['size'] = size
         if uri:
             data['uri'] = uri
-        if endpoint_url: 
+        if endpoint_url:
             data['endpoint_url'] = endpoint_url
         if library_type:
             data['library_type'] = library_type
@@ -1520,7 +1520,7 @@ class Project(object):
         params = { }
 
         if from_date:
-            params['fron_date'] = from_date
+            params['from_date'] = from_date
         if to_date:
             params['to_date'] = to_date
 
@@ -1657,7 +1657,7 @@ class Project(object):
 
     def get_sample(self, sample_id, only_keys=None):
         sample_data = self._mosaic.get(f'{self._path}/samples/{sample_id}')
-    
+
         if only_keys:
             return { key: sample_data[key] for key in only_keys }
 
@@ -1861,7 +1861,7 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/variants/annotations', params=params)
 
 
-    def get_variant_annotations_to_import(self): 
+    def get_variant_annotations_to_import(self):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/annotations/import')
 
 
@@ -2009,7 +2009,7 @@ class Project(object):
 
         return self._mosaic.post(f'{self._path}/variants/filters', data=data)
 
-    
+
     def update_variant_filter(self, filter_id, data):
         return self._mosaic.put(f'{self._path}/variants/filters/{filter_id}', data=data)
 
@@ -2173,5 +2173,3 @@ if __name__ == '__main__':
         'mosaic': Mosaic,
         'project': Project
         })
-
-
