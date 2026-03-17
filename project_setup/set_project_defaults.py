@@ -50,15 +50,15 @@ def main():
     json_info = read_json_file(json_filename)
 
     # Get all the sample attributes in the project
-    sample_attribute_names = {}
+    #sample_attribute_names = {}
     sample_attribute_uids = {}
     sample_attribute_ids = []
     for sample_attribute in project.get_sample_attributes():
 
       # Check for duplicate sample attributes
-      if sample_attribute['name'] in sample_attribute_names:
-        fail('there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(project_id))
-      sample_attribute_names[sample_attribute['name']] = sample_attribute['id']
+      #if sample_attribute['name'] in sample_attribute_names:
+      #  fail('there are multiple sample attributes with the name ' + str(sample_attribute['name']) + ' in project with id ' + str(project_id))
+      #sample_attribute_names[sample_attribute['name']] = sample_attribute['id']
       sample_attribute_uids[sample_attribute['uid']] = sample_attribute['id']
       sample_attribute_ids.append(sample_attribute['id'])
 
@@ -80,13 +80,13 @@ def main():
         attribute_type = json_info['sample_table'][attribute_specifier]
 
         # If the attribute name was specified
-        if attribute_type == 'name':
-          if attribute_specifier not in sample_attribute_names:
-            fail('sample table defaults includes a sample attribute specified by name that is not available: ' + attribute_specifier)
-          samples_table_columns.append(sample_attribute_names[attribute_specifier])
+        #if attribute_type == 'name':
+        #  if attribute_specifier not in sample_attribute_names:
+        #    fail('sample table defaults includes a sample attribute specified by name that is not available: ' + attribute_specifier)
+        #  samples_table_columns.append(sample_attribute_names[attribute_specifier])
 
         # If the attribute uid was specified
-        elif attribute_type == 'uid':
+        if attribute_type == 'uid':
           if attribute_specifier not in sample_attribute_uids:
             fail('sample table defaults includes a sample attribute specified by uid that is not available: ' + attribute_specifier)
           samples_table_columns.append(sample_attribute_uids[attribute_specifier])
@@ -96,6 +96,10 @@ def main():
           if attribute_specifier not in sample_attribute_ids:
             fail('sample table defaults includes a sample attribute specified by id that is not available: ' + attribute_specifier)
           samples_table_columns.append(attribute_specifier)
+
+        # If the input is invalid
+        else:
+          fail('sample table defaults includes a sample attribute specified by an unknown type. Must be id or uid')
 
     #######
     #######
@@ -142,14 +146,14 @@ def main():
           fail('chart_type for attribute "' + str(attribute) + '" in analytics is not recognised. Allowed values are histogram, pie, horizontal_bar, scatterplot, stacked_bar')
 
         # If the sample attribute name was specified
-        if attribute_type == 'name':
-          try:
-            attribute_id = sample_attribute_names[attribute]
-          except:
-            fail('the analytics section includes a sample attribute specified by name that is not available: ' + attribute)
+        #if attribute_type == 'name':
+        #  try:
+        #    attribute_id = sample_attribute_names[attribute]
+        #  except:
+        #    fail('the analytics section includes a sample attribute specified by name that is not available: ' + attribute)
 
         # If the sample attribute uid was specified
-        elif attribute_type == 'uid':
+        if attribute_type == 'uid':
           try:
             attribute_id = sample_attribute_uids[attribute]
           except:

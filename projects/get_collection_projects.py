@@ -65,6 +65,8 @@ def main():
         output_list += str(project_info['id']) + ','
       elif args.ids_only:
         print(project_info['id'])
+      elif args.display_raw_output:
+        pprint(project_info)
       else:
         print(project_info['name'], ': ', project_info['id'], sep = '')
         if args.display_all:
@@ -94,6 +96,7 @@ def parse_command_line():
   # Display options
   display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only return project ids')
   display_arguments.add_argument('--display_all', '-da', required = False, action = 'store_true', help = 'Display all project information')
+  display_arguments.add_argument('--display_raw_output', '-dr', required = False, action = 'store_true', help = 'Display the raw api output')
   display_arguments.add_argument('--comma_separated_list', '-ol', required = False, action = 'store_true', help = 'Output the project ids as a comma separated list')
   display_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Output projects associated with this reference genome')
 

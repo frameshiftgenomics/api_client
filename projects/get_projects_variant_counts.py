@@ -36,6 +36,13 @@ def main():
     display = True
     if args.reference:
       display = False
+    variant_count = 0 if not project_info['variant_count'] else project_info['variant_count']
+    if args.min_variants:
+      if int(variant_count) < int(args.min_variants):
+        display = False
+    if args.max_variants:
+      if int(variant_count) > int(args.max_variants):
+        display = False
 
     # Ignore template
     if project_info['is_template']:
@@ -56,16 +63,25 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Only output projects of a given reference
-  parser.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Only output projects with the specified reference')
+  project_arguments.add_argument('--reference', '-r', required = False, metavar = 'string', help = 'Only output projects with the specified reference')
 
   # Query params
-  parser.add_argument('--search', '-s', required = False, metavar = 'string', help = 'Term to search on')
+  optional_arguments.add_argument('--search', '-s', required = False, metavar = 'string', help = 'Term to search on')
+
+  # Display params
+  display_arguments.add_argument('--min_variants', '-min', required = False, metavar = 'integer', help = 'Only output projects with a minimum of this number of variants')
+  display_arguments.add_argument('--max_variants', '-max', required = False, metavar = 'integer', help = 'Only output projects with a maximum of this number of variants')
 
   return parser.parse_args()
 
