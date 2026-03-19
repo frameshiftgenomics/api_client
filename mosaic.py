@@ -403,6 +403,28 @@ class Mosaic(object):
 
 
     """
+    GLOBAL CLINVAR
+    """
+
+    def post_diff_clinvar_version_new(self, annotation_version_id_a, annotation_version_id_b, *, project_ids=None, annotation_filters=None, generate_tasks=None, emails=None):
+        data = { }
+
+        if project_ids:
+            data['project_ids_to_check'] = project_ids
+
+        if annotation_filters:
+            data['annotation_filters'] = annotation_filters
+
+        if generate_tasks:
+            data['generate_tasks'] = generate_tasks
+
+        if emails:
+            data['emails'] = emails
+
+        return self.post(f'variants/annotations/clinvar/versions/{annotation_version_id_a}/{annotation_version_id_b}/summary', data=data)
+
+
+    """
     GLOBAL CONVERSATION GROUPS
     """
 
