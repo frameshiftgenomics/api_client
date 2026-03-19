@@ -118,11 +118,11 @@ def parse_command_line():
   parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  #parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # The ClinVar versions to diff
-  parser.add_argument('--clinvar_version_a', '-v', required = True, metavar = 'string', help = 'The original ClinVar version in the format YYYYMMDD')
-  parser.add_argument('--clinvar_version_b', '-b', required = True, metavar = 'string', help = 'The new ClinVar version in the format YYYYMMDD')
+  parser.add_argument('--clinvar_annotation_version_id_a', '-v', required = True, metavar = 'string', help = 'The original ClinVar version in the format YYYYMMDD')
+  parser.add_argument('--clinvar_annotation_version_id_b', '-b', required = True, metavar = 'string', help = 'The new ClinVar version in the format YYYYMMDD')
 
   # The gnomAD allele frequency to filter on, this should be in the form "uid,value"
   parser.add_argument('--gnomad_af', '-g', required = False, metavar = 'string', help = 'The max gnomAD allele frequency to filter out common variants')
