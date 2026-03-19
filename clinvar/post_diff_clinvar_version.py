@@ -112,7 +112,8 @@ def main():
 
   # Perform the diff
   generate_tasks = False if args.disable_tasks else True
-  project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails, annotation_filters = annotation_filters)
+  include_hpo_ancestors = 'true' if arg.include_hpo_ancestors else 'false'
+  project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails, annotation_filters = annotation_filters, include_hpo_ancestors = include_hpo_ancestors)
 
 # Input options
 def parse_command_line():
@@ -140,6 +141,9 @@ def parse_command_line():
 
   # Do not create any tasks in Mosaic. By default, create tasks
   parser.add_argument('--disable_tasks', '-d', required = False, action = 'store_true', help = 'By default, tasks will be created for all ClinVar variants to review. This flag will disable task creation')
+
+  # Use the updated HPO terms including ancestry
+  parser.add_argument('--include_ancestry', '-ia', required = False, action = 'store_true', help = 'Set to include HPO ancestry terms')
 
   return parser.parse_args()
 

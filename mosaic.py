@@ -406,22 +406,8 @@ class Mosaic(object):
     GLOBAL CLINVAR
     """
 
-    def post_diff_clinvar_version_new(self, annotation_version_id_a, annotation_version_id_b, *, project_ids=None, annotation_filters=None, generate_tasks=None, emails=None):
-        data = { }
-
-        if project_ids:
-            data['project_ids_to_check'] = project_ids
-
-        if annotation_filters:
-            data['annotation_filters'] = annotation_filters
-
-        if generate_tasks:
-            data['generate_tasks'] = generate_tasks
-
-        if emails:
-            data['emails'] = emails
-
-        return self.post(f'variants/annotations/clinvar/versions/{annotation_version_id_a}/{annotation_version_id_b}/summary', data=data)
+    def get_clinvar_diff_summary(self, annotation_version_id_a, annotation_version_id_b):
+        return self.get(f'variants/annotations/clinvar/versions/{annotation_version_id_a}/{annotation_version_id_b}/summary')
 
 
     """
@@ -829,7 +815,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions', data=data)
 
 
-    def post_diff_clinvar_version(self, *, version_a=None, version_b=None, project_ids=None, annotation_filters=None, generate_tasks=None, emails=None):
+    def post_diff_clinvar_version(self, *, version_a=None, version_b=None, project_ids=None, annotation_filters=None, generate_tasks=None, emails=None, include_hpo_ancestors=None):
         data = { }
 
         if not version_a or not version_b:
@@ -849,6 +835,11 @@ class Project(object):
 
         if emails:
             data['emails'] = emails
+
+        if include_ancestry:
+            data['include_hpo_ancestors'] = 'true'
+        else:
+            data['include_hpo_ancestors'] = 'false'
 
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions/diff', data=data)
 
