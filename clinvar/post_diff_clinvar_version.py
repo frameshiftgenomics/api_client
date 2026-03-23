@@ -143,7 +143,7 @@ def parse_command_line():
   parser.add_argument('--disable_tasks', '-d', required = False, action = 'store_true', help = 'By default, tasks will be created for all ClinVar variants to review. This flag will disable task creation')
 
   # Use the updated HPO terms including ancestry
-  parser.add_argument('--include_ancestry', '-ia', required = False, action = 'store_true', help = 'Set to include HPO ancestry terms')
+  parser.add_argument('--include_hpo_ancestors', '-ih', required = False, action = 'store_true', help = 'Set to include HPO ancestry terms')
 
   return parser.parse_args()
 

@@ -844,7 +844,7 @@ class Project(object):
         if emails:
             data['emails'] = emails
 
-        if include_ancestry:
+        if include_hpo_ancestors:
             data['include_hpo_ancestors'] = 'true'
         else:
             data['include_hpo_ancestors'] = 'false'
