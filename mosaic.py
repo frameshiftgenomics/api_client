@@ -509,6 +509,14 @@ class Mosaic(object):
         return self.get(f'jobs/{job_id}')
 
 
+    def get_scheduled_job_logs(self):
+        yield from self.get_paged_route_iter(f'jobs/scheduled/logs', params=params)
+
+
+    def get_scheduled_job_logs_types(self):
+        return self.get(f'jobs/scheduled/logs/types')
+
+
     def get_queue_status(self, *, job_statuses=None, per_status_start=None, per_status_end=None):
         params = { }
         if job_statuses:

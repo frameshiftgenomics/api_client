@@ -112,7 +112,7 @@ def main():
 
   # Perform the diff
   generate_tasks = False if args.disable_tasks else True
-  include_hpo_ancestors = 'true' if arg.include_hpo_ancestors else 'false'
+  include_hpo_ancestors = 'true' if args.include_hpo_ancestors else 'false'
   project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails, annotation_filters = annotation_filters, include_hpo_ancestors = include_hpo_ancestors)
 
 # Input options
