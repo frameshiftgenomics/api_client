@@ -2129,6 +2129,22 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/sets/{variant_set_id}/annotations', data=data)
 
 
+    def put_variant_set(self, variant_set_id, *, name=None, description=None, is_public_to_project=None, variant_ids=None):
+        data = { }
+
+        if name:
+            data['name'] = name
+        if description:
+            data['description'] = description
+        if is_public_to_project:
+            data['is_public_to_project'] = is_public_to_project
+        if variant_ids:
+            data['variant_ids'] = variant_ids
+
+        return self._mosaic.put(f'{self._path}/variants/sets/{variant_set_id}', data=data)
+
+
+
     """
     VIEWS
     """
