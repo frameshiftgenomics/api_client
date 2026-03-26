@@ -26,25 +26,60 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
-  # Get the pedigre
-  data = project.get_pedigree(args.sample_id)
-  pprint(data)
+  # If the ped file is required, print this information
+  if args.output_ped:
+    samples = {}
+    for sample in project.get_samples():
+      pedigree = sample['pedigree']
+      samples[sample['id']] = {'name': sample['name'],
+                               'maternal_id': pedigree['maternal_id'],
+                               'paternal_id': pedigree['paternal_id'],
+                               'sex': pedigree['sex'],
+                               'kindred_name': pedigree['kindred_name'],
+                               'affection_status': pedigree['affection_status']}
+
+    # Write out the ped
+    for sample in samples:
+      kindred_name = samples[sample]['kindred_name']
+      sex = samples[sample]['sex']
+      affection_status = samples[sample]['affection_status']
+      maternal_id = samples[sample]['maternal_id']
+      maternal_name = samples[maternal_id]['name'] if maternal_id else ''
+      paternal_id = samples[sample]['paternal_id']
+      paternal_name = samples[paternal_id]['name'] if paternal_id else ''
+      print(samples[sample]['kindred_name'], samples[sample]['name'], paternal_name, maternal_name, sex, affection_status, sep = '\t')
+
+    # Get the pedigree
+  else:
+    for pedigree in project.get_pedigree(args.sample_id):
+      pprint(pedigree)
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
 
   # The sample id of the sample to get the pedigree for
-  parser.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The sample id of the sample whose pedigree is to be retrieved')
+  required_arguments.add_argument('--sample_id', '-s', required = True, metavar = 'integer', help = 'The sample id of the sample whose pedigree is to be retrieved')
+
+  # Output a ped file
+  display_arguments.add_argument('--output_ped', '-op', required = False, action = 'store_true', help = 'Output a ped file')
 
   return parser.parse_args()
 

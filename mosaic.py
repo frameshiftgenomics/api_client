@@ -561,9 +561,11 @@ class Mosaic(object):
     GLOBAL PROJECTS
     """
 
-    def get_projects(self, *, search=None, only_collections=None, project_ids=None):
+    def get_projects(self, *, search=None, only_collections=None, project_ids=None, attribute_filters=None):
         params = { }
 
+        if attribute_filters:
+            params['attribute_filters'] = attribute_filters
         if only_collections:
             params['show_collections'] = 'true'
             params['show_projects'] = 'false'

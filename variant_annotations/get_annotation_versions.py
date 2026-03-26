@@ -32,8 +32,9 @@ def main():
     fail('Unable to open project with the given id. The project id must be a valid integer')
 
   # Check for mututally exclusive options
-  if args.default and args.latest:
-    fail('cannot request the of the default and latest annotations simultaneously')
+  flag_list = (args.default, args.default_redirect, args.latest, args.latest_redirect)
+  if sum(flag_list) > 1:
+    fail('multiple flags to get default, latest etc are set. These flags are mutually exclusive')
 
   # Get the annotation version information
   for annotation_version in project.get_variant_annotation_versions(args.annotation_id):
@@ -43,12 +44,18 @@ def main():
           print(annotation_version['id'])
         else:
           print(annotation_version['version'], ': ', annotation_version['id'], ', redirects to: ', annotation_version['redirect_to_id'], sep = '')
+    elif args.default_redirect:
+      if annotation_version['version'] == 'default':
+        print(annotation_version['redirect_to_id'])
     elif args.latest:
       if annotation_version['version'] == 'Latest':
         if args.ids_only:
           print(annotation_version['id'])
         else:
           print(annotation_version['version'], ': ', annotation_version['id'], ', redirects to: ', annotation_version['redirect_to_id'], sep = '')
+    elif args.latest_redirect:
+      if annotation_version['version'] == 'Latest':
+        print(annotation_version['redirect_to_id'])
     else:
       if annotation_version['version'] == 'default' or annotation_version['version'] == 'Latest':
         if args.ids_only:
@@ -82,7 +89,9 @@ def parse_command_line():
 
   # Optional arguments
   optional_arguments.add_argument('--default', '-d', required = False, action = 'store_true', help = 'Get the id of the default version')
+  optional_arguments.add_argument('--default_redirect', '-dr', required = False, action = 'store_true', help = 'Get the id of the version that default points to')
   optional_arguments.add_argument('--latest', '-l', required = False, action = 'store_true', help = 'Get the id of the latest version')
+  optional_arguments.add_argument('--latest_redirect', '-lr', required = False, action = 'store_true', help = 'Get the id of the version that latest points to')
 
   # Display arguments
   optional_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only output the annotation id')
