@@ -49,9 +49,9 @@ def main():
       sex = samples[sample]['sex']
       affection_status = samples[sample]['affection_status']
       maternal_id = samples[sample]['maternal_id']
-      maternal_name = samples[maternal_id]['name'] if maternal_id else ''
+      maternal_name = samples[maternal_id]['name'] if maternal_id else '0'
       paternal_id = samples[sample]['paternal_id']
-      paternal_name = samples[paternal_id]['name'] if paternal_id else ''
+      paternal_name = samples[paternal_id]['name'] if paternal_id else '0'
       print(samples[sample]['kindred_name'], samples[sample]['name'], paternal_name, maternal_name, sex, affection_status, sep = '\t')
 
     # Get the pedigree
