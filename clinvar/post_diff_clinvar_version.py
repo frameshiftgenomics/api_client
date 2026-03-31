@@ -9,15 +9,6 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
-  # Import the api client
-  path.append(args.api_client)
-  try:
-    from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  api_store = Store(config_file = args.client_config)
-  api_mosaic = Mosaic(config_file = args.client_config)
-
   # If the api_client path was not specified, get it from the script path
   if not args.api_client:
     try:
@@ -25,8 +16,27 @@ def main():
     except:
       fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
+  # Import the api client
+  path.append(args.api_client)
+  try:
+    from mosaic import Mosaic, Project, Store
+  except Exception as e:
+    fail('Cannot find mosaic. Please set the --api_client / -a argument' + str(e))
+  api_store = Store(config_file = args.client_config)
+  api_mosaic = Mosaic(config_file = args.client_config)
+
+  # If the api_client path was not specified, get it from the script path
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except Exception as e:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('failed to open project. Error was: ' + str(e))
 
   # Check the name of the project
   if project.name != 'Mosaic GRCh37 Globals' and project.name != 'Mosaic GRCh38 Globals':
@@ -111,39 +121,44 @@ def main():
     annotation_filters.append({'annotation_version_id': version_id, 'uid': str(gnomad_af_uid), 'value_type': 'float', 'max': str(value), 'include_nulls': 'true'})
 
   # Perform the diff
-  generate_tasks = False if args.disable_tasks else True
+  generate_tasks = 'false' if args.disable_tasks else None
   include_hpo_ancestors = 'true' if args.include_hpo_ancestors else 'false'
   project.post_diff_clinvar_version(version_a = args.clinvar_version_a, version_b = args.clinvar_version_b, project_ids = project_ids, generate_tasks = generate_tasks, emails = emails, annotation_filters = annotation_filters, include_hpo_ancestors = include_hpo_ancestors)
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # The ClinVar versions to diff
-  parser.add_argument('--clinvar_version_a', '-v', required = True, metavar = 'string', help = 'The original ClinVar version in the format YYYYMMDD')
-  parser.add_argument('--clinvar_version_b', '-b', required = True, metavar = 'string', help = 'The new ClinVar version in the format YYYYMMDD')
+  required_arguments.add_argument('--clinvar_version_a', '-v', required = True, metavar = 'string', help = 'The original ClinVar version in the format YYYYMMDD')
+  required_arguments.add_argument('--clinvar_version_b', '-b', required = True, metavar = 'string', help = 'The new ClinVar version in the format YYYYMMDD')
 
   # The gnomAD allele frequency to filter on, this should be in the form "uid,value"
-  parser.add_argument('--gnomad_af', '-g', required = False, metavar = 'string', help = 'The max gnomAD allele frequency to filter out common variants')
+  optional_arguments.add_argument('--gnomad_af', '-g', required = False, metavar = 'string', help = 'The max gnomAD allele frequency to filter out common variants')
 
   # A list of project ids can be supplied as a comma separated list
-  parser.add_argument('--project_ids_to_check', '-i', required = True, metavar = 'string', help = 'A comma separated list of project ids to check for updated ClinVar variants')
+  optional_arguments.add_argument('--project_ids_to_check', '-i', required = True, metavar = 'string', help = 'A comma separated list of project ids to check for updated ClinVar variants')
 
   # A list of email address to notify about the update
-  parser.add_argument('--emails', '-e', required = False, metavar = 'string', help = 'A comma separated list of email address to send notifications to')
+  optional_arguments.add_argument('--emails', '-e', required = False, metavar = 'string', help = 'A comma separated list of email address to send notifications to')
 
   # Do not create any tasks in Mosaic. By default, create tasks
-  parser.add_argument('--disable_tasks', '-d', required = False, action = 'store_true', help = 'By default, tasks will be created for all ClinVar variants to review. This flag will disable task creation')
+  optional_arguments.add_argument('--disable_tasks', '-d', required = False, action = 'store_true', help = 'By default, tasks will be created for all ClinVar variants to review. This flag will disable task creation')
 
   # Use the updated HPO terms including ancestry
-  parser.add_argument('--include_hpo_ancestors', '-ih', required = False, action = 'store_true', help = 'Set to include HPO ancestry terms')
+  optional_arguments.add_argument('--include_hpo_ancestors', '-ih', required = False, action = 'store_true', help = 'Set to include HPO ancestry terms')
 
   return parser.parse_args()
 

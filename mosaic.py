@@ -847,9 +847,7 @@ class Project(object):
             data['emails'] = emails
 
         if include_hpo_ancestors:
-            data['include_hpo_ancestors'] = 'true'
-        else:
-            data['include_hpo_ancestors'] = 'false'
+            data['include_hpo_ancestors'] = include_hpo_ancestors
 
         return self._mosaic.post(f'{self._path}/variants/annotations/clinvar/versions/diff', data=data)
 

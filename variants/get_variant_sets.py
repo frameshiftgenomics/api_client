@@ -37,6 +37,11 @@ def main():
       set_name = variant_set['name']
       set_id = variant_set['id']
 
+      # Check if this is the watchlist
+      is_watchlist = variant_set['is_watchlist']
+      if args.exclude_watchlist and is_watchlist:
+        continue
+
       # If only Primary ClinVar sets are required, check that ClinVar and Primary appear in the set name
       if args.clinvar_primary:
         display = False
@@ -55,7 +60,6 @@ def main():
               print(set_id, ': ', set_name, sep = '')
             else:
               print(variant_set['project_id'], variant_set['variant_count'])
-              #pprint(variant_set)
 
       # If all variants sets are to be output
       else:
@@ -93,6 +97,7 @@ def parse_command_line():
   # Display arguments
   display_arguments.add_argument('--set_ids_only', '-so', required = False, action = 'store_true', help = 'If set, only display the ids of the variants sets')
   display_arguments.add_argument('--set_names_ids_only', '-no', required = False, action = 'store_true', help = 'If set, only display the names and ids of the variants sets')
+  display_arguments.add_argument('--exclude_watchlist', '-ew', required = False, action = 'store_true', help = 'If set, the watchlist will not be retruend')
 
   return parser.parse_args()
 

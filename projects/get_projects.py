@@ -28,6 +28,15 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
+#  # If attribute filters are set, turn them into a json
+  attribute_filters = []
+#  if args.attribute_filters:
+#
+#    # Get each filter, then break into uid, value_type and value
+#    for attribute_filter in args.attribute_filters.split(','):
+#      values = attribute_filter.split(':')
+#      attribute_filters.append({'uid': values[0], 'value_type': values[1], 'values': values[2].split('|')})
+
   if args.reference:
     if args.reference not in allowed_references:
       fail('Unknown reference genome: ' + str(args.reference))
@@ -45,15 +54,15 @@ def main():
   if all_project_ids:
     for i in range(0, len(all_project_ids), 100):
       project_ids = all_project_ids[i:i + 100]
-      process_projects(args, project_ids)
+      process_projects(args, project_ids, attribute_filters)
   else:
-    process_projects(args, None)
+    process_projects(args, None, attribute_filters)
 
 # Process the projects
-def process_projects(args, project_ids):
+def process_projects(args, project_ids, attribute_filters):
 
   # Get all the available projects
-  for project_info in api_mosaic.get_projects(search = args.search, only_collections = args.only_collections, project_ids = project_ids):
+  for project_info in api_mosaic.get_projects(search = args.search, only_collections = args.only_collections, project_ids = project_ids, attribute_filters = attribute_filters):
     display = True
     if args.reference:
       if project_info['reference'] != args.reference:
@@ -109,6 +118,9 @@ def parse_command_line():
 
   # Limit search to specific projects
   project_arguments.add_argument('--project_ids', '-p', required = False, metavar = 'string', help = 'A comma separate list of project ids to get information for')
+
+  # Filter projects based on attributes
+  #optional_arguments.add_argument('--attribute_filters', '-f', required = False, metavar = 'string', help = 'A comma separated list of attributes to filter on, in the format uid:value_type:value1|value2 etc')
 
   # Only output project ids, or exclude specific projects
   display_arguments.add_argument('--output_ids_only', '-o', required = False, action = 'store_true', help = 'If set, only the project ids will be output')

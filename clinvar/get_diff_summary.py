@@ -9,6 +9,13 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
+  # If the api_client path was not specified, get it from the script path
+  if not args.api_client:
+    try:
+      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
+    except:
+      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
+
   # Import the api client
   path.append(args.api_client)
   try:
@@ -26,19 +33,27 @@ def main():
       fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
 
   # Get the diff summary
-  api_mosaic.get_clinvar_diff_summary(annotation_version_id_a, annotation_version_id_b)
+  try:
+    pprint(api_mosaic.get_clinvar_diff_summary(args.annotation_version_id_a, args.annotation_version_id_b))
+  except Exception as e:
+    fail('failed to get summary. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The ClinVar versions to diff
-  parser.add_argument('--annotation_version_id_a', '-va', required = True, metavar = 'integer', help = 'The old ClinVar annotation version id')
-  parser.add_argument('--annotation_version_id_b', '-vb', required = True, metavar = 'integer', help = 'The new ClinVar annotation version id')
+  required_arguments.add_argument('--annotation_version_id_a', '-va', required = True, metavar = 'integer', help = 'The old ClinVar annotation version id')
+  required_arguments.add_argument('--annotation_version_id_b', '-vb', required = True, metavar = 'integer', help = 'The new ClinVar annotation version id')
 
   return parser.parse_args()
 
