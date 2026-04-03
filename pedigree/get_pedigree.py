@@ -36,12 +36,20 @@ def main():
     samples = {}
     for sample in project.get_samples():
       pedigree = sample['pedigree']
-      samples[sample['id']] = {'name': sample['name'],
+      if pedigree:
+        samples[sample['id']] = {'name': sample['name'],
                                'maternal_id': pedigree['maternal_id'],
                                'paternal_id': pedigree['paternal_id'],
                                'sex': pedigree['sex'],
                                'kindred_name': pedigree['kindred_name'],
                                'affection_status': pedigree['affection_status']}
+      else:
+        samples[sample['id']] = {'name': sample['name'],
+                               'maternal_id': None,
+                               'paternal_id': None,
+                               'sex': None,
+                               'kindred_name': None,
+                               'affection_status': None}
 
     # Write out the ped
     for sample in samples:
