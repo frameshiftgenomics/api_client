@@ -56,9 +56,12 @@ def main():
   except FileNotFoundError:
     fail('failed to open tsv file')
 
+  # Disable notifications for successful uploads
+  disable_successful_notifications = 'true' if args.disable_successful_notification else 'false'
+
   # Upload the sample attributes file
   try:
-    project.post_upload_sample_attributes(args.tsv)
+    project.post_upload_sample_attributes(args.tsv, disable_successful_notification = disable_successful_notifications)
   except Exception as e:
     fail('Failed to upload sample attributes. Error was: ' + str(e))
 
@@ -80,6 +83,9 @@ def parse_command_line():
 
   # Additional arguments
   required_arguments.add_argument('--tsv', '-t', required = True, metavar = 'string', help = 'The annotation tsv file to upload')
+
+  # Optional arguments
+  optional_arguments.add_argument('--disable_successful_notification', '-n', required = False, action = 'store_false', help = 'Only send notifications if the upload fails. Default: true')
 
   return parser.parse_args()
 

@@ -1614,8 +1614,14 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/samples/{sample_id}/attributes/{attribute_id}', data=data)
 
 
-    def post_upload_sample_attributes(self, file_path):
-        return self._mosaic.post(f'{self._path}/samples/attributes/upload', file_path=file_path)
+    def post_upload_sample_attributes(self, file_path, *, disable_successful_notification=None):
+        data = {'disable_successful_notification': 'true'}
+        if disable_successful_notification == 'true':
+            data['disable_successful_notification'] = 'true'
+        elif disable_successful_notification == 'true':
+            data['disable_successful_notification'] = 'false'
+
+        return self._mosaic.post(f'{self._path}/samples/attributes/upload', file_path=file_path, data=data)
 
 
     def put_sample_attribute_value(self, sample_id, attribute_id, value):
