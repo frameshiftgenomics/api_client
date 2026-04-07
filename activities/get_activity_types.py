@@ -1,10 +1,13 @@
 import os
 import argparse
 
-from pprint import pprint
 from sys import path
+from pprint import pprint
 
 def main():
+  global api_mosaic
+  global allowed_references
+  global system_projects
 
   # Parse the command line
   args = parse_command_line()
@@ -25,24 +28,14 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
   try:
-    collection = api_mosaic.get_project(args.project_id)
+    activity_types = {}
+    for activity_type in api_mosaic.get_activity_types()['data']:
+      activity_types[activity_type['id']] = activity_type['type']
+    for activity_type_id in sorted(activity_types.keys()):
+      print('id: ', activity_type_id, ', type: ', activity_types[activity_type_id], sep = '')
   except Exception as e:
-    fail('failed to open collection. Error was: ' + str(e))
-
-  # Check that this is a collection
-  if not collection.data['is_collection']:
-    fail('Supplied project id (' + args.project_id + ') needs to be the id of a collection')
-
-  # Add the projects to the collection
-  projects_to_delete = []
-  for udn_id in args.projects_to_delete.split(','):
-    projects_to_delete.append(str(udn_id))
-  try:
-    data = collection.delete_sub_projects(projects_to_delete)
-  except Exception as e:
-    fail('failed to delete projects. Error was: ' + str(e))
+    fail('failed to get activity types. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -57,18 +50,14 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id of the collection to add projects to
-  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id of the collection to add projects to')
-
-  # The name of the sample to add
-  required_arguments.add_argument('--projects_to_delete', '-d', required = True, metavar = 'string', help = 'A comma separated list of projects to delete from the collection')
-
   return parser.parse_args()
 
 # If the script fails, provide an error message and exit
 def fail(message):
   print('ERROR: ', message, sep = '')
   exit(1)
+
+api_mosaic = None
 
 if __name__ == "__main__":
   main()

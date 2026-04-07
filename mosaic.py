@@ -368,6 +368,16 @@ class Mosaic(object):
         """
         return self._request_history
 
+
+    """
+    GLOBAL ACTIVITIES
+    """
+
+
+    def get_activity_types(self):
+        return self.get(f'activities/types')
+
+
     """
     GLOBAL ATTRIBUTE FORMS
     """
@@ -797,6 +807,23 @@ class Project(object):
 
     def __str__(self):
         return f"{self.name} (id: {self.id})"
+
+
+    """
+    ACTIVITIES
+    """
+
+
+    def get_activities(self, *, from_date=None, to_date=None):
+        params = { }
+
+        if from_date:
+            params['from_date'] = from_date
+        if to_date:
+            params['to_date'] = to_date
+
+        yield from self._mosaic.get_paged_route_iter(f'{self._path}/activities', params=params)
+
 
 
     """
@@ -1535,17 +1562,6 @@ class Project(object):
 
     def get_collection_projects(self):
         return self._mosaic.get(f'{self._path}/sub-projects')
-
-
-    def get_activities(self, *, from_date=None, to_date=None):
-        params = { }
-
-        if from_date:
-            params['from_date'] = from_date
-        if to_date:
-            params['to_date'] = to_date
-
-        yield from self._mosaic.get_paged_route_iter(f'{self._path}/activities', params=params)
 
 
     def get_project(self):
