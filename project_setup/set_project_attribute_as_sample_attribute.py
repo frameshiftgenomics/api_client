@@ -13,7 +13,7 @@ from sys import path
 def main():
 
   # Parse the command line
-  args = parseCommandLine()
+  args = parse_command_line()
 
   # If the api_client path was not specified, get it from the script path
   if not args.api_client:
@@ -32,10 +32,16 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('failed to open project. Error was: ' + str(e))
 
   # Check if this is a collection
-  data = project.get_project()
+  try:
+    data = project.get_project()
+  except Exception as e: 
+    fail('failed to get project information. Error was: ' + str(e))
   if data['is_collection']:
     project_ids = []
     for sub_project in data['collection_projects']:
@@ -75,7 +81,7 @@ def main():
           data = project.put_sample_attribute_value(sample_info['id'], args.sample_attribute_id, value)
   
 # Input options
-def parseCommandLine():
+def parse_command_line():
   global version
   parser = argparse.ArgumentParser(description='Process the command line')
 

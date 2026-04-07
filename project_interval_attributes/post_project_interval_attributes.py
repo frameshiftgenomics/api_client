@@ -26,11 +26,14 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('failed to open project. Error was: ' + str(e))
 
   # Check that the start and end attribute ids correspond to timestamp attributes that exist in this project
   existing_attributes = {}
-  for attribute in project.get_project_attributes():
+  for attribute in project.get_project_attribute_definitions():
     existing_attributes[int(attribute['id'])] = {'name': attribute['name'], 'value_type': attribute['value_type'], 'is_public': attribute['is_public']}
 
   # Check the start id is an existing timestamp
