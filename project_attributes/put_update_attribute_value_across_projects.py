@@ -43,8 +43,9 @@ def main():
     if attribute['id'] == int(args.attribute_id):
       predefined_values = attribute['predefined_values']
 
-      # Check that the attribute value to change to is in the predefined values
-      if args.change_value_to not in predefined_values:
+      # Check that the attribute value to change to is in the predefined values, or that the new value should
+      # be added to the predefined values
+      if args.change_value_to not in predefined_values and not args.ignore_predefined_values:
         fail('The value to change to is not in the predefined values')
 
       # Loop over the attribute values and check if they are in the predefined values
@@ -96,8 +97,11 @@ def parse_command_line():
   project_arguments.add_argument('--attribute_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic attribute id to edit values for')
 
   # The attribute value to change from and to
-  project_arguments.add_argument('--change_value_from', '-cf', required = True, metavar = 'string', help = 'The attribute value to be changed')
-  project_arguments.add_argument('--change_value_to', '-ct', required = True, metavar = 'string', help = 'The attribute value to change to')
+  required_arguments.add_argument('--change_value_from', '-cf', required = True, metavar = 'string', help = 'The attribute value to be changed')
+  required_arguments.add_argument('--change_value_to', '-ct', required = True, metavar = 'string', help = 'The attribute value to change to')
+
+  # Choose to add the new value to the predefined values
+  optional_arguments.add_argument('--ignore_predefined_values', '-ip', required = False, action = 'store_true', help = 'If set, the new value does not need to be a predefined value')
 
   return parser.parse_args()
 
