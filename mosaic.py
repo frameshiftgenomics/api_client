@@ -1213,6 +1213,13 @@ class Project(object):
         return self._mosaic.put(f'{self._path}/attributes/{attribute_id}', data=data)
 
 
+
+    def put_project_attribute_uid(self, attribute_id, uid):
+        data = {'uid': uid}
+
+        return self._mosaic.put(f'{self._path}/attributes/{attribute_id}/{uid}', data=data)
+
+
     def put_update_attribute_value(self, attribute_id, value_id, *, value=None, record_date=None):
         data = {'value': None}
 
