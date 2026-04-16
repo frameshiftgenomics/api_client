@@ -52,9 +52,9 @@ def main():
           display = False
 
       # If only Primary ClinVar sets are required, check that ClinVar and Primary appear in the set name
-      if args.clinvar_primary:
+      if args.clinvar_primary and display:
         if 'ClinVar' in set_name and 'Primary' in set_name:
-          if display:
+          if ('w/HPO' in set_name and args.clinvar_ancestors) or ('w/HPO' not in set_name and not args.clinvar_ancestors):
             if args.set_ids_only:
               print(set_id)
             elif args.set_names_ids_only:
@@ -97,6 +97,7 @@ def parse_command_line():
   clinvar_arguments.add_argument('--clinvar_primary', '-cp', required = False, action = 'store_true', help = 'If set, only return Primary ClinVar review variant sets')
   clinvar_arguments.add_argument('--clinvar_start_date', '-cs', required = False, metavar = 'string', help = 'If set, only return Primary ClinVar review variant sets with this start date (format: YYYYMMDD)')
   clinvar_arguments.add_argument('--clinvar_end_date', '-ce', required = False, metavar = 'string', help = 'If set, only return Primary ClinVar review variant sets with this end date (format: YYYYMMDD)')
+  clinvar_arguments.add_argument('--clinvar_ancestors', '-ca', required = False, action = 'store_true', help = 'If set, only return Primary ClinVar review variant sets that includes HPO ancestors. If omitted, only return Primary sets without ancestors')
 
   # Display arguments
   display_arguments.add_argument('--set_ids_only', '-so', required = False, action = 'store_true', help = 'If set, only display the ids of the variants sets')

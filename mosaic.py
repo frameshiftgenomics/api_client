@@ -1680,11 +1680,14 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/hpo-terms')
 
 
-    def post_sample_hpo_term(self, sample_id, hpo_id):
+    def post_sample_hpo_term(self, sample_id, hpo_id, *, sources=None):
         data = { }
+        params = { }
 
         if hpo_id:
             data['hpo_id'] = hpo_id
+        if sources:
+            data['sources'] = sources
 
         return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
 

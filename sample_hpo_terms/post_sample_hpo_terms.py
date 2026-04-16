@@ -34,12 +34,15 @@ def main():
   # Check the HPO terms are valid
   hpo_ids = args.hpo_ids.split(',')
 
+  # Parse the sources into an array of strings
+  sources = args.sources.split(',') if args.sources else []
+
   # Post the HPO terms to the sample
   for hpo_id in hpo_ids:
     try:
-      project.post_sample_hpo_term(args.sample_id, hpo_id)
+      project.post_sample_hpo_term(args.sample_id, hpo_id, sources = sources)
     except Exception as e:
-      print('Failed to POST the following HPO term (this will occur if the term is already present for the sample): ', str(hpo_id), sep = '')
+      print('Failed to POST the following HPO term (this will occur if the term is already present for the sample): ', str(hpo_id), '. Error was: ' + str(e), sep = '')
 
 # Input options
 def parse_command_line():
@@ -60,6 +63,9 @@ def parse_command_line():
 
   # A list of HPO terms to add
   required_arguments.add_argument('--hpo_ids', '-i', required = True, metavar = 'string', help = 'A comma separated list of terms in the format HP:00001,HP:00002')
+
+  # Optional arguments
+  optional_arguments.add_argument('--sources', '-so', required = False, metavar = 'string', help = 'A comma separatd list of sources to assign to the HPO terms')
 
   return parser.parse_args()
 
