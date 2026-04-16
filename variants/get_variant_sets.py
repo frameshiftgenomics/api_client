@@ -34,6 +34,7 @@ def main():
   # Get the variant sets in the project
   try:
     for variant_set in project.get_variant_sets():
+      display = True
       set_name = variant_set['name']
       set_id = variant_set['id']
 
@@ -42,33 +43,36 @@ def main():
       if args.exclude_watchlist and is_watchlist:
         continue
 
+      # If ClinVar start and / or end dates are set, only return sets that match them
+      if args.clinvar_start_date:
+        if clinvar_date_format(args.clinvar_start_date, 'start') not in set_name:
+          display = False
+      if args.clinvar_end_date:
+        if clinvar_date_format(args.clinvar_end_date, 'end') not in set_name:
+          display = False
+
       # If only Primary ClinVar sets are required, check that ClinVar and Primary appear in the set name
       if args.clinvar_primary:
-        display = False
         if 'ClinVar' in set_name and 'Primary' in set_name:
-          display = True
-          if args.clinvar_start_date:
-            if clinvar_date_format(args.clinvar_start_date, 'start') not in set_name:
-              display = False
-          if args.clinvar_end_date:
-            if clinvar_date_format(args.clinvar_end_date, 'end') not in set_name:
-              display = False
           if display:
             if args.set_ids_only:
               print(set_id)
             elif args.set_names_ids_only:
               print(set_id, ': ', set_name, sep = '')
+            elif args.variant_count_only:
+              print(variant_set['variant_count'])
             else:
-              print(variant_set['project_id'], variant_set['variant_count'])
+              pprint(variant_set)
 
       # If all variants sets are to be output
       else:
-        if args.set_ids_only:
-          print(set_id)
-        elif args.set_names_ids_only:
-          print(set_id, ': ', set_name, sep = '')
-        else:
-          pprint(variant_set)
+        if display:
+          if args.set_ids_only:
+            print(set_id)
+          elif args.set_names_ids_only:
+            print(set_id, ': ', set_name, sep = '')
+          else:
+            pprint(variant_set)
   except Exception as e:
     fail('Failed to get variants sets. Error was: ' + str(e))
 
@@ -97,6 +101,7 @@ def parse_command_line():
   # Display arguments
   display_arguments.add_argument('--set_ids_only', '-so', required = False, action = 'store_true', help = 'If set, only display the ids of the variants sets')
   display_arguments.add_argument('--set_names_ids_only', '-no', required = False, action = 'store_true', help = 'If set, only display the names and ids of the variants sets')
+  display_arguments.add_argument('--variant_count_only', '-vo', required = False, action = 'store_true', help = 'If set, only the number of variants in the set will be displayed')
   display_arguments.add_argument('--exclude_watchlist', '-ew', required = False, action = 'store_true', help = 'If set, the watchlist will not be retruend')
 
   return parser.parse_args()

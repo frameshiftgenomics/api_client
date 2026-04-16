@@ -34,7 +34,19 @@ def main():
 
   # Get the diff summary
   try:
-    pprint(api_mosaic.get_clinvar_diff_summary(args.annotation_version_id_a, args.annotation_version_id_b))
+    summary_by_project = {}
+    for summary in api_mosaic.get_clinvar_diff_summary(args.annotation_version_id_a, args.annotation_version_id_b):
+      project_id = summary['project_id']
+      if project_id not in summary_by_project:
+        summary_by_project[project_id] = [summary]
+      else:
+        summary_by_project[project_id].append(summary)
+
+    # Print out the data
+    for project_id in summary_by_project:
+      print('Project:', project_id)
+      for summary in summary_by_project[project_id]:
+        print(summary)
   except Exception as e:
     fail('failed to get summary. Error was: ' + str(e))
 
