@@ -43,40 +43,46 @@ def main():
       if str(attribute['id']) in attribute_ids:
         display = True
 
+    # If attributes with a single predefined value are required
+    if args.find_single_predefined_value_with_comma:
+      if len(attribute['predefined_values']) == 1 and ',' in attribute['predefined_values'][0]:
+        print(attribute['name'])
+
     # Only display if the attribute is requested
-    if display:
-      if not args.display_all_information:
-        print(attribute['name'], ': ', attribute['id'], sep = '')
-        if args.include_values:
-          print('   values:')
-          for value in attribute['values']:
-            print('      project_id: ', value['project_id'], ', value_id: ', value['id'], ', value: ', value['value'], sep = '')
-      else:
-        print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
-        print('   created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')
-        for attribute_info in sorted(attribute.keys()):
-          if attribute_info == 'name' or attribute_info == 'id':
-            continue
-          elif attribute_info == 'created_at' or attribute_info == 'updated_at':
-            continue
-          elif attribute_info == 'predefined_values':
-            if len(attribute['predefined_values']) > 0:
-              print('   predefined_values:')
-              for value in attribute['predefined_values']:
-                print('      ', value, sep = '')
+    else:
+      if display:
+        if not args.display_all_information:
+          print(attribute['name'], ': ', attribute['id'], sep = '')
+          if args.include_values:
+            print('   values:')
+            for value in attribute['values']:
+              print('      project_id: ', value['project_id'], ', value_id: ', value['id'], ', value: ', value['value'], sep = '')
+        else:
+          print(attribute['name'], ' (id: ', attribute['id'], ')', sep = '')
+          print('   created_at: ', attribute['created_at'], ', updated_at: ', attribute['updated_at'], sep = '')
+          for attribute_info in sorted(attribute.keys()):
+            if attribute_info == 'name' or attribute_info == 'id':
+              continue
+            elif attribute_info == 'created_at' or attribute_info == 'updated_at':
+              continue
+            elif attribute_info == 'predefined_values':
+              if len(attribute['predefined_values']) > 0:
+                print('   predefined_values:')
+                for value in attribute['predefined_values']:
+                  print('      ', value, sep = '')
+              else:
+                print('   predefined values: none set')
+            elif attribute_info == 'start_attribute_id':
+              print('   start attribute id: ', attribute['start_attribute_id'], ', end attribute id: ', attribute['end_attribute_id'], sep = '')
+            elif attribute_info == 'end_attribute_id':
+              continue
+            elif attribute_info == 'values':
+              if args.include_values:
+                print('   values:')
+                for value in attribute['values']:
+                  print('      project_id: ', value['project_id'], ', value_id: ', value['id'], ', value: ', value['value'], sep = '')
             else:
-              print('   predefined values: none set')
-          elif attribute_info == 'start_attribute_id':
-            print('   start attribute id: ', attribute['start_attribute_id'], ', end attribute id: ', attribute['end_attribute_id'], sep = '')
-          elif attribute_info == 'end_attribute_id':
-            continue
-          elif attribute_info == 'values':
-            if args.include_values:
-              print('   values:')
-              for value in attribute['values']:
-                print('      project_id: ', value['project_id'], ', value_id: ', value['id'], ', value: ', value['value'], sep = '')
-          else:
-            print('   ', attribute_info, ': ', attribute[attribute_info], sep = '')
+              print('   ', attribute_info, ': ', attribute[attribute_info], sep = '')
 
 # Input options
 def parse_command_line():
@@ -100,6 +106,10 @@ def parse_command_line():
 
   # Verbose output
   display_arguments.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display Provide a verbose output')
+
+  # Find attributes with a single predefined value that contains a comma (e.g. cases where
+  # user accidentally added a single value instead of multiple values)
+  display_arguments.add_argument('--find_single_predefined_value_with_comma', '-pc', required = False, action = 'store_true', help = 'Output attributes with a single predefined value that also contains a comma')
 
   return parser.parse_args()
 
