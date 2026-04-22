@@ -468,6 +468,12 @@ class Mosaic(object):
         return self.put(f'conversation-groups/{group_id}', data=data)
 
 
+    """
+    GLOBAL DATA RESOURCES
+    """
+
+    def get_data_resources(self):
+        return self.get(f'data-resources')
 
 
     """
