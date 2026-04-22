@@ -31,13 +31,11 @@ def main():
       pprint(resource)
     elif args.clinvar_grch38:
       if resource['uid'] == 'clinvar_grch38':
-        version = resource['version'].strip('v').replace('-', '')
-        print(version)
+        print(resource['download_url'])
         exit(0)
     elif args.clinvar_grch37:
       if resource['uid'] == 'clinvar_grch37':
-        version = resource['version'].strip('v').replace('-', '')
-        print(version)
+        print(resource['download_url'])
         exit(0)
     else:
       print(resource['name'], ', version: ', resource['version'], sep = '')
@@ -56,8 +54,8 @@ def parse_command_line():
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # Get the latest ClinVar version
-  display_arguments.add_argument('--clinvar_grch38', '-cv', required = False, action = 'store_true', help = 'If set, output the latest ClinVar version in the format YYYYMMDD')
-  display_arguments.add_argument('--clinvar_grch37', '-cvo', required = False, action = 'store_true', help = 'If set, output the latest GRCh37 ClinVar version in the format YYYYMMDD')
+  display_arguments.add_argument('--clinvar_grch38', '-cv', required = False, action = 'store_true', help = 'If set, get the download link for the latest GRCh38 ClinVar version')
+  display_arguments.add_argument('--clinvar_grch37', '-cvo', required = False, action = 'store_true', help = 'If set, get the download link for the latest GRCh37 ClinVar version')
 
   # Dump the raw data object
   display_arguments.add_argument('--raw_output', '-ro', required = False, action = 'store_true', help = 'If set, dump the json object as output from Mosaic')
