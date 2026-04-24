@@ -26,7 +26,10 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
 
   # Get the optional information
   description = args.description if args.description else None
@@ -43,22 +46,27 @@ def main():
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to POST gene set to')
 
   # The name of the gene set
-  parser.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the gene set')
+  required_arguments.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the gene set')
 
   # Optional arguments
-  parser.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The description of the gene set')
-  parser.add_argument('--is_public_to_project', '-u', required = False, action = 'store_true', help = 'Publish this gene set for everyone in the project')
+  optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The description of the gene set')
+  optional_arguments.add_argument('--is_public_to_project', '-u', required = False, action = 'store_true', help = 'Publish this gene set for everyone in the project')
   #parser.add_argument('--gene_ids', '-i', required = False, metavar = 'string', help = 'A comma separated list of gene ids')
-  parser.add_argument('--gene_names', '-m', required = False, metavar = 'string', help = 'A comma separated list of gene names')
+  optional_arguments.add_argument('--gene_names', '-m', required = False, metavar = 'string', help = 'A comma separated list of gene names')
 
   return parser.parse_args()
 
