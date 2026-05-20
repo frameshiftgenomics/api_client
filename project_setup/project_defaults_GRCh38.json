@@ -1,0 +1,171 @@
+{
+        "sample_table": {
+                "pedigree": "uid",
+                "affected_status": "uid",
+                "relation": "uid",
+                "sex": "uid"
+        },
+        "analytics": {
+                "affected_status": {
+                        "attribute_type": "uid",
+                        "chart_type": "pie"
+                },
+                "predicted_sex_peddy": {
+                        "attribute_type": "uid",
+                        "chart_type": "pie"
+                },
+                "sex_error_peddy": {
+                        "attribute_type": "uid",
+                        "chart_type": "pie"
+                },
+                "ancestry-prediction_peddy": {
+                        "attribute_type": "uid",
+                        "chart_type": "pie"
+                },
+                "mean_depth_peddy": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "average_quality_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "error_rate_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "insert_size_average_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "reads_mapped_and_paired_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "reads_duplicated_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "reads_unmapped_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                },
+                "percentage_of_properly_paired_reads_samtools": {
+                        "attribute_type": "uid",
+                        "chart_type": "scatterplot"
+                }
+        },
+        "annotations": {
+                "Gene Name": {
+                        "uid": "gene_name",
+                        "version": "default"
+                },
+                "HGVSc": {
+                        "uid": "hgvsc_grch38",
+                        "version": "default"
+                },
+                "HGVSp": {
+                        "uid": "hgvsp_grch38",
+                        "version": "default"
+                },
+                "Genotype": {
+                        "uid": "genotype_per_sample",
+                        "version": "default"
+                },
+                "Gene Consequence": {
+                        "uid": "gene_consequence_grch38",
+                        "version": "default"
+                },
+                "ClinVar Significance": {
+                        "uid": "clinvar_significance_grch38",
+                        "version": "latest"
+                },
+                "HPO Labels": {
+                        "uid": "hpo_labels",
+                        "version": "default"
+                },
+                "Allele Frequency": {
+                        "uid": "gnomad_allele_frequency_genomes_v4_grch38",
+                        "version": "default"
+                },
+                "Allele Count": {
+                        "uid": "gnomad_allele_count_genomes_v4_grch38",
+                        "version": "default"
+                },
+                "Homozygotes": {
+                        "uid": "gnomad_homozygotes_genomes_v4_grch38",
+                        "version": "default"
+                },
+                "REVEL": {
+                        "uid": "revel_grch38",
+                        "version": "default"
+                },
+                "MutScore": {
+                        "uid": "mutscore_grch38",
+                        "version": "default"
+                },
+                "SpliceAI": {
+                        "uid": "spliceai_max_grch38",
+                        "version": "default"
+                },
+                "CADD Phred": {
+                        "uid": "cadd_phred_grch38",
+                        "version": "default"
+                }
+        },
+        "pin_watchlist": true,
+        "watchlist_annotations": {
+                "Gene Name": {
+                        "uid": "gene_name",
+                        "version": "default"
+                },
+                "HGVSc": {
+                        "uid": "hgvsc_grch38",
+                        "version": "default"
+                },
+                "HGVSp": {
+                        "uid": "hgvsp_grch38",
+                        "version": "default"
+                },
+                "Genotype": {
+                        "uid": "genotype_per_sample",
+                        "version": "default"
+                },
+                "Gene Consequence": {
+                        "uid": "gene_consequence_grch38",
+                        "version": "default"
+                },
+                "ClinVar Significance": {
+                        "uid": "clinvar_significance_grch38",
+                        "version": "latest"
+                },
+                "HPO Labels": {
+                        "uid": "hpo_labels",
+                        "version": "default"
+                },
+                "Allele Frequency": {
+                        "uid": "gnomad_allele_frequency_genomes_v4_grch38",
+                        "version": "default"
+                },
+                "Allele Count": {
+                        "uid": "gnomad_allele_count_genomes_v4_grch38",
+                        "version": "default"
+                },
+                "Homozygotes": {
+                        "uid": "gnomad_homozygotes_genomes_v4_grch38",
+                        "version": "default"
+                },
+                "REVEL": {
+                        "uid": "revel_grch38",
+                        "version": "default"
+                },
+                "SpliceAI": {
+                        "uid": "spliceai_max_grch38",
+                        "version": "default"
+                },
+                "CADD Phred": {
+                        "uid": "cadd_phred_grch38",
+                        "version": "default"
+                }
+        }
+}
