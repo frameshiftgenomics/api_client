@@ -50,12 +50,16 @@ def main():
         print('No annotation created. Annotation with the name "' + str(args.name) + '" already exists')
         exit(0)
 
+  # Set the display type
+  display_type = args.display_type if args.display_type else None
+    
+
   # Create the new annotation
   try:
     data = project.post_variant_annotation(name = args.name, \
                                            value_type = args.value_type, \
                                            privacy_level = args.privacy_level, \
-                                           display_type = None, \
+                                           display_type = display_type, \
                                            severity = None, \
                                            category = args.category, \
                                            value_truncate_type = None, \
@@ -111,6 +115,7 @@ def parse_command_line():
 
   # Annotations will not be created if an annotation of the given name already exists. This
   # flag will force the annotation to be created even if an annotation of the same name exists
+  optional_arguments.add_argument('--display_type', '-d', required = False, metavar = 'string', help = 'The display type: text, badge, percent')
   optional_arguments.add_argument('--force_creation', '-f', required = False, action = 'store_true', help = 'Force annotation creation, even if an annotation of the same name exists')
   optional_arguments.add_argument('--version_name', '-vn', required = False, metavar = 'string', help = 'Optionally create an annotation version with this name')
   optional_arguments.add_argument('--set_as_latest', '-s', required = False, action = 'store_true', help = 'If --version_name is set, this flag will set the named version (or the default version if no name is given) as the latest')

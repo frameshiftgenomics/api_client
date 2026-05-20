@@ -1241,6 +1241,9 @@ class Project(object):
     PROJECT CONVERSATIONS
     """
 
+    def delete_project_conversation(self, conversation_id):
+        return self._mosaic.delete(f'{self._path}/conversations/{conversation_id}')
+
 
     def get_project_conversation(self, conversation_id):
         return self._mosaic.get(f'{self._path}/conversations/{conversation_id}')
@@ -2079,6 +2082,10 @@ class Project(object):
 
     def delete_variant_set(self, variant_set_id):
         return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
+
+
+    def get_download_variants_tsv(self):
+        return self._mosaic.get(f'{self._path}/variants/tsv')
 
 
     def get_project_variants_list(self):
