@@ -594,7 +594,7 @@ class Mosaic(object):
         yield from self.get_paged_route_iter(f'projects', params=params)
 
 
-    def post_project(self, name, reference, *, nickname=None, description=None, is_collection=None, collection_projects=None, privacy_level='private', template_project_id=None, attribute_forms=None):
+    def post_project(self, name, reference, *, nickname=None, description=None, family_name=None, ped_file=None, is_collection=None, collection_projects=None, privacy_level='private', template_project_id=None, attribute_forms=None):
 
         data = { 'name': name,
                  'reference': reference }
@@ -605,6 +605,10 @@ class Mosaic(object):
             data['nickname'] = nickname
         if description:
             data['description'] = description
+        if family_name:
+            data['family_name'] = family_name
+        if ped_file:
+            data['ped_file'] = ped_file
         if is_collection:
             data['is_collection'] = 'true'
         else:
@@ -1062,10 +1066,53 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/pedigree')
 
 
+    def post_pedigree(self, sample_id, *, maternal_id=None, paternal_id=None, affection_status=None, sex=None, kindred_id=None):
+        data = {}
+
+        if maternal_id:
+            data['maternal_id'] = maternal_id
+        if paternal_id:
+            data['paternal_id'] = paternal_id
+        if affection_status:
+            data['affection_status'] = affection_status
+        if sex:
+            data['sex'] = sex
+        if kindred_id:
+            data['kindred_id'] = kindred_id
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/pedigree', data=data)
+
+
+    def put_pedigree(self, sample_id, *, maternal_id=None, paternal_id=None, affection_status=None, sex=None):
+        data = {}
+
+        if maternal_id:
+            data['maternal_id'] = maternal_id
+        if paternal_id:
+            data['paternal_id'] = paternal_id
+        if affection_status:
+            data['affection_status'] = affection_status
+        if sex:
+            data['sex'] = sex
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/pedigree', data=data)
+
+
+    def put_pedigree_kindred(self, pedigree_id, kindred_id):
+        data = {'kindred_id': kindred_id}
+
+        #return self._mosaic.put(f'{self._path}/samples/{sample_id}/pedigree', data=data)
+        return self._mosaic.put(f'{self._path}/pedigrees/{pedigree_id}', data=data)
+
+
     def post_upload_pedigree(self, *, file_path=None, create_new_samples=True):
         data = {'create_new_samples': create_new_samples}
 
         return self._mosaic.post(f'{self._path}/pedigree', file_path=file_path, data=data)
+
+
+    #def put_pedigree_kindred(self, ):
+    #    return self._mosaic.put(f'{self._path}/pedigrees/{pedigree_id}', data=data)
 
 
     """

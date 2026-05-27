@@ -1,7 +1,7 @@
 import os
 import argparse
-from pprint import pprint
 
+from pprint import pprint
 from sys import path
 
 def main():
@@ -25,18 +25,16 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Open an api client project object for the defined project
   try:
     project = api_mosaic.get_project(args.project_id)
   except Exception as e:
     fail('failed to open project. Error was: ' + str(e))
 
-  # Get the variants
+  # Update the kindred id
   try:
-    with open(args.tsv, "wb") as f:
-      f.write(project.get_download_variants_tsv())
+    project.put_pedigree_kindred(args.pedigree_id, args.kindred_id)
   except Exception as e:
-    fail('failed to get variants. Error was: ' + str(e))
+    fail('failed to post pedigree. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -51,11 +49,12 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # The project id to which the filter is to be added is required
-  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to download variants for')
+  # The project and sample ids
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
 
-  # The output file
-  required_arguments.add_argument('--tsv', '-t', required = True, metavar = 'string', help = 'The output tsv file')
+  # Additional pedigree information
+  required_arguments.add_argument('--pedigree_id', '-pi', required = True, metavar = 'string', help = 'The pedigree id')
+  required_arguments.add_argument('--kindred_id', '-k', required = True, metavar = 'string', help = 'The kindred id')
 
   return parser.parse_args()
 

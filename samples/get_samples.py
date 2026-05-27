@@ -43,6 +43,10 @@ def main():
     elif args.names_only:
       print(sample['name'], sep = '')
 
+    # Output the name and id
+    elif args.id_name_only:
+      print(sample['name'], ':', sample['id'], sep = '')
+
     # Output all information
     else:
       print(sample['name'])
@@ -68,6 +72,7 @@ def parse_command_line():
   # Output ids only
   display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'Only output sample ids')
   display_arguments.add_argument('--names_only', '-no', required = False, action = 'store_true', help = 'Only output sample names')
+  display_arguments.add_argument('--id_name_only', '-in', required = False, action = 'store_true', help = 'Output the sample name and id')
 
   return parser.parse_args()
 

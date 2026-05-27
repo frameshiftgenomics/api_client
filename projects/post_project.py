@@ -49,11 +49,16 @@ def main():
     for attribute_form_id in args.attribute_forms.split(','):
       attribute_forms.append({"form_id": attribute_form_id, "attribute_form_attributes": []})
 
+  ped_file = args.ped_file if args.ped_file else None
+  family_name = args.family_name if args.family_name else None
+
   # Create a project
   project = api_mosaic.post_project(args.name, \
                                     args.reference, \
                                     nickname = args.nickname, \
                                     description = args.description, \
+                                    family_name = args.family_name, \
+                                    ped_file = ped_file, \
                                     is_collection = args.is_collection, \
                                     collection_projects = collection_projects, \
                                     privacy_level = args.privacy_level, \
@@ -79,6 +84,10 @@ def parse_command_line():
   optional_arguments.add_argument('--nickname', '-m', required = False, metavar = 'string', help = 'The project nickname')
   optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The project description')
   optional_arguments.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The projects privacy level. Default: private')
+
+  # Post a ped file when creating the project or set the family name
+  optional_arguments.add_argument('--ped_file', '-pf', required = False, metavar = 'string', help = 'A ped file to create samples')
+  optional_arguments.add_argument('--family_name', '-f', required = False, metavar = 'string', help = 'The family name to apply to the project')
 
   # Information for creating a collection
   optional_arguments.add_argument('--is_collection', '-co', required = False, action = 'store_true', help = 'Set if this is to be a collection, not a project')
