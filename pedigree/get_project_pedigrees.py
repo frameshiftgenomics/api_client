@@ -25,10 +25,27 @@ def main():
   api_store = Store(config_file = args.client_config)
   api_mosaic = Mosaic(config_file = args.client_config)
 
-  # Create a new conversation group
-  description = args.description if args.description else None
-  user_ids = args.user_ids.split(',') if ',' in args.user_ids else [args.user_ids]
-  data = api_mosaic.post_conversation_groups(args.name,  user_ids, description = description)
+  # Open an api client project object for the defined project
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('Failed to open project. Error was: ' + str(e))
+
+  # Open the project
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('failed to open project. Error was: ' + str(e))
+
+  # Get the pedigrees
+  try:
+    for pedigree in project.get_project_pedigrees():
+      if args.only_show_kindred_names:
+        print(pedigree['kindred_name'])
+      else:
+        print(pedigree)
+  except Exception as e:
+    fail('failed to get pedigrees. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
@@ -43,10 +60,11 @@ def parse_command_line():
   api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
   api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
-  # Get information on the conversation group
-  required_arguments.add_argument('--name', '-n', required = True, metavar = 'string', help = 'The name of the conversation group')
-  required_arguments.add_argument('--user_ids', '-u', required = True, metavar = 'string', help = 'A comma separated list of user ids to add to the conversation group')
-  required_arguments.add_argument('--description', '-d', required = True, metavar = 'string', help = 'A description of the conversation group')
+  # The project id to which the filter is to be added is required
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to add variant filters to')
+
+  # Only show the kindred names
+  display_arguments.add_argument('--only_show_kindred_names', '-on', required = False, action = 'store_true', help = 'Only show the names of the pedigrees')
 
   return parser.parse_args()
 

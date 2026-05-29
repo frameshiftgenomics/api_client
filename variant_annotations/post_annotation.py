@@ -53,6 +53,11 @@ def main():
   # Set the display type
   display_type = args.display_type if args.display_type else None
     
+  # Put predefined values into an array
+  predefined_values = []
+  if args.predefined_values:
+    predefined_values = args.predefined_values.split(',')
+  only_suggest_predefined_values = 'true' if args.only_suggest_predefined_values else 'false'
 
   # Create the new annotation
   try:
@@ -62,6 +67,8 @@ def main():
                                            display_type = display_type, \
                                            severity = None, \
                                            category = args.category, \
+                                           predefined_values = predefined_values, \
+                                           only_suggest_predefined_values = only_suggest_predefined_values, \
                                            value_truncate_type = None, \
                                            value_max_length = None)
     annotation_id = data['id']
@@ -119,6 +126,8 @@ def parse_command_line():
   optional_arguments.add_argument('--force_creation', '-f', required = False, action = 'store_true', help = 'Force annotation creation, even if an annotation of the same name exists')
   optional_arguments.add_argument('--version_name', '-vn', required = False, metavar = 'string', help = 'Optionally create an annotation version with this name')
   optional_arguments.add_argument('--set_as_latest', '-s', required = False, action = 'store_true', help = 'If --version_name is set, this flag will set the named version (or the default version if no name is given) as the latest')
+  optional_arguments.add_argument('--predefined_values', '-pv', required = False, metavar = 'string', help = 'A comma separated list of predefined values')
+  optional_arguments.add_argument('--only_suggest_predefined_values', '-opv', required = False, action = 'store_true', help = 'Only suggest predefined values in the dropdown')
 
   return parser.parse_args()
 

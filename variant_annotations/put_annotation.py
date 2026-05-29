@@ -26,34 +26,64 @@ def main():
   api_mosaic = Mosaic(config_file = args.client_config)
 
   # Open an api client project object for the defined project
-  project = api_mosaic.get_project(args.project_id)
+  try:
+    project = api_mosaic.get_project(args.project_id)
+  except Exception as e:
+    fail('failed to open project. Error was: ' + str(e))
+
+  # Put predefined values into an array
+  predefined_values = []
+  if args.predefined_values:
+    predefined_values = args.predefined_values.split(',')
+  only_suggest_predefined_values = 'true' if args.only_suggest_predefined_values else 'false'
 
   # Import tha annotation
-  data = project.put_variant_annotation(args.annotation_id, name = args.name, value_type = args.type, privacy_level = args.privacy_level, display_type = args.display_type, severity = args.severity, category = args.category, value_truncate_type = args.value_truncate_type, value_max_length = args.value_max_length, latest_version_id = args.latest_version_id)
+  try:
+    project.put_variant_annotation(args.annotation_id, \
+                                   name = args.name, \
+                                   value_type = args.type, \
+                                   privacy_level = args.privacy_level, \
+                                   display_type = args.display_type, \
+                                   severity = args.severity, \
+                                   category = args.category, \
+                                   predefined_values = predefined_values, \
+                                   only_suggest_predefined_values = only_suggest_predefined_values, \
+                                   value_truncate_type = args.value_truncate_type, \
+                                   value_max_length = args.value_max_length, \
+                                   latest_version_id = args.latest_version_id)
+  except Exception as e:
+    fail('failed to update annotation. Error was: ' + str(e))
 
 # Input options
 def parse_command_line():
   parser = argparse.ArgumentParser(description='Process the command line arguments')
+  api_arguments = parser.add_argument_group('API Arguments')
+  project_arguments = parser.add_argument_group('Project Arguments')
+  required_arguments = parser.add_argument_group('Required Arguments')
+  optional_arguments = parser.add_argument_group('Optional Arguments')
+  display_arguments = parser.add_argument_group('Display Information')
 
   # Define the location of the api_client and the ini config file
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
+  api_arguments.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
+  api_arguments.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
 
   # The project id to which the filter is to be added is required
-  parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
+  project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # The annotation id to update
-  parser.add_argument('--annotation_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic annotation id to import')
+  required_arguments.add_argument('--annotation_id', '-i', required = True, metavar = 'integer', help = 'The Mosaic annotation id to import')
 
   # Optional values to update
-  parser.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the annotation')
-  parser.add_argument('--type', '-t', required = False, metavar = 'string', help = 'The type of the annotation')
-  parser.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The privacy level of the annotation')
-  parser.add_argument('--display_type', '-d', required = False, metavar = 'string', help = 'The display type of the annotation')
-  parser.add_argument('--severity', '-s', required = False, metavar = 'string', help = 'The severity of the annotation')
-  parser.add_argument('--category', '-g', required = False, metavar = 'string', help = 'The category of the annotation')
-  parser.add_argument('--value_truncate_type', '-v', required = False, metavar = 'string', help = 'The method of truncating the annotation values')
-  parser.add_argument('--value_max_length', '-m', required = False, metavar = 'string', help = 'The max length of the of the annotation values')
+  optional_arguments.add_argument('--category', '-g', required = False, metavar = 'string', help = 'The category of the annotation')
+  optional_arguments.add_argument('--display_type', '-d', required = False, metavar = 'string', help = 'The display type of the annotation')
+  optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the annotation')
+  optional_arguments.add_argument('--predefined_values', '-pv', required = False, metavar = 'string', help = 'A comma separated list of predefined values')
+  optional_arguments.add_argument('--only_suggest_predefined_values', '-opv', required = False, action = 'store_true', help = 'Only suggest predefined values in the dropdown')
+  optional_arguments.add_argument('--privacy_level', '-l', required = False, metavar = 'string', help = 'The privacy level of the annotation')
+  optional_arguments.add_argument('--severity', '-s', required = False, metavar = 'string', help = 'The severity of the annotation')
+  optional_arguments.add_argument('--type', '-t', required = False, metavar = 'string', help = 'The type of the annotation')
+  optional_arguments.add_argument('--value_truncate_type', '-v', required = False, metavar = 'string', help = 'The method of truncating the annotation values')
+  optional_arguments.add_argument('--value_max_length', '-m', required = False, metavar = 'string', help = 'The max length of the of the annotation values')
 
   # Set the latest version
   parser.add_argument('--latest_version_id', '-e', required = False, metavar = 'integer', help = 'The annotation version id to set as the latest version')

@@ -1066,6 +1066,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/pedigree')
 
 
+    def get_project_pedigrees(self):
+        return self._mosaic.get(f'{self._path}/pedigrees')
+
+
     def post_pedigree(self, sample_id, *, maternal_id=None, paternal_id=None, affection_status=None, sex=None, kindred_id=None):
         data = {}
 
@@ -1094,6 +1098,7 @@ class Project(object):
             data['affection_status'] = affection_status
         if sex:
             data['sex'] = sex
+        print(sample_id, data)
 
         return self._mosaic.put(f'{self._path}/samples/{sample_id}/pedigree', data=data)
 
@@ -1977,7 +1982,7 @@ class Project(object):
     def get_variant_annotation_versions(self, annotation_id):
         return self._mosaic.get(f'{self._path}/variants/annotations/{annotation_id}/versions')
 
-    def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None):
+    def post_variant_annotation(self, *, name=None, allow_deletion='true', value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, predefined_values=None, only_suggest_predefined_values=None):
         data = { }
 
         if allow_deletion:
@@ -1998,6 +2003,10 @@ class Project(object):
                 exit(1)
         if name:
             data['name'] = name
+        if only_suggest_predefined_values:
+            data['only_suggest_predefined_values'] = only_suggest_predefined_values
+        if predefined_values:
+            data['predefined_values'] = predefined_values
         if value_type:
             data['value_type'] = value_type
         if privacy_level:
@@ -2044,7 +2053,7 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/variants/annotations/{annotation_id}/versions', data=data)
 
 
-    def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, latest_version_id=None):
+    def put_variant_annotation(self, annotation_id, *, name=None, value_type=None, privacy_level=None, display_type=None, severity=None, category=None, value_truncate_type=None, value_max_length=None, latest_version_id=None, predefined_values=None, only_suggest_predefined_values=None):
         data = { }
 
         if name:
@@ -2065,6 +2074,10 @@ class Project(object):
             data['value_max_length'] = value_max_length
         if latest_version_id:
             data['latest_annotation_version_id'] = latest_version_id
+        if predefined_values:
+            data['predefined_values'] = predefined_values
+        if only_suggest_predefined_values:
+            data['only_suggest_predefined_values'] = only_suggest_predefined_values
 
         return self._mosaic.put(f'{self._path}/variants/annotations/{annotation_id}', data=data)
 
