@@ -1212,9 +1212,13 @@ class Project(object):
         return self._mosaic.post(f'{self._path}/attributes/{attribute_id}/values', data=data)
 
 
-    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_longitudinal=None, is_public=False, only_suggest_predefined_values=None):
+    def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_longitudinal=None, is_public=False, only_suggest_predefined_values=None, display_type=None, severity=None, color=None):
         data = { }
 
+        if coloe:
+            data['color'] = color
+        if display_type:
+            data['display_type'] = display_type
         if description:
             data['description'] = description
         if is_editable:
@@ -1229,6 +1233,8 @@ class Project(object):
             data['only_suggest_predefined_values'] = only_suggest_predefined_values
         if predefined_values:
             data['predefined_values'] = predefined_values
+        if severity:
+            data['severity'] = severity
         if value:
             data['value'] = value
         if value_type:
@@ -1246,7 +1252,7 @@ class Project(object):
         return self._mosaic.put(f'{self._path}/attributes/{attribute_id}/convert-type', data=data)
 
 
-    def put_project_attributes(self, attribute_id, *, description=None, name=None, original_project_id=None, predefined_values=None, value=None, is_editable=None, display_type=None, severity=None, only_suggest_predefined_values=None):
+    def put_project_attributes(self, attribute_id, *, description=None, name=None, original_project_id=None, predefined_values=None, value=None, is_editable=None, display_type=None, color=None, severity=None, only_suggest_predefined_values=None):
         data = { }
 
         if description:
@@ -1265,6 +1271,8 @@ class Project(object):
             data['original_project_id'] = original_project_id
         if severity:
             data['severity'] = severity
+        if color:
+            data['color'] = color
         if value:
             data['value'] = value
 

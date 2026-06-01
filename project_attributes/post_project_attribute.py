@@ -44,6 +44,29 @@ def main():
   # Set the predefined values
   predefined_values = args.predefined_values.split(',') if args.predefined_values else None
 
+  # Set the display type
+  allowed_display_types = ['time', 'date', 'duration', 'custom', 'badge']
+  if args.display_type:
+    if args.display_type not in allowed_display_types:
+      fail('unknown display type: ' + args.display_type)
+    display_type = args.display_type
+  else:
+    display_type = None
+
+  # Check that the severity is a json
+  if args.severity:
+    try:
+      json.loads(args.severity)
+    except Exception as e:
+      fail('Severity string is not in json format. Error: ' + str(e))
+
+  # Check that color is a json
+  if args.color:
+    try:
+      json.loads(args.color)
+    except Exception as e:
+      fail('Color string is not in json format. Error: ' + str(e))
+
   # Deal with whether the attribute is editable or longitudinal
   is_editable = 'false' if args.is_editable else 'true'
   is_longitudinal = 'true' if args.is_longitudinal else 'false'
@@ -59,6 +82,9 @@ def main():
                                    is_editable = is_editable, \
                                    is_longitudinal = is_longitudinal, \
                                    is_public = is_public, \
+                                   display_type = display_type, \
+                                   severity = severity, \
+                                   color = color, \
                                    only_suggest_predefined_values = only_suggest_predefined)
   except Exception as e:
     fail('Failed to create attribute. Error was: ' + str(e))
@@ -91,6 +117,9 @@ def parse_command_line():
   optional_arguments.add_argument('--only_suggest_predefined', '-o', required = False, action = 'store_true', help = 'If set, when editing the attribute, only predefined values will be suggested')
   optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
   optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
+  optional_arguments.add_argument('--display_type', '-dt', required = False, metavar = 'string', help = 'The display type for the attribute: badge, time, date, duration, custom')
+  optional_arguments.add_argument('--severity', '-se', required = False, metavar = 'string', help = 'A json object of severity levels')
+  optional_arguments.add_argument('--color', '-sc', required = False, metavar = 'string', help = 'A json object of colors to use')
 
   return parser.parse_args()
 

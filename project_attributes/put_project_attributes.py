@@ -45,6 +45,13 @@ def main():
     except Exception as e:
       fail('Severity string is not in json format. Error: ' + str(e))
 
+  # Check that color is a json
+  if args.color:
+    try:
+      json.loads(args.color)
+    except Exception as e:
+      fail('Color string is not in json format. Error: ' + str(e))
+
   # Get the project settings
   is_editable = 'false' if args.is_editable else 'true'
   only_suggest_predefined = 'true' if args.only_suggest_predefined else 'false'
@@ -60,6 +67,7 @@ def main():
                                         is_editable=is_editable, \
                                         display_type=display_type, \
                                         value=args.value, \
+                                        color=args.color, \
                                         severity = args.severity)
   except Exception as e:
     fail('Failed to update the attribute. Error: ' + str(e))
@@ -88,12 +96,13 @@ def parse_command_line():
   optional_arguments.add_argument('--name', '-n', required = False, metavar = 'string', help = 'The name of the attribute')
   optional_arguments.add_argument('--description', '-d', required = False, metavar = 'string', help = 'The attribute description')
   optional_arguments.add_argument('--original_project_id', '-o', required = False, metavar = 'string', help = 'The id of the project that the attribute should live in')
-  optional_arguments.add_argument('--display_type', '-s', required = False, metavar = 'string', help = 'The display type for the attribute: badge, time, date, duration, custom')
+  optional_arguments.add_argument('--display_type', '-dt', required = False, metavar = 'string', help = 'The display type for the attribute: badge, time, date, duration, custom')
   optional_arguments.add_argument('--is_editable', '-e', required = False, action = 'store_true', help = 'If set, the attribute will not be editable')
   optional_arguments.add_argument('--only_suggest_predefined', '-os', required = False, action = 'store_true', help = 'If set, when editing the attribute, only predefined values will be suggested')
   optional_arguments.add_argument('--predefined_values', '-r', required = False, metavar = 'string', help = 'A comma separated list of values that will be available by default')
   optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
   optional_arguments.add_argument('--severity', '-se', required = False, metavar = 'string', help = 'A json object of severity levels')
+  optional_arguments.add_argument('--color', '-sc', required = False, metavar = 'string', help = 'A json object of colors to use')
 
   return parser.parse_args()
 

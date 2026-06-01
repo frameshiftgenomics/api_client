@@ -78,6 +78,8 @@ def main():
       if is_display:
         if args.display_raw_information:
           pprint(activity)
+        elif args.display_activity:
+          print(activity['id'], ': ', activity['type'], ', ', activity['message'], sep = '')
         elif args.output_ids_only:
           print(activity['id'])
 
@@ -109,8 +111,9 @@ def parse_command_line():
   optional_arguments.add_argument('--to_date', '-td', required = False, metavar = 'string', help = 'Only output activities before this date')
 
   # Display arguments
-  optional_arguments.add_argument('--output_ids_only', '-io', required = False, action = 'store_true', help = 'Only output the activity ids')
-  optional_arguments.add_argument('--display_raw_information', '-dr', required = False, action = 'store_true', help = 'Show the full, raw activity information')
+  display_arguments.add_argument('--output_ids_only', '-io', required = False, action = 'store_true', help = 'Only output the activity ids')
+  display_arguments.add_argument('--display_activity', '-da', required = False, action = 'store_true', help = 'Only show the activity taht was taken')
+  display_arguments.add_argument('--display_raw_information', '-dr', required = False, action = 'store_true', help = 'Show the full, raw activity information')
 
   return parser.parse_args()
 
