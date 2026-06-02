@@ -48,9 +48,61 @@ def main():
   # Check that color is a json
   if args.color:
     try:
-      json.loads(args.color)
+      color_json = json.loads(args.color)
     except Exception as e:
       fail('Color string is not in json format. Error: ' + str(e))
+
+    # Check if there are already colors associated with the project
+    try:
+      data = project.get_project_attribute_definitions(attribute_ids=[args.attribute_id])
+      if len(data) != 1:
+        fail('Got information on more than one attribute')
+      existing_colors = data[0]['color']
+    except Exception as e:
+      fail('failed to get existing colors for the attribute. Error was: ' + str(e))
+   
+    same_colors = {}
+    different_colors = {}
+    new_colors = {}
+    omitted_colors = {}
+    all_colors = {}
+    for value in color_json:
+
+      # Check for mututally exlusive flags
+      if args.omit_colors and args.add_existing_colors:
+        fail('--omit_colors (-oc) and --add_existing_colors (-ac) are mutually exclusive')
+
+      # If the value in the input already exists in the project, check if the color has changed
+      if value in existing_colors:
+        if existing_colors[value] == color_json[value]:
+          same_colors[value] = color_json[value]
+          all_colors[value] = color_json[value]
+        else:
+          different_colors[value] = color_json[value]
+          all_colors[value] = color_json[value]
+      else:
+        new_colors[value] = color_json[value]
+        all_colors[value] = color_json[value]
+
+    # Check for existing colors that will have their colors removed
+    for value in existing_colors:
+      if value not in color_json:
+        omitted_colors[value] = existing_colors[value]
+
+    # If colors are to be omitted, the args.omit_colors flag must be set or the omitted values need
+    # to be added to the args.color
+    if len(omitted_colors) > 0:
+      if not args.omit_colors and not args.add_existing_colors:
+        print('ERROR: These values will have colors removed. Add these to the json string, or set --omit_colors (-oc) or --add_existing_colors (-ac):')
+        for value in omitted_colors:
+          print('  ', value, ': ', omitted_colors[value], sep = '')
+        exit(1)
+
+      # Add the existing colors
+      elif args.add_existing_colors:
+        for value in omitted_colors:
+          all_colors[value] = omitted_colors[value]
+        args.color = json.dumps(all_colors)
 
   # Get the project settings
   is_editable = 'false' if args.is_editable else 'true'
@@ -103,6 +155,8 @@ def parse_command_line():
   optional_arguments.add_argument('--value', '-v', required = False, metavar = 'string', help = 'The value of the attribute')
   optional_arguments.add_argument('--severity', '-se', required = False, metavar = 'string', help = 'A json object of severity levels')
   optional_arguments.add_argument('--color', '-sc', required = False, metavar = 'string', help = 'A json object of colors to use')
+  optional_arguments.add_argument('--omit_colors', '-oc', required = False, action = 'store_true', help = 'If colors are included and existing colors are not given a value in the entered json string, those colors will be removed from the attribute. Set this argument if omitting colors is desired, otherwise the update will not proceed')
+  optional_arguments.add_argument('--add_existing_colors', '-ac', required = False, action = 'store_true', help = 'If colors are included and existing colors are not given a value in the entered json string, set this flag to keep all existing colors')
 
   return parser.parse_args()
 
