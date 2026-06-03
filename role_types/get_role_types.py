@@ -29,12 +29,14 @@ def main():
   role_types = {}
   for role_information in api_mosaic.get_role_types():
     role_types[role_information['id']] = {'name': role_information['display_name'], \
-                                               'level': role_information['level'], \
-                                               'access_level': role_information['access_level']}
+                                          'id': role_information['id'], \
+                                          'level': role_information['level'], \
+                                          'access_level': role_information['access_level']}
 
-#  # Print out the roles
+# Print out the roles
   for role_id in sorted(role_types.keys()):
     print(role_types[role_id]['name'], sep = '')
+    print('  id: ', role_types[role_id]['id'], sep = '')
     print('  level: ', role_types[role_id]['level'], sep = '')
     print('  access_level: ', role_types[role_id]['access_level'], sep = '')
 
