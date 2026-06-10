@@ -2274,6 +2274,21 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/{view_type}/views/tabs')
 
 
+    def post_create_collection_projects_view(self, name, *, description=None, icon=None, selected_attribute_ids=None, attribute_filters=None):
+        data = { 'name': name }
+
+        if description:
+            data['description'] = description
+        if icon:
+            data['icon'] = icon
+        if selected_attribute_ids:
+            data['selected_attribute_ids'] = selected_attribute_ids
+        if attribute_filters:
+            data['attribute_filters'] = attribute_filters
+
+        return self._mosaic.post(f'{self._path}/collection-projects/views', data=data)
+
+
     def post_create_view(self, view_type, name, *, description=None, icon=None, data_group_attribute_id=None, selected_attribute_ids=None):
         data = { 'name': name }
 

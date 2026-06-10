@@ -86,6 +86,17 @@ def main():
         else:
           print_simple(annotation)
 
+    # If a privacy class is specified, check the value
+    elif args.privacy_level:
+      privacy = annotation['privacy_level']
+      if args.privacy_level == privacy:
+        if args.show_detailed:
+          print_verbose(annotation)
+        elif args.ids_only:
+          print(annotation['id'])
+        else:
+          print_simple(annotation)
+
     # Otherwise, print all annotations
     else:
 
@@ -143,6 +154,7 @@ def parse_command_line():
 
   # Define a category if only annotations from that category are required
   optional_arguments.add_argument('--category', '-ca', required = False, metavar = 'string', help = 'Only view annotations from this category')
+  optional_arguments.add_argument('--privacy_level', '-pl', required = False, metavar = 'string', help = 'Only view annotations from this privacy class: private, semi-public, public')
 
   # Determine what to display
   display_arguments.add_argument('--ids_only', '-io', required = False, action = 'store_true', help = 'If set, only the annotation ids will be output')

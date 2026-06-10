@@ -34,7 +34,7 @@ def main():
     fail('Failed to open project. Error was: ' + str(e))
 
   # Define the allowed object types
-  allowed_view_types = {'data-group'}
+  allowed_view_types = {'data-group', 'collection-projects'}
   if args.view_type not in allowed_view_types:
     fail('type is unknown. Allowed types are: ' + ', '.join(allowed_view_types))
 
@@ -81,7 +81,7 @@ def parse_command_line():
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # View information
-  required_arguments.add_argument('--view_type', '-t', required = True, metavar = 'string', help = 'The type of views to get. Available options: data-group')
+  required_arguments.add_argument('--view_type', '-t', required = True, metavar = 'string', help = 'The type of views to get. Available options: data-group, collection-projects')
 
   return parser.parse_args()
 
