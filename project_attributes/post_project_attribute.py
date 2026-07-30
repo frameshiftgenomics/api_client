@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 from pprint import pprint
 
@@ -71,8 +72,8 @@ def main():
                                    is_longitudinal = is_longitudinal, \
                                    is_public = is_public, \
                                    display_type = display_type, \
-                                   severity = severity, \
-                                   color = color, \
+                                   severity = args.severity, \
+                                   color = args.color, \
                                    only_suggest_predefined_values = only_suggest_predefined)
   except Exception as e:
     fail('Failed to create attribute. Error was: ' + str(e))

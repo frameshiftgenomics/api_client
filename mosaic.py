@@ -1215,7 +1215,7 @@ class Project(object):
     def post_project_attribute(self, *, description=None, name=None, predefined_values=None, value=None, value_type=None, is_editable=None, is_longitudinal=None, is_public=False, only_suggest_predefined_values=None, display_type=None, severity=None, color=None):
         data = { }
 
-        if coloe:
+        if color:
             data['color'] = color
         if display_type:
             data['display_type'] = display_type
