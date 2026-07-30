@@ -1,11 +1,12 @@
 import os
-import argparse
 import json
 import sys
 
 from os.path import exists
 from pprint import pprint
-from sys import path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from _bootstrap import base_parser, init, warning, fail
 
 def main():
   global version
@@ -13,21 +14,7 @@ def main():
   # Parse the command line
   args = parseCommandLine()
 
-  # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
-
-  # Import the api client
-  path.append(args.api_client)
-  try:
-    from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  store = Store(config_file = args.config)
-  api_mosaic = Mosaic(config_file = args.config)
+  api_mosaic = init(args)
 
   # Check that the supplied project id is for a collection
   collection = api_mosaic.get_project(args.project_id)
@@ -46,11 +33,7 @@ def main():
 
 # Input options
 def parseCommandLine():
-  parser = argparse.ArgumentParser(description='Process the command line')
-
-  # Required arguments
-  parser.add_argument('--config', '-c', required = True, metavar = 'string', help = 'The config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The directory where the Python api wrapper lives')
+  parser, _ = base_parser()
 
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
@@ -59,11 +42,6 @@ def parseCommandLine():
   parser.add_argument('--template_id', '-t', required = True, metavar = 'integer', help = 'The Mosaic project id of the template project')
 
   return parser.parse_args()
-
-# If the script fails, provide an error message and exit
-def fail(message):
-  print('ERROR: ', message, sep = '')
-  exit(1)
 
 # Throw a warning
 def warning(message):
