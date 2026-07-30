@@ -46,7 +46,9 @@ def main():
       if args.view_type == 'data-groups':
         print('  data group id: ', view['project_view_data_group']['data_group_attribute_id'], sep = '')
         attribute_string = ''
-        for attribute_id in view['project_view_data_group']['selected_attribute_ids']:
+
+        # A view with no columns selected has selected_attribute_ids set to null, not []
+        for attribute_id in view['project_view_data_group']['selected_attribute_ids'] or []:
           attribute_string += str(attribute_id) + ', '
         print('  attribute ids: ', attribute_string.rstrip().rstrip(','), sep = '')
   except Exception as e:
