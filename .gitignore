@@ -1,3 +1,4 @@
 *.ini
 *.nfs*
 __pycache__
+.venv

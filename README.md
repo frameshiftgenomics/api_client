@@ -3,10 +3,20 @@
 ```bash
 cd api_client
 
-pip3 install requests
+python3 -m venv .venv
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
+
+pip install requests
 
 touch config.ini
 ```
+
+The virtual environment keeps `requests` out of your system Python. It must be
+active (`source .venv/bin/activate`) in each new shell before running any of the
+scripts; use `deactivate` to leave it.
+
+If you would rather not use one, `pip3 install requests` on its own is enough —
+`requests` is the only dependency.
 
 ### config.ini
 
