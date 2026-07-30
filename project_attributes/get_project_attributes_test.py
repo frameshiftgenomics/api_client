@@ -1,18 +1,16 @@
-import argparse
 import os
 import sys
 
 from pprint import pprint
-from sys import path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from _bootstrap import base_parser, init, warning, fail
 
 def main():
 
-  # Common code for all scripts living in the api client directories. This will get the mosaic
-  # endpoints and initialise the argument parsing
-  sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-  from _bootstrap import init, base_parser, warning, fail
-  args = set_command_line_arguments(base_parser())
-  api_mosaic, api_store = init(args)
+  # Parse the command line and open the Mosaic endpoints
+  args = parse_command_line()
+  api_mosaic = init(args)
 
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
@@ -65,12 +63,12 @@ def main():
             print('   ', attribute_info, ': ', attribute[attribute_info], sep = '')
 
 # Input options
-def set_command_line_arguments(parser):
-  groups = {g.title: g for g in parser._action_groups}
-  groups['project arguments'].add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
-  groups['project arguments'].add_argument('--attribute_ids', '-i', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to view. If omitted, all will be shown')
-  groups['display arguments'].add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Include attribute values in the output. Only output when used in conjunction with --verbose')
-  groups['display arguments'].add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display Provide a verbose output')
+def parse_command_line():
+  parser, groups = base_parser()
+  groups.project.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id')
+  groups.project.add_argument('--attribute_ids', '-i', required = False, metavar = 'string', help = 'A comma separated list of attribute ids to view. If omitted, all will be shown')
+  groups.display.add_argument('--include_values', '-v', required = False, action = 'store_true', help = 'Include attribute values in the output. Only output when used in conjunction with --verbose')
+  groups.display.add_argument('--display_all_information', '-da', required = False, action = 'store_true', help = 'Display Provide a verbose output')
 
   return parser.parse_args()
 

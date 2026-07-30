@@ -126,7 +126,7 @@ class Mosaic(object):
     (to avoid needing to work directly with Store() )
     """
     def get_config(self, section, key):
-        self._store.get(section, key)
+        return self._store.get(section, key)
 
 
     def set_config(self, section, key, value):
