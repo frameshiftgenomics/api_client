@@ -83,14 +83,15 @@ def main():
       if annotation_uids[annotation_uid]['privacy_level'] == 'private':
         name = annotation_uids[annotation_uid]['name']
         if name in private_annotation_names:
-          fail('ERROR: Multiple private annotations with the same name (' + str(name) + ' exist in the project, but there can only be one')
+          fail('Multiple private annotations with the same name (' + str(name) + ' exist in the project, but there can only be one')
         else:
           private_annotation_names[name] = annotation_uid
 
-    # Get HPO terms from Mosaic
+    # Get HPO terms from Mosaic. The terms are attached to the proband, so this is only possible if a proband was identified
     hpo_terms = []
-    for hpo_term in project.get_sample_hpo_terms(samples[proband]['id']):
-      hpo_terms.append({'hpo_id': hpo_term['hpo_id'], 'label': hpo_term['label']})
+    if has_proband:
+      for hpo_term in project.get_sample_hpo_terms(samples[proband]['id']):
+        hpo_terms.append({'hpo_id': hpo_term['hpo_id'], 'label': hpo_term['label']})
 
     # Determine all of the variant filters that are to be added; remove any filters that already exist with the same name; fill out variant
     # filter details not in the json (e.g. the uids of private annotations); create the filters; and finally update the project settings to
