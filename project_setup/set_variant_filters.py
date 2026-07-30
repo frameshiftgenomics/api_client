@@ -1,5 +1,4 @@
 import os
-import argparse
 import copy
 import json
 import math
@@ -9,43 +8,16 @@ import sys
 
 from os.path import exists
 from pprint import pprint
-from sys import path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from _bootstrap import base_parser, init, warning, fail
 
 def main():
 
   # Parse the command line
   args = parse_command_line()
 
-  # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
-
-  # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
-
-  # Read the json file describing the filters
-  filters_info = read_variant_filters_json(args.variant_filters_json)
-  filter_categories, filters = get_filter_categories(filters_info)
-
-  # The filters_info can be updated based on private annotations, so maintain a clean copy to reset to
-  # after each project
-  filters_info_original = copy.deepcopy(filters_info)
-
-  # Import the api client
-  path.append(args.api_client)
-  try:
-    from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  api_store = Store(config_file = args.client_config)
-  api_mosaic = Mosaic(config_file = args.client_config)
+  api_mosaic = init(args)
 
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
@@ -154,11 +126,8 @@ def main():
 
 # Input options
 def parse_command_line():
-  parser = argparse.ArgumentParser(description='Process the command line')
+  parser, _ = base_parser()
 
-  # Required arguments
-  parser.add_argument('--client_config', '-c', required = True, metavar = 'string', help = 'The ini config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The api_client directory')
   parser.add_argument('--project_id', '-p', required = True, metavar = 'string', help = 'The project id that variants will be uploaded to. Supply the id of a collection and the filters will be applied to all projects in the collection')
   parser.add_argument('--variant_filters_json', '-f', required = True, metavar = 'string', help = 'The json file describing the variant filters to apply to each project')
 
@@ -737,10 +706,6 @@ def create_filters(project, annotation_uids, categories, filters):
 # If the script fails, provide an error message and exit
 def warning(message):
   print('  WARNING: ', message, sep = '')
-
-def fail(message):
-  print('ERROR: ', message, sep = '')
-  exit(1)
 
 # Initialise global variables
 
