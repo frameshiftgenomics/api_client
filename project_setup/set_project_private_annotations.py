@@ -1,32 +1,19 @@
 import os
-import argparse
 import json
 import sys
 
 from datetime import date
 from os.path import exists
-from sys import path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from _bootstrap import base_parser, init, fail
 
 def main():
 
   # Parse the command line
   args = parse_command_line()
 
-  # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
-
-  # Import the api client
-  path.append(args.api_client)
-  try:
-    from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  store = Store(config_file = args.config)
-  mosaic = Mosaic(config_file = args.config)
+  mosaic = init(args)
   project = mosaic.get_project(args.project_id)
 
   # Read the Mosaic json and validate its contents
@@ -50,11 +37,7 @@ def main():
 # Input options
 def parse_command_line():
   global version
-  parser = argparse.ArgumentParser(description='Process the command line')
-
-  # Required arguments
-  parser.add_argument('--config', '-c', required = True, metavar = 'string', help = 'The config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The directory where the Python api wrapper lives')
+  parser, _ = base_parser()
 
   # The id of the project
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The id of the project whose private annotations are to be updated')
@@ -126,11 +109,6 @@ def read_annotations_json(json_filename):
 
   # Return the annotation information
   return json_info
-
-# If the script fails, provide an error message and exit
-def fail(message):
-  print('ERROR: ', message, sep = '')
-  exit(1)
 
 # Initialise global variables
 

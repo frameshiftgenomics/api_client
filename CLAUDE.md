@@ -43,7 +43,7 @@ python3 project_attributes/put_project_attributes.py -c config.ini -p 123 -i 456
 ```
 
 - `--client_config` / `-c` (**required**) — path to the ini file. A few older scripts call this `--config` / `-c`.
-- `--api_client` / `-a` (optional) — path to this repo. Scripts still on the legacy preamble derive it by splitting their own realpath on the literal string `api_client`, so **for those the checkout directory must be named `api_client`** or `-a` becomes mandatory. Scripts migrated to `_bootstrap.py` locate the repo from their own position instead, making the flag vestigial for them.
+- `--api_client` / `-a` (optional) — path to this repo. Every script now locates it from its own position, so the flag is only needed to point at a *different* checkout. **The checkout directory no longer has to be named `api_client`**; it used to, because scripts derived the path by splitting their own realpath on that literal string.
 - `--project_id` / `-p` — required by any script that operates on a project.
 
 Interactive/interpreter use:
@@ -91,9 +91,9 @@ Required values are positional; everything optional is keyword-only and omitted 
 
 ## Script conventions
 
-Two start-up patterns coexist. **New and migrated scripts use `_bootstrap.py`; the other ~203 still carry the old copied preamble.** Match whichever the file you are editing already uses — do not migrate a script as a side effect of an unrelated change.
+**Every script starts up through `_bootstrap.py`.** There is no second pattern; if you find one deriving its own path or defining its own `fail()`, it predates this and should be brought in line.
 
-### `_bootstrap.py` (the pattern to use for new scripts)
+### `_bootstrap.py`
 
 ```python
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -110,25 +110,19 @@ def main():
 ```
 
 - `base_parser()` returns `(parser, groups)`. `groups` is a `SimpleNamespace` with `.api .project .required .optional .display`, pre-titled to match the legacy group names, and already carrying `--client_config` and `--api_client`. A script needing its own group adds it to the returned `parser`.
-- `init(args)` returns **only** `api_mosaic`. It does not return a `Store` — the old preamble built one in 203 of 205 scripts and none used it. Read config via `api_mosaic.get_config(section, key)`.
+- `init(args)` returns **only** `api_mosaic`. It does not return a `Store` — the old preamble built one in nearly every script and not one of them ever called a method on it. Read config via `api_mosaic.get_config(section, key)`, as `variant_annotations/upload_annotations.py` does.
 - `fail`/`warning` come from `_bootstrap`; don't redefine them.
 - Because the repo root goes on the front of `sys.path` for every script, never add an `__init__.py` to a topic directory, and never add a root-level file whose name shadows a stdlib module.
-- `project_attributes/get_project_attributes.py` is the reference migration.
+- `project_attributes/get_project_attributes.py` is the reference migration; copy its shape.
+- Scripts that declare no groups of their own keep their arguments on the parser and discard the handle: `parser, _ = base_parser()`.
 
-### The legacy preamble (still in ~203 scripts)
-
-- Fixed opening boilerplate: `parse_command_line()`, derive `args.api_client` by splitting the script path on the string `api_client`, `path.append`, `from mosaic import Mosaic, Project, Store`, then build `api_store` / `api_mosaic` — all inside `main()`, each step wrapped in `try/except` that calls `fail()`. (`Project` is imported by every script and instantiated by none; `api_store` is likewise unused.)
-- Each script defines its own module-level `fail(message)` (prints `ERROR: …`, `exit(1)`) and sometimes `warning(message)`. `mosaic.py` has its own copies.
-
-### Both patterns
+### Other conventions
 
 - **2-space indentation** in scripts and `_bootstrap.py`; **4-space** in `mosaic.py`.
-- `argparse` uses named groups (`API Arguments`, `Project Arguments`, `Required Arguments`, `Optional Arguments`, `Display Information`) and spaces around `=` in kwargs (`required = False`). 81 of the 205 scripts use no groups at all.
+- `argparse` uses the group names above and spaces around `=` in kwargs (`required = False`). Roughly a third of the scripts declare their arguments straight on the parser instead.
 - Output goes to stdout via `print`/`pprint`; most scripts offer `--raw_output`/`-ro` or `--display_all`/`-da` for a full dump. Scripts do not return values, do not prompt for confirmation (including the `delete_all_*` ones), and validate enum-ish inputs against a local `allowed_*` list before calling the API.
 - `--ids_only` / `-io` is the convention for machine-readable output meant to be piped into another script.
-- 9 scripts name the config flag `--config` rather than `--client_config`; `init()` reads `args.client_config`, so those need renaming when migrated.
-
-`project_attributes/get_project_attributes_test.py` is the prototype that led to `_bootstrap.py`. It is a lossy subset of `get_project_attributes.py` (missing `--ids_only`, `--only_longitudinal`, `--in_data_groups`, `--list_data_groups`, `--find_single_predefined_value_with_comma`) and is a deletion candidate — prefer the reference migration as the example to copy.
+- The config flag is `--client_config` / `-c` everywhere. Nine scripts used to spell the long form `--config`; that spelling no longer works.
 
 ## Other directories
 

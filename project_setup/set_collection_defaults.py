@@ -1,11 +1,12 @@
 import os
-import argparse
 import json
 import sys
 
 from os.path import exists
 from pprint import pprint
-from sys import path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from _bootstrap import base_parser, init, warning, fail
 
 def main():
   global version
@@ -13,21 +14,7 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
-  # If the api_client path was not specified, get it from the script path
-  if not args.api_client:
-    try:
-      args.api_client = os.path.dirname(os.path.realpath(__file__)).split('api_client')[0] + str('api_client')
-    except:
-      fail('Could not get the api_client path from the command. Please specify using --api_client / -a')
-
-  # Import the api client
-  path.append(args.api_client)
-  try:
-    from mosaic import Mosaic, Project, Store
-  except:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument')
-  api_store = Store(config_file = args.config)
-  api_mosaic = Mosaic(config_file = args.config)
+  api_mosaic = init(args)
   project = api_mosaic.get_project(args.project_id)
 
   # Check if this is a collection
@@ -222,11 +209,7 @@ def main():
 # Input options
 def parse_command_line():
   global version
-  parser = argparse.ArgumentParser(description='Process the command line')
-
-  # Required arguments
-  parser.add_argument('--config', '-c', required = True, metavar = 'string', help = 'The config file for Mosaic')
-  parser.add_argument('--api_client', '-a', required = False, metavar = 'string', help = 'The directory where the Python api wrapper lives')
+  parser, _ = base_parser()
 
   # Optional pipeline arguments
   parser.add_argument('--json', '-j', required = False, metavar = 'string', help = 'The json file describing the project defaults')
@@ -354,11 +337,6 @@ def get_variant_table_ids(project, project_id, data, annotation_names, annotatio
 
   # Return the list of version ids
   return annotation_version_ids
-
-# If the script fails, provide an error message and exit
-def fail(message):
-  print('ERROR: ', message, sep = '')
-  exit(1)
 
 # Throw a warning
 def warning(message):
