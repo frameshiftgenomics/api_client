@@ -9,6 +9,9 @@ def main():
   # Parse the command line
   args = parseCommandLine()
 
+  # Ensure the new uri terminates with a '/'
+  if not args.uri.endswith('/'): args.uri += '/'
+
   api_mosaic = init(args)
 
   # Open an api client project object for the defined project
