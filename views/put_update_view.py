@@ -86,7 +86,7 @@ def parse_command_line():
   project_arguments.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
   # View information
-  required_arguments.add_argument('--view_type', '-t', required = True, metavar = 'string', help = 'The type of view to delete. Available options: data-group')
+  required_arguments.add_argument('--view_type', '-t', required = True, metavar = 'string', help = 'The type of view to update. Available options: data-groups')
   required_arguments.add_argument('--view_id', '-i', required = True, metavar = 'string', help = 'The id of the view to update')
 
   # Optional arguments
