@@ -24,6 +24,7 @@ def main():
   # Determine which tasks to return based on categories
   categories = None
   if args.categories:
+    categories = []
     category_list = args.categories.split(',') if ',' in args.categories else [args.categories]
     for category in category_list:
       if category == 'project_setup':
@@ -39,8 +40,9 @@ def main():
   # Determine which task types to return
   types = None
   if args.types:
+    types = []
     types_list = args.types.split(',') if ',' in args.types else [args.types]
-    for task_type in type_list:
+    for task_type in types_list:
       if task_type == 'set_project_attribute_value':
         types.append(task_type)
       elif task_type == 'add_files_for_samples':
@@ -49,11 +51,11 @@ def main():
         types.append(task_type)
       elif task_type == 'submit_for_processing':
         types.append(task_type)
-      elif category == 'all':
-        task_type.append('set_project_attribute_value')
-        task_type.append('add_files_for_samples')
-        task_type.append('primary_clinvar_review')
-        task_type.append('submit_for_processing')
+      elif task_type == 'all':
+        types.append('set_project_attribute_value')
+        types.append('add_files_for_samples')
+        types.append('primary_clinvar_review')
+        types.append('submit_for_processing')
       else:
         fail('--types / -t must take the value(s) "set_project_attribute_value", "add_files_for_samples", "primary_clinvar_review", "submit_for_processing", or "all"')
 

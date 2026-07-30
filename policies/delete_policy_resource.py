@@ -34,9 +34,8 @@ def parse_command_line():
   # The policy id to post attributes to
   parser.add_argument('--policy_id', '-i', required = True, metavar = 'integer', help = 'The policy id to post attributes to')
 
-  # The type or resource to delete and the id of the resource
-  parser.add_argument('--resource_type', '-t', required = True, metavar = 'string', help = 'The resource type to dekete: project_attribute, project_conversation')
-  parser.add_argument('--resource_id', '-r', required = True, metavar = 'integer', help = 'The id of the resource to delete')
+  # The type of resource to delete
+  parser.add_argument('--resource_type', '-t', required = True, metavar = 'string', help = 'The resource type to delete: project_attribute, project_conversation')
 
   return parser.parse_args()
 
