@@ -91,7 +91,7 @@ Required values are positional; everything optional is keyword-only and omitted 
 
 ## Script conventions
 
-**All 205 scripts start up through `_bootstrap.py`.** There is no second pattern; if you find a script deriving its own path or defining its own `fail()`, it predates this and should be brought in line.
+**Every script starts up through `_bootstrap.py`.** There is no second pattern; if you find one deriving its own path or defining its own `fail()`, it predates this and should be brought in line.
 
 ### `_bootstrap.py`
 
@@ -110,7 +110,7 @@ def main():
 ```
 
 - `base_parser()` returns `(parser, groups)`. `groups` is a `SimpleNamespace` with `.api .project .required .optional .display`, pre-titled to match the legacy group names, and already carrying `--client_config` and `--api_client`. A script needing its own group adds it to the returned `parser`.
-- `init(args)` returns **only** `api_mosaic`. It does not return a `Store` — the old preamble built one in 203 of 205 scripts and none used it. Read config via `api_mosaic.get_config(section, key)`, as `variant_annotations/upload_annotations.py` does.
+- `init(args)` returns **only** `api_mosaic`. It does not return a `Store` — the old preamble built one in nearly every script and not one of them ever called a method on it. Read config via `api_mosaic.get_config(section, key)`, as `variant_annotations/upload_annotations.py` does.
 - `fail`/`warning` come from `_bootstrap`; don't redefine them.
 - Because the repo root goes on the front of `sys.path` for every script, never add an `__init__.py` to a topic directory, and never add a root-level file whose name shadows a stdlib module.
 - `project_attributes/get_project_attributes.py` is the reference migration; copy its shape.
@@ -123,8 +123,6 @@ def main():
 - Output goes to stdout via `print`/`pprint`; most scripts offer `--raw_output`/`-ro` or `--display_all`/`-da` for a full dump. Scripts do not return values, do not prompt for confirmation (including the `delete_all_*` ones), and validate enum-ish inputs against a local `allowed_*` list before calling the API.
 - `--ids_only` / `-io` is the convention for machine-readable output meant to be piped into another script.
 - The config flag is `--client_config` / `-c` everywhere. Nine scripts used to spell the long form `--config`; that spelling no longer works.
-
-`project_attributes/get_project_attributes_test.py` is the prototype that led to `_bootstrap.py`. It is a lossy subset of `get_project_attributes.py` (missing `--ids_only`, `--only_longitudinal`, `--in_data_groups`, `--list_data_groups`, `--find_single_predefined_value_with_comma`) and is a deletion candidate — prefer the reference migration as the example to copy.
 
 ## Other directories
 
