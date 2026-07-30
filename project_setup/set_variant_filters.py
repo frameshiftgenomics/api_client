@@ -17,6 +17,14 @@ def main():
   # Parse the command line
   args = parse_command_line()
 
+  # Read the json file describing the filters
+  filters_info = read_variant_filters_json(args.variant_filters_json)
+  filter_categories, filters = get_filter_categories(filters_info)
+
+  # The filters_info can be updated based on private annotations, so maintain a clean copy to reset to
+  # after each project
+  filters_info_original = copy.deepcopy(filters_info)
+
   api_mosaic = init(args)
 
   # Open an api client project object for the defined project
