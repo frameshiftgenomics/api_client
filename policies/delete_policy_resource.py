@@ -34,7 +34,7 @@ def main():
   resource_type = args.resource_type if args.resource_type in allowed_types else fail('Unknown resource type') 
 
   # Delete the policy resource
-  project.delete_policy_resource(args.policy_id, resource_type):
+  project.delete_policy_resource(args.policy_id, resource_type)
 
 # Input options
 def parse_command_line():
