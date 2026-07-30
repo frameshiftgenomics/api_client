@@ -85,13 +85,15 @@ def init(args):
   if args.api_client:
     sys.path.insert(0, args.api_client)
 
-  # Only an ImportError means the api client could not be found. Anything else (a broken
-  # install of requests, for example) is a real error and should not be reported as a
-  # missing api client
+  # Only report a missing api client when mosaic itself cannot be found. A module missing
+  # from inside mosaic (a broken install of requests, for example) also raises ImportError,
+  # but is a real error and should not be reported as a missing api client
   try:
     from mosaic import Mosaic
   except ImportError as e:
-    fail('Cannot find mosaic. Please set the --api_client / -a argument. Error was: ' + str(e))
+    if e.name == 'mosaic':
+      fail('Cannot find mosaic. Please set the --api_client / -a argument. Error was: ' + str(e))
+    fail('Failed to import the api client. Error was: ' + str(e))
 
   if not os.path.exists(args.client_config):
     fail('The config file does not exist: ' + str(args.client_config))
