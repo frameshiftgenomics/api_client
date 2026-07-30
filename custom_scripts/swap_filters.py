@@ -109,6 +109,9 @@ def parse_command_line():
   # The project id to which the filter is to be added is required
   parser.add_argument('--project_id', '-p', required = True, metavar = 'integer', help = 'The Mosaic project id to upload attributes to')
 
+  # Optional mosaic arguments
+  parser.add_argument('--no_genotype_filters', '-n', required = False, action = 'store_true', help = 'If set, all filters that include genotypes will be omitted')
+
   return parser.parse_args()
 
 # Throw a warning
