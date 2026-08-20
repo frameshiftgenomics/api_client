@@ -240,8 +240,8 @@ class Mosaic(object):
         return self._http_request(requests.put, resource, params=params, data=data)
 
 
-    def delete(self, resource, *, params=None, data=None):
-        return self._http_request(requests.delete, resource, params=params, data=data)
+    def delete(self, resource, *, params=None, data=None, file_path=None):
+        return self._http_request(requests.delete, resource, params=params, data=data, file_upload=file_path)
 
 
     def get_paged_route_iter(self, resource, *, params=None):
@@ -2150,6 +2150,10 @@ class Project(object):
 
     def delete_variant_set(self, variant_set_id):
         return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
+
+
+    def delete_variants_by_vcf(self, file_path):
+        return self._mosaic.delete(f'{self._path}/variants/vcf', file_path=file_path)
 
 
     def get_download_variants_tsv(self):
