@@ -154,8 +154,10 @@ class Mosaic(object):
                 else:
                     formatted_params[key] = value
 
+        # Copy the headers so a file upload, which clears Content-Type below, does not
+        # strip it from every later JSON request made with this instance
         kwargs = {
-                'headers': self._headers,
+                'headers': dict(self._headers),
                 'verify': self._verify,
                 'params': formatted_params
                 }
@@ -546,6 +548,20 @@ class Mosaic(object):
 
 
     """
+    GLOBAL MONDO TERMS
+    """
+
+    def get_mondo_terms(self, mondo_ids, *, search=None):
+        params = { }
+        if mondo_ids:
+            params['mondo_ids'] = mondo_ids
+        if search:
+            params['search'] = search
+
+        yield from self.get_paged_route_iter(f'mondo-terms', params=params)
+
+
+    """
     GLOBAL POLICIES
     """
 
@@ -772,6 +788,14 @@ class Mosaic(object):
         return self.get(f'user')
 
 
+    """
+    GLOBAL VARIANT REVIEWS
+    """
+
+    def get_variant_review_reasons(self):
+        return self.get(f'variants/review-reasons')
+
+
 
 
 
@@ -946,6 +970,25 @@ class Project(object):
 
         return self._mosaic.put(f'{self._path}/settings', data=data)
 
+
+    """
+    COMPOUND HETS
+    """
+
+    def get_compound_hets(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/compound-hets')
+
+
+    def post_compound_het(self, sample_id, variant_id_a, variant_id_b, *, phase=None):
+        data = { 'variant_id_a': variant_id_a,
+                 'variant_id_b': variant_id_b }
+
+        if phase:
+            data['phase'] = phase
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/compound-hets', data=data)
+
+
     """
     CONVERSATIONS
     """
@@ -953,7 +996,90 @@ class Project(object):
     def delete_watchers(self, conversation_id, user_ids):
         data = { 'user_ids': user_ids}
 
-        return self._mosaic.delete(f'{self._path}/conversations/{conversation_id}/watchers')
+        return self._mosaic.delete(f'{self._path}/conversations/{conversation_id}/watchers', data=data)
+
+
+    """
+    DIAGNOSES
+    """
+
+    def get_diagnoses(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/diagnoses')
+
+
+    def get_diagnosis(self, sample_id, diagnosis_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}')
+
+
+    def post_diagnosis(self, sample_id, status, certainty, diagnosis_type, *, name=None, mondo_term_id=None, is_suggested=None):
+        data = { 'status': status,
+                 'certainty': certainty,
+                 'type': diagnosis_type }
+
+        if name:
+            data['name'] = name
+        if mondo_term_id:
+            data['mondo_term_id'] = mondo_term_id
+        if is_suggested:
+            data['is_suggested'] = is_suggested
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/diagnoses', data=data)
+
+
+    def post_diagnosis_hpo_terms(self, sample_id, diagnosis_id, hpo_term_ids):
+        data = { 'hpo_term_ids': hpo_term_ids }
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}/hpo-terms', data=data)
+
+
+    def post_diagnosis_variants(self, sample_id, diagnosis_id, variant_ids):
+        data = { 'variant_ids': variant_ids }
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}/variants', data=data)
+
+
+    def post_diagnosis_workflow(self, sample_id, diagnosis_id, action, *, note=None, user_id=None, sign_off_method=None, sign_off_method_detail=None):
+        data = { 'action': action }
+
+        if note:
+            data['note'] = note
+        if user_id:
+            data['user_id'] = user_id
+        if sign_off_method:
+            data['sign_off_method'] = sign_off_method
+        if sign_off_method_detail:
+            data['sign_off_method_detail'] = sign_off_method_detail
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}/workflow', data=data)
+
+
+    def put_diagnosis(self, sample_id, diagnosis_id, *, name=None, mondo_term_id=None, status=None, certainty=None, diagnosis_type=None):
+        data = { }
+
+        if name:
+            data['name'] = name
+        if mondo_term_id:
+            data['mondo_term_id'] = mondo_term_id
+        if status:
+            data['status'] = status
+        if certainty:
+            data['certainty'] = certainty
+        if diagnosis_type:
+            data['type'] = diagnosis_type
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}', data=data)
+
+
+    def put_diagnosis_compound_het_status(self, sample_id, diagnosis_id, compound_het_id, diagnostic_status):
+        data = { 'diagnostic_status': diagnostic_status }
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}/compound-hets/{compound_het_id}', data=data)
+
+
+    def put_diagnosis_variant_status(self, sample_id, diagnosis_id, variant_id, diagnostic_status):
+        data = { 'diagnostic_status': diagnostic_status }
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}/variants/{variant_id}/diagnostic-status', data=data)
 
 
     """
@@ -1066,8 +1192,20 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/pedigree')
 
 
+    def get_pedigree_graph(self, kindred_id):
+        return self._mosaic.get(f'{self._path}/pedigrees/{kindred_id}/graph')
+
+
     def get_project_pedigrees(self):
         return self._mosaic.get(f'{self._path}/pedigrees')
+
+
+    def put_pedigree_graph(self, kindred_id, graph):
+        """
+        The graph is the full desired state of the kindred: members, unions, twin_sets and
+        condition_statuses. Members left out of the payload leave the kindred.
+        """
+        return self._mosaic.put(f'{self._path}/pedigrees/{kindred_id}/graph', data=graph)
 
 
     def post_pedigree(self, sample_id, *, maternal_id=None, paternal_id=None, affection_status=None, sex=None, kindred_id=None):
@@ -1309,8 +1447,15 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/conversations/{conversation_id}')
 
 
-    def get_project_conversations(self):
-        return self._mosaic.get(f'{self._path}/conversations')
+    def get_project_conversations(self, *, conversation_type=None, type_id=None):
+        params = { }
+
+        if conversation_type:
+            params['type'] = conversation_type
+        if type_id:
+            params['type_id'] = type_id
+
+        return self._mosaic.get(f'{self._path}/conversations', params=params)
 
 
     """
@@ -1749,16 +1894,50 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/hpo-terms')
 
 
-    def post_sample_hpo_term(self, sample_id, hpo_id, *, sources=None):
+    def post_sample_hpo_term(self, sample_id, hpo_id, *, sources=None, status=None, severity=None, onset_age=None, onset_hpo_id=None):
+        """
+        status is one of observed, carrier, obligate_carrier, uncertain or excluded. Severity
+        and onset are dropped by the server for excluded terms.
+        """
         data = { }
-        params = { }
 
         if hpo_id:
             data['hpo_id'] = hpo_id
         if sources:
             data['sources'] = sources
+        if status:
+            data['status'] = status
+        if severity:
+            data['severity'] = severity
+        if onset_age:
+            data['onset_age'] = onset_age
+        if onset_hpo_id:
+            data['onset_hpo_id'] = onset_hpo_id
 
         return self._mosaic.post(f'{self._path}/samples/{sample_id}/hpo-terms', data=data)
+
+
+    """
+    SAMPLE MONDO TERMS
+    """
+
+    def get_sample_mondo_terms(self, sample_id):
+        return self._mosaic.get(f'{self._path}/samples/{sample_id}/mondo-terms')
+
+
+    def post_sample_mondo_term(self, sample_id, mondo_id, *, status=None, severity=None, onset_age=None, onset_hpo_id=None):
+        data = { 'mondo_id': mondo_id }
+
+        if status:
+            data['status'] = status
+        if severity:
+            data['severity'] = severity
+        if onset_age:
+            data['onset_age'] = onset_age
+        if onset_hpo_id:
+            data['onset_hpo_id'] = onset_hpo_id
+
+        return self._mosaic.post(f'{self._path}/samples/{sample_id}/mondo-terms', data=data)
 
 
     """
@@ -2169,7 +2348,7 @@ class Project(object):
         params['include_annotation_data'] = 'true' if include_annotation_data else 'false'
         params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
 
-        return self._mosaic.get(f'{self._path}/variants/position/{variant_position}')
+        return self._mosaic.get(f'{self._path}/variants/position/{variant_position}', params=params)
 
 
     def get_variant_watchlist(self, *, include_variant_data=None):
@@ -2235,6 +2414,51 @@ class Project(object):
               data['disable_successful_notification'] = 'false'
 
         return self._mosaic.post(f'{self._path}/variants/upload', file_path=file_path, data=data, sample_map=sample_map)
+
+
+    def post_variants_by_positions(self, positions, *, include_annotation_data=None, include_genotype_data=None, annotation_version_ids=None):
+        """
+        positions is a list of {'chr': '17', 'start': 41196312}. Variants are matched on start
+        position only, so callers must check ref and alt themselves.
+        """
+        params = { }
+        params['include_annotation_data'] = 'true' if include_annotation_data else 'false'
+        params['include_genotype_data'] = 'true' if include_genotype_data else 'false'
+        if annotation_version_ids:
+            params['annotation_version_ids'] = annotation_version_ids
+
+        return self._mosaic.post(f'{self._path}/variants/position', params=params, data={'positions': positions})
+
+
+    def put_variant_clia_validation(self, sample_id, variant_id, clia_status):
+        data = { 'clia_status': clia_status }
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/variants/{variant_id}/clia-validation', data=data)
+
+
+    def put_variant_inheritance(self, sample_id, variant_id, inheritance):
+        data = { 'inheritance': inheritance }
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/variants/{variant_id}/inheritance', data=data)
+
+
+    def put_variant_review(self, sample_id, variant_id, reason_id, *, other_reason=None):
+        data = { 'status': 'not_relevant',
+                 'reason_id': reason_id }
+
+        if other_reason:
+            data['other_reason'] = other_reason
+
+        return self._mosaic.put(f'{self._path}/samples/{sample_id}/variants/{variant_id}/reviews', data=data)
+
+
+    def put_variant_site_classification(self, variant_id, classification, *, discordance_note=None):
+        data = { 'classification': classification }
+
+        if discordance_note:
+            data['discordance_note'] = discordance_note
+
+        return self._mosaic.put(f'{self._path}/variants/{variant_id}/site-classification', data=data)
 
 
     def post_variant_set_annotations(self, variant_set_id, annotation_version_ids):
