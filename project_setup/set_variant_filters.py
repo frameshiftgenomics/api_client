@@ -374,7 +374,7 @@ def get_filters(project, filters_info, categories, filters, samples, sample_map,
                   sort_uid = sort_uid.split('@')[0]
                 if sort_uid in annotation_uids:
                   if version:
-                    if version not in annotation_uids[value]['versions']:
+                    if version not in annotation_uids[sort_uid]['annotation_versions']:
                       fail('version "' + str(version) + '" in the sort for filter "' + str(name) + '" does not exist')
                     sort_uid = str(sort_uid)+ '@' + str(version)
 
