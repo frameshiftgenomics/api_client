@@ -133,6 +133,19 @@ class Mosaic(object):
         self._store.set(section, key, value)
 
 
+    def with_token(self, token):
+        """
+        Returns a copy of this instance, on the same host, that authenticates with another
+        user's API token.
+        """
+        other = Mosaic.__new__(Mosaic)
+        other.__dict__.update(self.__dict__)
+        other._headers = dict(self._headers, Authorization=f'Bearer {token}')
+        other._request_history = []
+
+        return other
+
+
     def config_file(self):
         return self._store._config_file
 
@@ -140,7 +153,7 @@ class Mosaic(object):
     """
     Mosaic HTTP request methods.
     """
-    def _http_request(self, method, resource, *, params=None, data=None, file_upload=None, sample_map=None):
+    def _http_request(self, method, resource, *, params=None, data=None, file_upload=None, sample_map=None, api_host=None):
 
         formatted_params = {}
         """
@@ -186,7 +199,7 @@ class Mosaic(object):
             # json.dumps prevents form encoding
             kwargs['data'] = json.dumps(data)
 
-        url = f'{self._api_host}/{resource}'
+        url = f'{api_host or self._api_host}/{resource}'
 
         res = method(url, **kwargs)
 
@@ -214,6 +227,19 @@ class Mosaic(object):
 
     def get(self, resource, *, params=None):
         return self._http_request(requests.get, resource, params=params)
+
+
+    def post_legacy(self, resource, *, data=None):
+        """
+        POST through the legacy /apiv1 prefix, which also exposes Mosaic's internal routes (sign-up,
+        access tokens, comment replies) to token authentication. /apiv1 is deprecated, so only
+        use this for routes /api/v1 does not offer.
+        """
+        legacy_host = self._api_host.replace('/api/v1', '/apiv1')
+        if legacy_host == self._api_host:
+            raise Exception(f'Cannot derive the /apiv1 host from {self._api_host}')
+
+        return self._http_request(requests.post, resource, data=data, api_host=legacy_host)
 
 
     def post(self, resource, *, params=None, data=None, file_path=None, sample_map=None):
@@ -741,6 +767,33 @@ class Mosaic(object):
         return self.get(f'users/{user_id}/roles')
 
 
+    def post_access_token(self, email, password, description):
+        """
+        Creates an API token for the user with these credentials (they must have confirmed their
+        email). The returned object's 'token' is the bearer token.
+        """
+        data = { 'email': email,
+                 'password': password,
+                 'description': description }
+
+        return self.post_legacy(f'tokens', data=data)
+
+
+    def post_signup(self, email, username, first_name, last_name, password):
+        """
+        Creates an account. Mosaic emails a confirmation link that must be followed before the
+        account can be used. Subject to the whitelist when the instance enables it.
+        """
+        data = { 'email': email,
+                 'username': username,
+                 'first_name': first_name,
+                 'last_name': last_name,
+                 'password': password,
+                 'confirm_password': password }
+
+        return self.post_legacy(f'signup', data=data)
+
+
     def post_to_whitelist(self, email):
         data = { 'email': email }
 
@@ -979,6 +1032,10 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/compound-hets')
 
 
+    def delete_compound_het(self, sample_id, compound_het_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/compound-hets/{compound_het_id}')
+
+
     def post_compound_het(self, sample_id, variant_id_a, variant_id_b, *, phase=None):
         data = { 'variant_id_a': variant_id_a,
                  'variant_id_b': variant_id_b }
@@ -1002,6 +1059,10 @@ class Project(object):
     """
     DIAGNOSES
     """
+
+    def delete_diagnosis(self, sample_id, diagnosis_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/diagnoses/{diagnosis_id}')
+
 
     def get_diagnoses(self, sample_id):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/diagnoses')
@@ -1196,6 +1257,14 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/pedigrees/{kindred_id}/graph')
 
 
+    def get_pedigree_conditions(self):
+        return self._mosaic.get(f'{self._path}/pedigree-conditions')
+
+
+    def delete_pedigree_condition(self, condition_id):
+        return self._mosaic.delete(f'{self._path}/pedigree-conditions/{condition_id}')
+
+
     def get_project_pedigrees(self):
         return self._mosaic.get(f'{self._path}/pedigrees')
 
@@ -1249,7 +1318,9 @@ class Project(object):
 
 
     def post_upload_pedigree(self, *, file_path=None, create_new_samples=True):
-        data = {'create_new_samples': create_new_samples}
+        # Multipart form values are strings, and the server only accepts 'true' or 'false'
+        # (requests would send a Python bool as 'True')
+        data = {'create_new_samples': 'true' if create_new_samples else 'false'}
 
         return self._mosaic.post(f'{self._path}/pedigree', file_path=file_path, data=data)
 
@@ -1447,6 +1518,22 @@ class Project(object):
         return self._mosaic.get(f'{self._path}/conversations/{conversation_id}')
 
 
+    def post_comment_reply(self, conversation_id, comment_id, text):
+        """
+        Replies to a comment, threading the reply under it. Replies are an internal route, only
+        reachable with a token through the legacy /apiv1 prefix.
+        """
+        data = { 'text': text }
+
+        return self._mosaic.post_legacy(f'{self._path}/conversations/{conversation_id}/comments/{comment_id}/replies', data=data)
+
+
+    def post_conversation_comment(self, conversation_id, text):
+        data = { 'text': text }
+
+        return self._mosaic.post(f'{self._path}/conversations/{conversation_id}/comments', data=data)
+
+
     def get_project_conversations(self, *, conversation_type=None, type_id=None):
         params = { }
 
@@ -1456,6 +1543,30 @@ class Project(object):
             params['type_id'] = type_id
 
         return self._mosaic.get(f'{self._path}/conversations', params=params)
+
+
+    def post_project_conversation(self, title, *, description=None, variant_id=None, sample_id=None):
+        data = { 'title': title }
+
+        if description:
+            data['description'] = description
+        if variant_id:
+            data['variant_id'] = variant_id
+        if sample_id:
+            data['sample_id'] = sample_id
+
+        return self._mosaic.post(f'{self._path}/conversations', data=data)
+
+
+    def put_project_conversation(self, conversation_id, *, title=None, description=None):
+        data = { }
+
+        if title:
+            data['title'] = title
+        if description:
+            data['description'] = description
+
+        return self._mosaic.put(f'{self._path}/conversations/{conversation_id}', data=data)
 
 
     """
@@ -1853,9 +1964,7 @@ class Project(object):
 
     def post_upload_sample_attributes(self, file_path, *, disable_successful_notification=None):
         data = {'disable_successful_notification': 'true'}
-        if disable_successful_notification == 'true':
-            data['disable_successful_notification'] = 'true'
-        elif disable_successful_notification == 'true':
+        if disable_successful_notification == 'false':
             data['disable_successful_notification'] = 'false'
 
         return self._mosaic.post(f'{self._path}/samples/attributes/upload', file_path=file_path, data=data)
@@ -1920,6 +2029,10 @@ class Project(object):
     """
     SAMPLE MONDO TERMS
     """
+
+    def delete_sample_mondo_term(self, sample_id, mondo_term_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/mondo-terms/{mondo_term_id}')
+
 
     def get_sample_mondo_terms(self, sample_id):
         return self._mosaic.get(f'{self._path}/samples/{sample_id}/mondo-terms')
@@ -2335,12 +2448,44 @@ class Project(object):
         return self._mosaic.delete(f'{self._path}/variants/vcf', file_path=file_path)
 
 
+    def delete_variant_clia_validation(self, sample_id, variant_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/variants/{variant_id}/clia-validation')
+
+
+    def delete_variant_inheritance(self, sample_id, variant_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/variants/{variant_id}/inheritance')
+
+
+    def delete_variant_review(self, sample_id, variant_id):
+        return self._mosaic.delete(f'{self._path}/samples/{sample_id}/variants/{variant_id}/reviews')
+
+
+    def delete_variant_site_classification(self, variant_id):
+        return self._mosaic.delete(f'{self._path}/variants/{variant_id}/site-classification')
+
+
     def get_download_variants_tsv(self):
         return self._mosaic.get(f'{self._path}/variants/tsv')
 
 
     def get_project_variants_list(self):
         yield from self._mosaic.get_paged_route_iter(f'{self._path}/variants/list')
+
+
+    def get_variant_clia_validations(self):
+        return self._mosaic.get(f'{self._path}/variants/clia-validations')
+
+
+    def get_variant_inheritance(self):
+        return self._mosaic.get(f'{self._path}/variants/inheritance')
+
+
+    def get_variant_reviews(self):
+        return self._mosaic.get(f'{self._path}/variants/reviews')
+
+
+    def get_variant_site_classifications(self):
+        return self._mosaic.get(f'{self._path}/variants/site-classifications')
 
 
     def get_variant_by_position(self, variant_position, *, include_annotation_data=None, include_genotype_data=None):
