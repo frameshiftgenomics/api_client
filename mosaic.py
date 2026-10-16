@@ -1792,10 +1792,17 @@ class Project(object):
     """
 
     def delete_role(self, role_id, *, disable_cascade=None):
-        params = { 'cascade': 'true'}
+        """
+        The same route removes a user from a project or a collection. For a collection, the
+        user's roles in all of its sub-projects are also removed, unless disable_cascade is
+        set. The server reads cascade_delete (not the cascade its api docs describe), and fails
+        with a 400 without removing anything if the caller's role in any sub-project is lower
+        than the user's.
+        """
+        params = { 'cascade_delete': 'true' }
 
         if disable_cascade:
-            params['cascade'] = 'false'
+            params['cascade_delete'] = 'false'
 
         return self._mosaic.delete(f'{self._path}/roles/{role_id}', params=params)
 

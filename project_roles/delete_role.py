@@ -16,8 +16,9 @@ def main():
   # Open an api client project object for the defined project
   project = api_mosaic.get_project(args.project_id)
 
-  # Delete the role
-  data = project.delete_role(args.role_id)
+  # Delete the role. For a collection, this also removes the user from the sub-projects unless
+  # --disable_cascade is set
+  data = project.delete_role(args.role_id, disable_cascade = args.disable_cascade)
 
 # Input options
 def parse_command_line():
@@ -28,6 +29,9 @@ def parse_command_line():
 
   # The role id to delete
   parser.add_argument('--role_id', '-r', required = True, metavar = 'integer', help = 'The role id to delete')
+
+  # For a collection, only remove the role from the collection itself
+  parser.add_argument('--disable_cascade', '-dc', required = False, action = 'store_true', help = 'Only remove the role from this project, not from the projects in a collection')
 
   return parser.parse_args()
 
