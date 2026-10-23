@@ -660,7 +660,7 @@ def create_filters(project, annotation_uids, categories, filters):
         # If the variant table display is getting modified, get the ids of the columns to show in the table as an array,
         # the id of the column to sort on and the sort direction
         column_ids = []
-        sort_column_id = None
+        sort_column_version_id = None
         sort_direction = None
         if filters[name]['set_display']:
           for column_uid in filters[name]['column_uids']:
@@ -672,8 +672,8 @@ def create_filters(project, annotation_uids, categories, filters):
               column_uid = column_uid.split('@')[0]
             annotation_version_id = get_annotation_version_id(annotation_uids, annotation_version, column_uid)
             column_ids.append(annotation_version_id)
-          if filters[name]['sort_column_uid']:
-            version = False
+          if filters[name].get('sort_column_uid'):
+            annotation_version = False
             column_uid = filters[name]['sort_column_uid']
             if '@' in column_uid:
               annotation_version = column_uid.split('@')[1]

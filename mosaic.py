@@ -38,7 +38,9 @@ import configparser
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
+import random
 import sys
+import time
 from requests.exceptions import HTTPError
 from pprint import pprint
 
@@ -46,6 +48,24 @@ from pprint import pprint
 # (which we use for the local Mosaic instance)
 # Note: Not needed with new infrastructure.
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+# Rate limited (HTTP 429) requests are retried up to this many times, waiting for the time the
+# server asks for in Retry-After, or backing off exponentially, up to the maximum wait in seconds
+RATE_LIMIT_RETRIES = 6
+MAX_RETRY_WAIT = 60
+
+def retry_wait(response, attempt):
+    """
+    The seconds to wait before retrying a rate limited request: the server's Retry-After if
+    it sent one, otherwise an exponential backoff. Jitter is added so parallel threads do not
+    all retry at the same moment.
+    """
+    try:
+        wait = float(response.headers.get('Retry-After'))
+    except (TypeError, ValueError):
+        wait = 2 ** attempt
+
+    return min(wait, MAX_RETRY_WAIT) + random.uniform(0, 1)
 
 class Store(object):
     def __init__(self, config_file='local.ini'):
@@ -202,6 +222,14 @@ class Mosaic(object):
         url = f'{api_host or self._api_host}/{resource}'
 
         res = method(url, **kwargs)
+
+        # Retry rate limited requests. The server rejected them, so they are safe to resend. File
+        # uploads are not retried, since the upload stream has already been read
+        attempt = 0
+        while res.status_code == 429 and not file_upload and attempt < RATE_LIMIT_RETRIES:
+            time.sleep(retry_wait(res, attempt))
+            attempt += 1
+            res = method(url, **kwargs)
 
         self._log_request(res.request)
 
@@ -2449,6 +2477,10 @@ class Project(object):
 
     def delete_variant_set(self, variant_set_id):
         return self._mosaic.delete(f'{self._path}/variants/sets/{variant_set_id}')
+
+
+    def delete_variants(self):
+        return self._mosaic.delete(f'{self._path}/variants')
 
 
     def delete_variants_by_vcf(self, file_path):
