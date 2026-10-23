@@ -465,6 +465,11 @@ def check_genotype_filters(data, name, sample_ids, sample_map):
   # Return the updated data
   return data
 
+# The fields Mosaic accepts in an annotation filter, and the fields the json can include that are
+# only used by this script
+allowed_annotation_filter_fields = ['uid', 'annotation_version_id', 'value_type', 'include_nulls', 'exclude', 'min', 'max', 'values']
+json_only_annotation_filter_fields = ['privacy']
+
 # Process the annotation filters
 def check_annotation_filters(data, name, annotation_uids, private_annotation_names):
   filters_to_delete = []
@@ -569,6 +574,17 @@ def check_annotation_filters(data, name, annotation_uids, private_annotation_nam
     # and Latest is defined, use this. Otherwise, use the highest id
     annotation_version_id = get_annotation_version_id(annotation_uids, annotation_version, annotation_filter['uid'])
     annotation_filter['annotation_version_id'] = annotation_version_id
+
+    # Mosaic rejects annotation filters containing any fields beyond those it recognises, so remove
+    # any others (e.g. "privacy", which the json uses to describe private annotations). The values
+    # must also all be strings
+    for field in list(annotation_filter.keys()):
+      if field not in allowed_annotation_filter_fields:
+        if field not in json_only_annotation_filter_fields:
+          warning('removing unknown field "' + str(field) + '" from an annotation filter in filter "' + str(name) + '"')
+        del annotation_filter[field]
+    if 'values' in annotation_filter and type(annotation_filter['values']) == list:
+      annotation_filter['values'] = [str(value) for value in annotation_filter['values']]
 
   # Remove any annotation filters that were not available
   for i in reversed(filters_to_delete):
