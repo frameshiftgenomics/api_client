@@ -700,12 +700,19 @@ def create_filters(project, annotation_uids, categories, filters):
             elif filters[name]['sort_direction'] == 'descending':
               sort_direction = 'DESC'
 
-        filter_info = project.post_variant_filter(name = name, 
-                                                  category = category, 
-                                                  column_ids = column_ids, 
-                                                  sort_column_id = sort_column_version_id, 
-                                                  sort_direction = sort_direction, 
-                                                  filter_data = filters[name]['info']['filters'])
+        # If Mosaic rejects the filter, report which filter failed and the data that was sent
+        try:
+          filter_info = project.post_variant_filter(name = name,
+                                                    category = category,
+                                                    column_ids = column_ids,
+                                                    sort_column_id = sort_column_version_id,
+                                                    sort_direction = sort_direction,
+                                                    filter_data = filters[name]['info']['filters'])
+        except Exception as e:
+          print('Failed to create filter "', name, '" in category "', category, '". The filter data sent was:', sep = '')
+          print(json.dumps(filters[name]['info']['filters'], indent = 2, default = str))
+          print('column_ids: ', column_ids, ', sort_column_id: ', sort_column_version_id, ', sort_direction: ', sort_direction, sep = '')
+          fail('Mosaic rejected filter "' + str(name) + '". Error was: ' + str(e).strip())
         filter_id = filter_info['id']
         record['sort_order'].append(str(filter_id))
         use_category = True
